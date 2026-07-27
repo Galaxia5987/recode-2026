@@ -49,6 +49,7 @@ import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.smartdashboard.Field2d;
 import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.sysid.SysIdRoutineLog;
 import org.wpilib.system.Timer;
 import org.wpilib.units.Units;
 import org.wpilib.units.measure.Angle;
@@ -58,7 +59,11 @@ import org.wpilib.units.measure.Voltage;
 
 import static org.wpilib.units.Units.*;
 
-public class Drive extends Mechanism implements SysIdable {
+/*
+ * 2027 Changes and problems:
+ * Seems to be a problem with SysId related stuff, removed for now.
+ */
+public class Drive extends Mechanism {
     // TunerConstants doesn't include these constants, so they are declared locally
     public static final double ODOMETRY_FREQUENCY =
             new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
@@ -129,7 +134,6 @@ public class Drive extends Mechanism implements SysIdable {
             new Angle[]{Radians.zero(), Radians.zero(), Radians.zero(), Radians.zero()};
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
-    private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
             new Alert("Disconnected gyro, using kinematics as fallback.", Alert.Level.HIGH);
 
@@ -201,17 +205,6 @@ public class Drive extends Mechanism implements SysIdable {
                     Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
                 });
 
-        // Configure SysId
-        sysId =
-                new SysIdRoutine(
-                        new SysIdRoutine.Config(
-                                null,
-                                null,
-                                null,
-                                (state) ->
-                                        Logger.recordOutput("Drive/SysIdState", state.toString())),
-                        new SysIdRoutine.Mechanism(
-                                (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
         SmartDashboard.putData("Field", fieldPose);
     }
 
@@ -453,24 +446,6 @@ public class Drive extends Mechanism implements SysIdable {
     }
 
     /**
-     * Returns a command to run a quasistatic test in the specified direction.
-     */
-    public Command sysIdQuasistatic(SysIdRoutineLog.Direction direction) {
-        return run(() -> runCharacterization(0.0))
-                .withTimeout(1.0)
-                .andThen(sysId.quasistatic(direction));
-    }
-
-    /**
-     * Returns a command to run a dynamic test in the specified direction.
-     */
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return run(() -> runCharacterization(0.0))
-                .withTimeout(1.0)
-                .andThen(sysId.dynamic(direction));
-    }
-
-    /**
      * Returns the module states (turn angles and drive velocities) for all of the modules.
      */
     @AutoLogOutput(key = "SwerveStates/Measured")
@@ -612,14 +587,12 @@ public class Drive extends Mechanism implements SysIdable {
         };
     }
 
-    @Override
     public void setVoltage(@NotNull Voltage voltage) {
         for (int i = 0; i < 4; i++) {
             modules[i].runCharacterization(voltage.in(Volts));
         }
     }
 
-    @Override
     public @NotNull Function1<Voltage, Unit> getSetVoltageConsumer() {
         return (voltage) -> {
             setVoltage(voltage);
