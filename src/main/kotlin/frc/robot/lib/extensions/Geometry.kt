@@ -1,21 +1,12 @@
 package frc.robot.lib.extensions
 
 import com.pathplanner.lib.util.FlippingUtil
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Pose3d
-import edu.wpi.first.math.geometry.Rectangle2d
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Rotation3d
-import edu.wpi.first.math.geometry.Transform2d
-import edu.wpi.first.math.geometry.Transform3d
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.geometry.Translation3d
-import edu.wpi.first.units.Units
-import edu.wpi.first.units.Units.Rotations
-import edu.wpi.first.units.measure.Angle
-import edu.wpi.first.units.measure.Distance
 import frc.robot.lib.IS_RED
-import frc.robot.lib.extensions.get
+import org.wpilib.math.geometry.*
+import org.wpilib.units.Units
+import org.wpilib.units.Units.Rotations
+import org.wpilib.units.measure.Angle
+import org.wpilib.units.measure.Distance
 
 fun Pose2d.moveBack(distance: Distance): Pose2d =
     this + Transform2d(-distance, Units.Meters.zero(), Rotation2d.kZero)
