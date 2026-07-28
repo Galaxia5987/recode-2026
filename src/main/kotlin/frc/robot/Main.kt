@@ -4,7 +4,7 @@
 
 package frc.robot
 
-import edu.wpi.first.wpilibj.RobotBase
+import org.wpilib.framework.RobotBase
 
 /**
  * Main initialization function. Do not perform any initialization here other
@@ -24,4 +24,4 @@ import edu.wpi.first.wpilibj.RobotBase
  * Rename * Refactoring when renaming the object, it will get changed everywhere
  * including here.)
  */
-fun main() = RobotBase.startRobot { Robot }
+fun main() = RobotBase.startRobot(Robot.javaClass)
