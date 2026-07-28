@@ -1,8 +1,8 @@
 package frc.robot.lib.extensions
 
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.units.*
-import edu.wpi.first.units.measure.*
+import org.wpilib.math.geometry.Rotation2d
+import org.wpilib.units.*
+import org.wpilib.units.measure.*
 import frc.robot.lib.getRotation3d
 import frc.robot.lib.getTranslation3d
 import kotlin.math.PI
