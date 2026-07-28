@@ -1,10 +1,10 @@
 package frc.robot.lib.math
 
-import edu.wpi.first.math.Nat
-import edu.wpi.first.math.Vector
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.numbers.N2
-import edu.wpi.first.units.measure.Distance
+import org.wpilib.math.util.Nat
+import org.wpilib.math.linalg.Vector
+import org.wpilib.math.geometry.Translation2d
+import org.wpilib.math.numbers.N2
+import org.wpilib.units.measure.Distance
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.meters
 import java.util.ArrayDeque
