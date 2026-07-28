@@ -1,7 +1,7 @@
 package frc.robot.lib.unified_controller
 
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller
-import edu.wpi.first.wpilibj2.command.button.Trigger
+import org.wpilib.command2.button.CommandPS5Controller
+import org.wpilib.command2.button.Trigger
 
 class PsControllerMap(port: Int) : UnifiedControllerIO {
     private val ps5Controller = CommandPS5Controller(port)

@@ -1,8 +1,8 @@
 package frc.robot.lib.unified_controller
 
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID
-import edu.wpi.first.wpilibj2.command.button.Trigger
+import org.wpilib.driverstation.DriverStation
+import org.wpilib.command2.button.CommandGenericHID
+import org.wpilib.command2.button.Trigger
 import frc.robot.lib.logged_output.LoggedOutputManager.runOnce
 import org.littletonrobotics.junction.Logger.recordOutput
 

@@ -1,13 +1,13 @@
 package frc.robot.lib.unified_controller
 
-import edu.wpi.first.wpilibj2.command.CommandScheduler
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController
-import edu.wpi.first.wpilibj2.command.button.Trigger
+import org.wpilib.command3.Trigger
+import org.wpilib.command3.button.CommandGamepad
+
 
 class PS5LinuxController(port: Int) {
-    private val controller = CommandXboxController(port)
+    private val controller = CommandGamepad(port)
 
-    fun square(): Trigger = controller.x()
+    fun square(): Trigger = controller.westFace()
 
     /**
      * Constructs a Trigger instance around the cross button's digital signal.

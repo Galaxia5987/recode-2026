@@ -1,8 +1,9 @@
 package frc.robot.lib.unified_controller
 
-import edu.wpi.first.wpilibj2.command.button.CommandGenericHID
-import edu.wpi.first.wpilibj2.command.button.Trigger
+import org.wpilib.command3.Trigger
+import org.wpilib.command3.button.CommandGenericHID
 
+// Not sure if this is needed in 2027
 enum class Button(val value: Int) {
     Square(3),
     Cross(1),
