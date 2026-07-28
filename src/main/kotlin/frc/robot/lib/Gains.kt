@@ -2,8 +2,8 @@ package frc.robot.lib
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs
 import com.ctre.phoenix6.configs.Slot0Configs
-import edu.wpi.first.units.measure.AngularAcceleration
-import edu.wpi.first.units.measure.AngularVelocity
+import org.wpilib.units.measure.AngularAcceleration
+import org.wpilib.units.measure.AngularVelocity
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.rad_ps
 import frc.robot.lib.extensions.rad_ps_ps
