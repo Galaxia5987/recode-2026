@@ -1,13 +1,15 @@
 package frc.robot.subsystems.drive
 
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.trajectory.TrapezoidProfile
-import edu.wpi.first.units.Units.*
-import edu.wpi.first.units.measure.AngularAcceleration
-import edu.wpi.first.units.measure.AngularVelocity
+import org.wpilib.math.geometry.Pose2d
+import org.wpilib.math.geometry.Rotation2d
+import org.wpilib.math.trajectory.TrapezoidProfile
+import org.wpilib.units.Units.*
+import org.wpilib.units.measure.AngularAcceleration
+import org.wpilib.units.measure.AngularVelocity
 import frc.robot.lib.extensions.cm
 import frc.robot.lib.extensions.deg
+
+// TODO: AlignCommand.kt isn't currently compatible with WPILib 2027
 
 const val DEFAULT_CONTROLLER_NAME = "RegularAlign"
 const val LINEAR_KP = 5.0
