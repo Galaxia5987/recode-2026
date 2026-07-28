@@ -1,22 +1,21 @@
 package frc.robot.lib.extensions
 
-import edu.wpi.first.math.controller.HolonomicDriveController
-import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.controller.ProfiledPIDController
-import edu.wpi.first.math.geometry.*
-import edu.wpi.first.units.Measure
-import edu.wpi.first.units.MutableMeasure
-import edu.wpi.first.units.Unit as WPIUnit
-import edu.wpi.first.util.struct.Struct
-import edu.wpi.first.util.struct.StructSerializable
-import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.button.Trigger
+import org.wpilib.math.controller.PIDController
+import org.wpilib.math.controller.ProfiledPIDController
+import org.wpilib.math.geometry.*
+import org.wpilib.units.Measure
+import org.wpilib.units.Unit as WPIUnit
+import org.wpilib.util.struct.Struct
+import org.wpilib.util.struct.StructSerializable
 import kotlin.reflect.KProperty
 import org.littletonrobotics.junction.AutoLogOutputManager
 import org.littletonrobotics.junction.LogTable
 import org.littletonrobotics.junction.Logger.recordOutput
+import org.littletonrobotics.junction.Logger.recordOutputMeasure
 import org.littletonrobotics.junction.inputs.LoggableInputs
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d
+import org.wpilib.command3.Command
+import org.wpilib.command3.Trigger
 
 abstract class AutoLogInputs : LoggableInputs {
     fun log(value: Double, key: String? = null) =
@@ -46,14 +45,7 @@ abstract class AutoLogInputs : LoggableInputs {
         )
 
     fun <U : WPIUnit> log(value: Measure<U>, key: String? = null) =
-        LoggedInput(value, key, LogTable::put, LogTable::get)
-
-    fun <
-        U : WPIUnit,
-        Base : Measure<WPIUnit>,
-        M : MutableMeasure<U, Base, M>,
-    > log(value: M, key: String? = null) =
-        LoggedInput(value, key, LogTable::put, LogTable::get)
+        LoggedInput(value, key, LogTable::putMeasure, LogTable::getMeasure)
 
     fun log(value: DoubleArray, key: String? = null) =
         LoggedInput(value, key, LogTable::put, LogTable::get)
@@ -128,7 +120,7 @@ fun Any.log(key: String) {
         is Int -> recordOutput(key, this)
         is Double -> recordOutput(key, this)
         is Boolean -> recordOutput(key, this)
-        is Measure<*> -> recordOutput(key, this)
+        is Measure<*> -> recordOutputMeasure(key, this)
         is StructSerializable -> recordOutput(key, this)
         is LoggedMechanism2d -> recordOutput(key, this)
         is Trigger -> recordOutput(key, this)
@@ -142,7 +134,9 @@ fun Any.log(prefix: String, key: String) {
 }
 
 fun Trigger.logTrigger(key: String): Trigger {
-    onChange(Commands.runOnce({ log(key) }))
+    val cmd = Command.noRequirements {log(key) }
+    onTrue(cmd)
+    onFalse(cmd)
     return this
 }
 
@@ -178,12 +172,15 @@ fun ProfiledPIDController.log(loggingName: String) {
         .log(loggingName)
 }
 
+// TODO: Not sure what's the replacement yet
+/*
 fun HolonomicDriveController.log() {
     xController.log("XController")
     yController.log("YController")
     thetaController.log("ThetaController")
     recordOutput("Alignment/Controllers/AtGoal", atReference())
 }
+ */
 
 // ```
 // This provides a replacement for the @AutoLog annotation as well as the ability to manually
