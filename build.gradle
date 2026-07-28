@@ -102,9 +102,9 @@ dependencies {
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
     testImplementation "org.jetbrains.kotlin:kotlin-test:2.0.0"
 
-//    def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit.json.bak").text)
-//    kapt "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
-    implementation fileTree(dir: 'deps', include: ['*.jar'])
+    def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit-27.0.0-alpha-4.json").text)
+    kapt "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
+//    implementation fileTree(dir: 'deps', include: ['*.jar'])
 }
 
 sourceSets {
