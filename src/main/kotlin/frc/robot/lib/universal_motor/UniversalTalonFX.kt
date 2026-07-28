@@ -3,9 +3,9 @@ package frc.robot.lib.universal_motor
 import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.ControlRequest
-import edu.wpi.first.units.measure.Angle
-import edu.wpi.first.units.measure.Distance
-import edu.wpi.first.units.measure.MomentOfInertia
+import org.wpilib.units.measure.Angle
+import org.wpilib.units.measure.Distance
+import org.wpilib.units.measure.MomentOfInertia
 import frc.robot.CURRENT_MODE
 import frc.robot.lib.Gains
 import frc.robot.lib.Mode

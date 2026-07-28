@@ -2,15 +2,18 @@ package frc.robot.lib.motors;
 
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.controls.compound.*;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N2;
-import edu.wpi.first.math.system.LinearSystem;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Current;
-import edu.wpi.first.units.measure.Voltage;
 import frc.robot.lib.math.differential.Derivative;
+import org.wpilib.math.numbers.N1;
+import org.wpilib.math.numbers.N2;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.system.LinearSystem;
+import org.wpilib.units.Units;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Current;
+import org.wpilib.units.measure.Voltage;
+
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.Rotation;
 
 public class TalonFXSim extends SimMotor {
 
@@ -173,12 +176,12 @@ public class TalonFXSim extends SimMotor {
 
     public AngularVelocity getVelocity() {
         return Units.Rotation.per(Units.Minutes)
-                .of(motorSim.getAngularVelocityRPM())
+                .of(motorSim.getAngularVelocity())
                 .times(conversionFactor);
     }
 
     public double getPosition() {
-        return motorSim.getAngularPositionRotations() * conversionFactor;
+        return Radians.of(motorSim.getAngularPosition()).in(Rotation) * conversionFactor;
     }
 
     public double getAcceleration() {
@@ -186,7 +189,7 @@ public class TalonFXSim extends SimMotor {
     }
 
     public Current getAppliedCurrent() {
-        return Units.Amps.of(motorSim.getCurrentDrawAmps());
+        return Units.Amps.of(motorSim.getCurrentDraw());
     }
 
     public Voltage getAppliedVoltage() {

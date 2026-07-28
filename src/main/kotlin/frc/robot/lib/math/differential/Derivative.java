@@ -1,6 +1,6 @@
 package frc.robot.lib.math.differential;
 
-import edu.wpi.first.wpilibj.Timer;
+import org.wpilib.system.Timer;
 
 /*
 This class represents the derivative of a value over time.
@@ -40,7 +40,7 @@ public class Derivative {
      * @param newValue The new value to differentiate.
      */
     public void update(double newValue) {
-        update(newValue, Timer.getFPGATimestamp());
+        update(newValue, Timer.getTimestamp());
     }
 
     /**

@@ -2,12 +2,12 @@ package frc.robot.lib.universal_motor
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.*
-import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.controller.ProfiledPIDController
-import edu.wpi.first.math.trajectory.TrapezoidProfile
-import edu.wpi.first.units.measure.Distance
-import edu.wpi.first.units.measure.MomentOfInertia
-import edu.wpi.first.wpilibj.Timer
+import org.wpilib.math.controller.PIDController
+import org.wpilib.math.controller.ProfiledPIDController
+import org.wpilib.math.trajectory.TrapezoidProfile
+import org.wpilib.units.measure.Distance
+import org.wpilib.units.measure.MomentOfInertia
+import org.wpilib.system.Timer
 import frc.robot.lib.Gains
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.kg2m
@@ -77,7 +77,7 @@ class MotorIOSim(
     }
 
     override fun updateInputs() {
-        motor.update(Timer.getFPGATimestamp())
+        motor.update(Timer.getTimestamp())
         if (logConfig.current) inputs.current = motor.appliedCurrent
         if (logConfig.statorCurrent)
             inputs.statorCurrent = motor.appliedCurrent * 2.0

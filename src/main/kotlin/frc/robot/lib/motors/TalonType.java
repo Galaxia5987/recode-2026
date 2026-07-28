@@ -1,6 +1,7 @@
 package frc.robot.lib.motors;
 
-import edu.wpi.first.math.system.plant.DCMotor;
+
+import org.wpilib.math.system.DCMotor;
 
 public enum TalonType {
     FALCON,
