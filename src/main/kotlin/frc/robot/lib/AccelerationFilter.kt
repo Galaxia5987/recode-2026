@@ -1,14 +1,14 @@
 package frc.robot.lib
 
-import edu.wpi.first.math.Matrix
-import edu.wpi.first.math.Nat
-import edu.wpi.first.math.VecBuilder
-import edu.wpi.first.math.estimator.ExtendedKalmanFilter
-import edu.wpi.first.math.geometry.Transform2d
-import edu.wpi.first.math.numbers.N1
-import edu.wpi.first.math.numbers.N2
-import edu.wpi.first.math.numbers.N6
-import edu.wpi.first.wpilibj.Timer
+import org.wpilib.math.linalg.Matrix
+import org.wpilib.math.util.Nat
+import org.wpilib.math.linalg.VecBuilder
+import org.wpilib.math.estimator.ExtendedKalmanFilter
+import org.wpilib.math.geometry.Transform2d
+import org.wpilib.math.numbers.N1
+import org.wpilib.math.numbers.N2
+import org.wpilib.math.numbers.N6
+import org.wpilib.system.Timer
 import frc.robot.LOOP_TIME
 import kotlin.math.pow
 
@@ -35,7 +35,7 @@ class AccelerationKalmanFusion(
 ) : AccelerationFilter {
 
     private val ekf: ExtendedKalmanFilter<N2, N2, N6>
-    private var lastTime: Double = Timer.getFPGATimestamp()
+    private var lastTime: Double = Timer.getTimestamp()
     private val inputs = Matrix(Nat.N2(), Nat.N1())
     private val measurements = Matrix(Nat.N6(), Nat.N1())
     private val expectedMeasurements = Matrix(Nat.N6(), Nat.N1())
@@ -98,7 +98,7 @@ class AccelerationKalmanFusion(
         gyroOmega: Double,
         gyroAlpha: Double
     ) {
-        val currentTime = Timer.getFPGATimestamp()
+        val currentTime = Timer.getTimestamp()
         val dt = currentTime - lastTime
         lastTime = currentTime
 
