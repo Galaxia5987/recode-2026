@@ -1,16 +1,18 @@
 package frc.robot.lib.controllers
 
-import edu.wpi.first.math.controller.HolonomicDriveController
-import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.controller.ProfiledPIDController
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.kinematics.ChassisSpeeds
-import edu.wpi.first.math.trajectory.Trajectory
-import edu.wpi.first.units.Units.MetersPerSecond
-import edu.wpi.first.units.Units.Radians
-import edu.wpi.first.units.measure.Angle
-import edu.wpi.first.units.measure.LinearVelocity
+// TODO: HolonomicDriveController was removed in 2027. A replacement is needed. Maybe [AutoPilot](https://therekrab.github.io/autopilot/) would be good.
+/*
+import org.wpilib.math.controller.HolonomicDriveController
+import org.wpilib.math.controller.PIDController
+import org.wpilib.math.controller.ProfiledPIDController
+import org.wpilib.math.geometry.Pose2d
+import org.wpilib.math.geometry.Rotation2d
+import org.wpilib.math.kinematics.ChassisSpeeds
+import org.wpilib.math.trajectory.Trajectory
+import org.wpilib.units.Units.MetersPerSecond
+import org.wpilib.units.Units.Radians
+import org.wpilib.units.measure.Angle
+import org.wpilib.units.measure.LinearVelocity
 import frc.robot.lib.extensions.log
 import frc.robot.subsystems.drive.controller
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
@@ -144,3 +146,5 @@ class TunableHolonomicDriveController(
         )
     }
 }
+
+ */
