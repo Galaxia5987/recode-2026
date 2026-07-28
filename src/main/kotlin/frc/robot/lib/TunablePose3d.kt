@@ -1,10 +1,10 @@
 package frc.robot.lib
 
-import edu.wpi.first.math.geometry.Pose3d
-import edu.wpi.first.math.geometry.Rotation3d
-import edu.wpi.first.math.geometry.Translation3d
-import edu.wpi.first.units.measure.Angle
-import edu.wpi.first.units.measure.Distance
+import org.wpilib.math.geometry.Pose3d
+import org.wpilib.math.geometry.Rotation3d
+import org.wpilib.math.geometry.Translation3d
+import org.wpilib.units.measure.Angle
+import org.wpilib.units.measure.Distance
 import frc.robot.lib.extensions.*
 import frc.robot.lib.extensions.get
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
