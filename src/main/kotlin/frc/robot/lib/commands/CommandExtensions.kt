@@ -19,7 +19,10 @@ fun sequence(vararg commands: Command): Command {
     return head.withAutomaticName()
 }
 
-fun emptyCommand() =
+fun emptyCommand(): Command =
     Command.noRequirements(Coroutine::park)
         .withPriority(Command.LOWEST_PRIORITY)
         .named("EmptyCommand")
+
+context(coroutine: Coroutine)
+operator fun Command.unaryPlus() = coroutine.await(this)
