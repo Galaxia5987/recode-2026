@@ -3,28 +3,20 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot
 
-import com.pathplanner.lib.commands.FollowPathCommand
-import com.pathplanner.lib.commands.PathfindingCommand
-import edu.wpi.first.hal.FRCNetComm.tInstances
-import edu.wpi.first.hal.FRCNetComm.tResourceType
-import edu.wpi.first.hal.HAL
-import edu.wpi.first.math.VecBuilder
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.PowerDistribution
-import edu.wpi.first.wpilibj.Timer
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.lib.BetterPoseEstimator
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.extensions.toPose3d
 import frc.robot.lib.logged_output.LoggedOutputManager
-import frc.robot.subsystems.drive.DriveCommands
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.*
 import org.littletonrobotics.junction.networktables.NT4Publisher
 import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
+import org.wpilib.command3.Command
+import org.wpilib.command3.Scheduler
+import org.wpilib.hardware.power.PowerDistribution
+import org.wpilib.math.linalg.VecBuilder
+import org.wpilib.system.Timer
 
 /**
  * The VM is configured to automatically run this class, and to call the
@@ -41,12 +33,6 @@ object Robot : LoggedRobot() {
      * used for any initialization code.
      */
     init {
-        // Report Kotlin language usage
-        // https://www.chiefdelphi.com/t/do-you-use-kotlin-make-sure-first-knows/447155?u=dan
-        HAL.report(
-            tResourceType.kResourceType_Language,
-            tInstances.kLanguage_Kotlin
-        )
         arrayOf(vision, drive).forEach { AutoLogOutputManager.addObject(it) }
 
         // Initialize logger
@@ -71,8 +57,9 @@ object Robot : LoggedRobot() {
         when (CURRENT_MODE) {
             frc.robot.lib.Mode.REAL -> {
                 LoggedPowerDistribution.getInstance(
+                    0,
                     1,
-                    PowerDistribution.ModuleType.kRev
+                    PowerDistribution.ModuleType.REV
                 )
                 Logger.addDataReceiver(WPILOGWriter())
                 Logger.addDataReceiver(NT4Publisher())
@@ -94,17 +81,12 @@ object Robot : LoggedRobot() {
 
         LoggedOutputManager
 
-        DriverStation.silenceJoystickConnectionWarning(true)
-        CommandScheduler.getInstance()
-            .schedule(
-                FollowPathCommand.warmupCommand(),
-                PathfindingCommand.warmupCommand()
-            )
-
-        SmartDashboard.putData(
-            "ResetByVision",
-            DriveCommands.resetByPoseEstimation().ignoringDisable(true)
-        )
+        // TODO: Update when PathPlanner works with CommandsV3
+//        Scheduler.getDefault()
+//            .schedule(
+//                FollowPathCommand.warmupCommand(),
+//                PathfindingCommand.warmupCommand()
+//            )
     }
 
     /**
@@ -116,7 +98,7 @@ object Robot : LoggedRobot() {
      * LiveWindow and SmartDashboard integrated updating.
      */
     override fun robotPeriodic() {
-        CommandScheduler.getInstance().run()
+        Scheduler.getDefault().run()
     }
 
     /**
@@ -135,7 +117,7 @@ object Robot : LoggedRobot() {
         autonomousCommand = RobotContainer.getAutonomousCommand()
 
         // Schedule the autonomous command
-        CommandScheduler.getInstance().schedule(autonomousCommand)
+        Scheduler.getDefault().schedule(autonomousCommand)
     }
 
     /** This function is called periodically during autonomous. */
@@ -144,7 +126,7 @@ object Robot : LoggedRobot() {
     /** This function is called once when teleop is enabled. */
     override fun teleopInit() {
         if (::autonomousCommand.isInitialized) {
-            autonomousCommand.cancel()
+            autonomousCommand.raceWith(Command.noRequirements {  }.named("CancelAutonomousCommand")) // TODO: Make this less shitty
         }
     }
 
@@ -178,12 +160,4 @@ object Robot : LoggedRobot() {
 
     /** This function is called periodically when disabled. */
     override fun disabledPeriodic() {}
-
-    /** This function is called once when test mode is enabled. */
-    override fun testInit() {
-        CommandScheduler.getInstance().cancelAll()
-    }
-
-    /** This function is called periodically during test mode. */
-    override fun testPeriodic() {}
 }
