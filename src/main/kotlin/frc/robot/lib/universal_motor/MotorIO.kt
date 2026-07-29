@@ -39,6 +39,8 @@ interface MotorIO {
      */
     fun updateInputs() {}
 
+    fun resetInputs() {}
+
     /**
      * Base class representing the observable inputs from a motor. This class
      * generates the logging class `LoggedMotorInputs`

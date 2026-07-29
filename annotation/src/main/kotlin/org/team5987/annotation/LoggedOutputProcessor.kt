@@ -15,15 +15,18 @@ class LoggedOutputProcessor(
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("LoggedOutputProcessor started processing...")
-        val symbols = resolver.getSymbolsWithAnnotation("org.team5987.annotation.LoggedOutput")
+        val symbols =
+            resolver
+                .getSymbolsWithAnnotation("org.team5987.annotation.LoggedOutput")
+                .toList()
 
-        if (symbols.none()) {
+        if (symbols.isEmpty()) {
             logger.warn("No @LoggedOutput symbols found this round.")
             generateEmptyFile(codeGenerator, resolver)
             return emptyList()
         }
 
-        logger.info("Found ${symbols.count()} @LoggedOutput symbols.")
+        logger.info("Found ${symbols.size} @LoggedOutput symbols.")
 
         val fileSpecBuilder = FileSpec.builder("frc.robot.lib.logged_output.generated", "LoggedRegistry")
         val funSpecBuilder = FunSpec.builder("registerAllLoggedOutputs")

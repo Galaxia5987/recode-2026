@@ -10,6 +10,7 @@ import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.kg2m
 import frc.robot.lib.extensions.m
 import frc.robot.lib.getFileNameFromStack
+import frc.robot.lib.unit_test.allMotorsFromPorts
 import org.littletonrobotics.junction.Logger
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.Distance
@@ -33,7 +34,7 @@ import org.wpilib.units.measure.MomentOfInertia
  * ```
  */
 class UniversalTalonFX(
-    private val port: Int,
+    val port: Int,
     private val canbus: CANBus = CANBus("rio"),
     private val subsystem: String = getFileNameFromStack(),
     private val motorName: String = "motorId $port",
@@ -45,6 +46,12 @@ class UniversalTalonFX(
     private val absoluteEncoderOffset: Angle = 0.deg,
     private val logConfig: MotorLogConfig = MotorLogConfig(),
 ) {
+    init {
+        if (CURRENT_MODE == Mode.SIM) {
+            allMotorsFromPorts[port to canbus.name] = this
+        }
+    }
+
     private val motorIO: MotorIO =
         if (CURRENT_MODE == Mode.REAL)
             MotorIOReal(
@@ -80,6 +87,10 @@ class UniversalTalonFX(
     fun periodic() {
         motorIO.updateInputs()
         Logger.processInputs("Subsystems/$subsystem/$motorName", inputs)
+    }
+
+    fun resetInputs() {
+        motorIO.resetInputs()
     }
 
     fun applyConfiguration(config: TalonFXConfiguration) {
