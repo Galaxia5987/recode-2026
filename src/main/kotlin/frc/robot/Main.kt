@@ -24,4 +24,4 @@ import org.wpilib.framework.RobotBase
  * Rename * Refactoring when renaming the object, it will get changed everywhere
  * including here.)
  */
-fun main() = RobotBase.startRobot(Robot.javaClass)
+fun main() = RobotBase.startRobot(Robot::class.java)
