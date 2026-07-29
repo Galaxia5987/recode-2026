@@ -62,9 +62,6 @@ abstract class AutoLogInputs : LoggableInputs {
     fun log(value: LongArray, key: String? = null) =
         LoggedInput(value, key, LogTable::put, LogTable::get)
 
-    fun <T : StructSerializable> log(value: Array<T>, key: String? = null) =
-        LoggedInput(value, key, LogTable::put, LogTable::get)
-
     private val toLogRunners = mutableListOf<(LogTable) -> Unit>()
     private val fromLogRunners = mutableListOf<(LogTable) -> Unit>()
 
