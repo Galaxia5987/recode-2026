@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # Grab the WPILib docker container
-    container: wpilib/roborio-cross-ubuntu:2025-22.04
+    container: wpilib/systemcore-cross-ubuntu:2026-24.04-py314
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
