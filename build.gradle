@@ -67,6 +67,7 @@ task(replayWatch, type: JavaExec) {
 }
 
 dependencies {
+    implementation 'org.junit.jupiter:junit-jupiter:5.9.2'
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
@@ -105,7 +106,7 @@ dependencies {
     kapt "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
     implementation 'org.dyn4j:dyn4j:5.0.2'
     implementation 'com.github.Galaxia5987:maple-sim:main-SNAPSHOT'
-//    implementation fileTree(dir: 'deps', include: ['*.jar'])
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit5:2.0.0"
 }
 
 sourceSets {

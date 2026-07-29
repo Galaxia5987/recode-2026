@@ -183,6 +183,16 @@ public class TalonFXSim extends SimMotor {
         return Radians.of(motorSim.getAngularPosition()).in(Rotation) * conversionFactor;
     }
 
+    public void resetInputs() {
+        voltageRequest = MotorSetpoint.simpleVoltage(0);
+        if (controller != null) controller.reset();
+        if (profiledController != null) profiledController.reset(0);
+
+        motorSim.setAngularVelocity(0);
+        motorSim.setAngle(0);
+        motorSim.setInputVoltage(0);
+    }
+
     public double getAcceleration() {
         return acceleration.get();
     }
