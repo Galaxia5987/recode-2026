@@ -73,8 +73,8 @@ public class Module {
     /** Runs the module with the specified setpoint state. Mutates the state to optimize it. */
     public void runSetpoint(SwerveModuleVelocity state) {
         // Optimize velocity setpoint
-        state.optimize(getAngle());
-        state.cosineScale(inputs.turnPosition);
+        state = state.optimize(getAngle());
+        state = state.cosineScale(inputs.turnPosition);
 
         // Apply setpoints
         io.setDriveVelocity(state.velocity / constants.WheelRadius);
