@@ -134,7 +134,7 @@ fun Any.log(prefix: String, key: String) {
 }
 
 fun Trigger.logTrigger(key: String): Trigger {
-    val cmd = Command.noRequirements {log(key) }
+    val cmd = Command.noRequirements {log(key) }.named("Log$key")
     onTrue(cmd)
     onFalse(cmd)
     return this
