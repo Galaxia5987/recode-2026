@@ -1,37 +1,48 @@
 package frc.robot.lib.logged_output
 
-import edu.wpi.first.math.controller.ProfiledPIDController
-import edu.wpi.first.units.Measure
-import edu.wpi.first.util.WPISerializable
-import edu.wpi.first.util.struct.StructSerializable
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj.util.Color
-import edu.wpi.first.wpilibj2.command.SubsystemBase
 import frc.robot.lib.extensions.log
 import frc.robot.lib.extensions.toPrimitiveTypeJava
 import frc.robot.lib.ifNotNull
 import frc.robot.lib.logged_output.generated.registerAllLoggedOutputs
 import frc.robot.logLevel
+import org.littletonrobotics.junction.Logger.recordOutput
+import org.littletonrobotics.junction.Logger.recordOutputMeasure
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d
+import org.team5987.annotation.LogLevel
+import org.wpilib.command3.Scheduler
+import org.wpilib.driverstation.DriverStationErrors
+import org.wpilib.driverstation.RobotState
+import org.wpilib.math.controller.ProfiledPIDController
+import org.wpilib.system.RobotController
+import org.wpilib.units.Measure
+import org.wpilib.units.Units.Microsecond
+import org.wpilib.units.Units.Millisecond
+import org.wpilib.util.Color
+import org.wpilib.util.WPISerializable
+import org.wpilib.util.struct.StructSerializable
 import java.util.function.*
 import kotlin.reflect.KFunction
 import kotlin.reflect.KProperty0
 import kotlin.reflect.jvm.javaGetter
 import kotlin.reflect.jvm.javaMethod
-import org.littletonrobotics.junction.Logger.recordOutput
-import org.littletonrobotics.junction.mechanism.LoggedMechanism2d
-import org.team5987.annotation.LogLevel
 
-object LoggedOutputManager : SubsystemBase() {
+object LoggedOutputManager {
     private val callbacks = mutableListOf<Runnable>()
 
     private val currentLogLevel =
-        if (DriverStation.isFMSAttached()) LogLevel.COMP else logLevel
+        if (RobotState.isFMSAttached()) LogLevel.COMP else logLevel
 
     init {
         registerAllLoggedOutputs()
+        Scheduler.getDefault().addPeriodic {
+            val startTime = RobotController.getTime()
+            periodic()
+            val totalTime = Millisecond.convertFrom((RobotController.getTime() - startTime).toDouble(),Microsecond)
+            recordOutput("LoggedOutput/loopTime", totalTime)
+        }
     }
 
-    override fun periodic() = callbacks.forEach { it.run() }
+    fun periodic() = callbacks.forEach { it.run() }
 
     private fun makeKey(
         key: String,
@@ -154,7 +165,7 @@ object LoggedOutputManager : SubsystemBase() {
                                                 value.toDouble()
                                             )
                                         is Measure<*> ->
-                                            recordOutput(subKey, value)
+                                            recordOutputMeasure(subKey, value)
                                         else ->
                                             recordOutput(
                                                 subKey,
@@ -204,7 +215,7 @@ object LoggedOutputManager : SubsystemBase() {
                 Measure::class.java.isAssignableFrom(type) ->
                     addRunnable(key) {
                         value().ifNotNull {
-                            recordOutput(key, it as Measure<*>)
+                            recordOutputMeasure(key, it as Measure<*>)
                         }
                     }
                 String::class.java.isAssignableFrom(type) ->
@@ -218,7 +229,7 @@ object LoggedOutputManager : SubsystemBase() {
 
                                 recordOutput(key, value() as WPISerializable)
                             } catch (e: ClassCastException) {
-                                DriverStation.reportError(
+                                DriverStationErrors.reportError(
                                     "[LoggedOutputManager] Auto serialization is not supported for type " +
                                         type.getSimpleName(),
                                     false
@@ -282,7 +293,7 @@ object LoggedOutputManager : SubsystemBase() {
                                     *value() as Array<StructSerializable?>
                                 )
                             } catch (e: ClassCastException) {
-                                DriverStation.reportError(
+                                DriverStationErrors.reportError(
                                     "[LoggedOutputManager] Auto serialization is not supported for array type " +
                                         componentType.getSimpleName(),
                                     false
@@ -346,7 +357,7 @@ object LoggedOutputManager : SubsystemBase() {
                                     it as Array<Array<StructSerializable>?>?
                                 )
                             } catch (e: ClassCastException) {
-                                DriverStation.reportError(
+                                DriverStationErrors.reportError(
                                     ("[LoggedOutputManager] Auto serialization is not supported for 2D array type " +
                                         componentType.getSimpleName()),
                                     false
