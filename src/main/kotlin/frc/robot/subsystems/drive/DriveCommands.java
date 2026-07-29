@@ -178,7 +178,7 @@ public class DriveCommands {
         // Construct command
         return drive.run(
                 (coroutine) -> {
-                    angleController.reset(drive.getRotation().getRadians())
+                    angleController.reset(drive.getRotation().getRadians());
                     while (true) {
                         // Get linear velocity
                         Translation2d linearVelocity =
