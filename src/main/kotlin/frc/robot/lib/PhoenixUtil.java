@@ -13,8 +13,6 @@
 
 package frc.robot.lib;
 
-import static edu.wpi.first.units.Units.*;
-import static edu.wpi.first.units.Units.Seconds;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -22,15 +20,17 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.CANcoderSimState;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.Timer;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.motorsims.SimulatedBattery;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
+import org.wpilib.framework.RobotBase;
+import org.wpilib.system.Timer;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.Voltage;
+
+import static org.wpilib.units.Units.*;
 
 public final class PhoenixUtil {
     /** Attempts to run the command until no error is produced. */
@@ -94,7 +94,7 @@ public final class PhoenixUtil {
                 new double[SimulatedArena.getSimulationSubTicksIn1Period()];
         for (int i = 0; i < odometryTimeStamps.length; i++) {
             odometryTimeStamps[i] =
-                    Timer.getFPGATimestamp()
+                    Timer.getTimestamp()
                             - 0.02
                             + i * SimulatedArena.getSimulationDt().in(Seconds);
         }
