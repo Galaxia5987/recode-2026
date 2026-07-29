@@ -13,17 +13,18 @@
 
 package frc.robot.subsystems.drive.ModuleIOs;
 
-import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import frc.robot.lib.PhoenixUtil;
 import frc.robot.subsystems.drive.TunerConstants;
 import java.util.Arrays;
 import org.ironmaple.simulation.drivesims.SwerveModuleSimulation;
 import org.ironmaple.simulation.motorsims.SimulatedMotorController;
 import org.littletonrobotics.junction.Logger;
+import org.wpilib.math.controller.PIDController;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.util.Units;
+
+import static org.wpilib.units.Units.*;
 
 /**
  * Physics sim implementation of module IO. The sim models are configured using a set of module
@@ -72,7 +73,7 @@ public class ModuleIOSim implements ModuleIO {
                     driveFFVolts
                             + driveController.calculate(
                                     moduleSimulation
-                                            .getDriveWheelFinalSpeed()
+                                            .getDriveWheelFinalVelocity()
                                             .in(RadiansPerSecond));
         } else {
             driveController.reset();
@@ -93,7 +94,7 @@ public class ModuleIOSim implements ModuleIO {
         inputs.driveConnected = true;
         inputs.drivePositionRad = moduleSimulation.getDriveWheelFinalPosition().in(Radians);
         inputs.driveVelocityRadPerSec =
-                moduleSimulation.getDriveWheelFinalSpeed().in(RadiansPerSecond);
+                moduleSimulation.getDriveWheelFinalVelocity().in(RadiansPerSecond);
         inputs.driveAppliedVolts = driveAppliedVolts;
         inputs.driveCurrentAmps = Math.abs(moduleSimulation.getDriveMotorStatorCurrent().in(Amps));
 
@@ -103,7 +104,7 @@ public class ModuleIOSim implements ModuleIO {
         inputs.turnAbsolutePosition = moduleSimulation.getSteerAbsoluteFacing();
         inputs.turnPosition = moduleSimulation.getSteerAbsoluteFacing();
         inputs.turnVelocityRadPerSec =
-                moduleSimulation.getSteerAbsoluteEncoderSpeed().in(RadiansPerSecond);
+                moduleSimulation.getSteerAbsoluteEncoderVelocity().in(RadiansPerSecond);
         inputs.turnAppliedVolts = turnAppliedVolts;
         inputs.turnCurrentAmps = Math.abs(moduleSimulation.getSteerMotorStatorCurrent().in(Amps));
 
