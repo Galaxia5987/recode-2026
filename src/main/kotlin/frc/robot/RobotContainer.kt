@@ -1,18 +1,17 @@
 package frc.robot
 
-import com.pathplanner.lib.auto.AutoBuilder
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine
 import frc.robot.lib.Mode
+import frc.robot.lib.commands.emptyCommand
 import frc.robot.lib.extensions.enableAutoLogOutputFor
+import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.subsystems.drive.DriveCommands
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
+import org.wpilib.command3.Command
+import org.wpilib.smartdashboard.SendableChooser
 
 object RobotContainer {
-    private val driverController = CommandPS5Controller(0)
+    private val driverController = PS5Gamepad(0)
     private val autoChooser: LoggedDashboardChooser<Command>
 
     init {
@@ -20,7 +19,7 @@ object RobotContainer {
         autoChooser =
             LoggedDashboardChooser(
                 "Auto Choices",
-                AutoBuilder.buildAutoChooser()
+                SendableChooser()
             )
         registerAutoCommands()
         configureButtonBindings()
@@ -51,7 +50,7 @@ object RobotContainer {
     fun getAutonomousCommand(): Command = autoChooser.get()
 
     private fun registerAutoCommands() {
-        autoChooser.addDefaultOption("Empty", Commands.none())
+        autoChooser.addDefaultOption("Empty", emptyCommand())
 
         // SysIds
         autoChooser.addOption(
@@ -62,22 +61,24 @@ object RobotContainer {
             "Drive Simple FF Characterization",
             DriveCommands.feedforwardCharacterization()
         )
-        autoChooser.addOption(
-            "Drive SysId (Quasistatic Forward)",
-            drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
-        )
-        autoChooser.addOption(
-            "Drive SysId (Quasistatic Reverse)",
-            drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
-        )
-        autoChooser.addOption(
-            "Drive SysId (Dynamic Forward)",
-            drive.sysIdDynamic(SysIdRoutine.Direction.kForward)
-        )
-        autoChooser.addOption(
-            "Drive SysId (Dynamic Reverse)",
-            drive.sysIdDynamic(SysIdRoutine.Direction.kReverse)
-        )
+
+        // TODO: Uncomment when I figure out what happened to SysId
+//        autoChooser.addOption(
+//            "Drive SysId (Quasistatic Forward)",
+//            drive.sysIdQuasistatic(SysIdRoutine.Direction.kForward)
+//        )
+//        autoChooser.addOption(
+//            "Drive SysId (Quasistatic Reverse)",
+//            drive.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)
+//        )
+//        autoChooser.addOption(
+//            "Drive SysId (Dynamic Forward)",
+//            drive.sysIdDynamic(SysIdRoutine.Direction.kForward)
+//        )
+//        autoChooser.addOption(
+//            "Drive SysId (Dynamic Reverse)",
+//            drive.sysIdDynamic(SysIdRoutine.Direction.kReverse)
+//        )
 
         autoChooser.addOption(
             "swerveFFCharacterization",
