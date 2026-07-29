@@ -1,20 +1,21 @@
 package frc.robot.lib
 
-import org.wpilib.math.linalg.Matrix
-import org.wpilib.math.util.Nat
-import org.wpilib.math.linalg.VecBuilder
+import frc.robot.LOOP_TIME
+import kotlin.math.pow
 import org.wpilib.math.estimator.ExtendedKalmanFilter
 import org.wpilib.math.geometry.Transform2d
+import org.wpilib.math.linalg.Matrix
+import org.wpilib.math.linalg.VecBuilder
 import org.wpilib.math.numbers.N1
 import org.wpilib.math.numbers.N2
 import org.wpilib.math.numbers.N6
+import org.wpilib.math.util.Nat
 import org.wpilib.system.Timer
-import frc.robot.LOOP_TIME
-import kotlin.math.pow
 
 interface AccelerationFilter {
     val estimatedAccelerationX: Double
     val estimatedAccelerationY: Double
+
     fun update(
         swerveAx: Double,
         swerveAy: Double,
@@ -23,7 +24,7 @@ interface AccelerationFilter {
         pigeonX: Double,
         pigeonY: Double,
         gyroOmega: Double,
-        gyroAlpha: Double
+        gyroAlpha: Double,
     )
 }
 
@@ -31,7 +32,7 @@ class AccelerationKalmanFusion(
     val rioToCenter: Transform2d,
     measurementStdDevs: Matrix<N6, N1> =
         VecBuilder.fill(0.5, 0.5, 0.1, 0.1, 0.1, 0.1),
-    stateStdDevs: Matrix<N2, N1> = VecBuilder.fill(0.1, 0.1)
+    stateStdDevs: Matrix<N2, N1> = VecBuilder.fill(0.1, 0.1),
 ) : AccelerationFilter {
 
     private val ekf: ExtendedKalmanFilter<N2, N2, N6>
@@ -57,13 +58,13 @@ class AccelerationKalmanFusion(
                 { x, u -> getMeasurements(x, u) },
                 stateStdDevs,
                 measurementStdDevs,
-                LOOP_TIME
+                LOOP_TIME,
             )
     }
 
     private fun getMeasurements(
         x: Matrix<N2, N1>,
-        u: Matrix<N2, N1>
+        u: Matrix<N2, N1>,
     ): Matrix<N6, N1> {
         val ax = x.get(0, 0)
         val ay = x.get(1, 0)
@@ -75,12 +76,12 @@ class AccelerationKalmanFusion(
         expectedMeasurements.set(
             2,
             0,
-            ax - (alpha * rioToCenter.y) - (omegaSq * rioToCenter.x)
+            ax - (alpha * rioToCenter.y) - (omegaSq * rioToCenter.x),
         ) // RIO X
         expectedMeasurements.set(
             3,
             0,
-            ay + (alpha * rioToCenter.x) - (omegaSq * rioToCenter.y)
+            ay + (alpha * rioToCenter.x) - (omegaSq * rioToCenter.y),
         ) // RIO Y
         expectedMeasurements.set(4, 0, ax) // Pigeon X
         expectedMeasurements.set(5, 0, ay) // Pigeon Y
@@ -96,7 +97,7 @@ class AccelerationKalmanFusion(
         pigeonX: Double,
         pigeonY: Double,
         gyroOmega: Double,
-        gyroAlpha: Double
+        gyroAlpha: Double,
     ) {
         val currentTime = Timer.getTimestamp()
         val dt = currentTime - lastTime
@@ -118,6 +119,7 @@ class AccelerationKalmanFusion(
         ekf.correct(inputs, measurements)
     }
 }
+
 // Alpha
 // Higher trusts previous estimate
 // Lower faster response but more noise
@@ -126,7 +128,7 @@ class AccelerationComplementaryFilter(
     private val swerveWeight: Double = 0.2,
     private val rioWeight: Double = 0.2,
     private val pigeonWeight: Double = 0.6,
-    private val alpha: Double = 0.7
+    private val alpha: Double = 0.7,
 ) : AccelerationFilter {
 
     override var estimatedAccelerationX: Double = 0.0
@@ -143,7 +145,7 @@ class AccelerationComplementaryFilter(
         pigeonX: Double,
         pigeonY: Double,
         gyroOmega: Double,
-        gyroAlpha: Double
+        gyroAlpha: Double,
     ) {
         val omegaSq = gyroOmega.pow(2)
 

@@ -11,6 +11,6 @@ private val coastOut = CoastOut()
 fun createDisableTriggerForCoast(motor: UniversalTalonFX) {
     val coast = { motor.setControl(coastOut) }
     Trigger { RobotState.isDisabled() }
-        .onTrue(Command.noRequirements{coast.invoke()}.named("CoastMotor"))
+        .onTrue(Command.noRequirements { coast.invoke() }.named("CoastMotor"))
     coast.invoke()
 }

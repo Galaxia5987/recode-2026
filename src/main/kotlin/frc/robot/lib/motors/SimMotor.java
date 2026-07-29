@@ -1,5 +1,6 @@
 package frc.robot.lib.motors;
 
+import java.util.function.DoubleSupplier;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.controller.ProfiledPIDController;
 import org.wpilib.math.numbers.N1;
@@ -8,8 +9,6 @@ import org.wpilib.math.system.DCMotor;
 import org.wpilib.math.system.LinearSystem;
 import org.wpilib.math.system.Models;
 import org.wpilib.simulation.DCMotorSim;
-
-import java.util.function.DoubleSupplier;
 
 public class SimMotor {
 

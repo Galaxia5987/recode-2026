@@ -1,6 +1,5 @@
 package frc.robot.lib.math.differential;
 
-
 import org.wpilib.system.Timer;
 
 /*

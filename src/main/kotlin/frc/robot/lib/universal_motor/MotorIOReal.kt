@@ -4,9 +4,9 @@ import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.ControlRequest
 import com.ctre.phoenix6.hardware.TalonFX
+import frc.robot.lib.extensions.toDistance
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.Distance
-import frc.robot.lib.extensions.toDistance
 
 /**
  * Real implementation of [MotorIO] for interacting with actual TalonFX
@@ -25,7 +25,7 @@ class MotorIOReal(
     private val gearRatio: Double,
     private val diameter: Distance,
     private val absoluteEncoderOffset: Angle,
-    private val logConfig: MotorLogConfig
+    private val logConfig: MotorLogConfig,
 ) : MotorIO {
     override val inputs = LoggedMotorInputs()
     private val motor = TalonFX(port, canBus)

@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.drive.gyroIOs;
 
+import static org.wpilib.units.Units.MetersPerSecondPerSecond;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
@@ -21,16 +23,13 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.PhoenixOdometryThread;
 import frc.robot.subsystems.drive.TunerConstants;
+import java.util.Queue;
 import org.wpilib.math.filter.LinearFilter;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.geometry.Translation2d;
 import org.wpilib.math.util.Units;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
-
-import java.util.Queue;
-
-import static org.wpilib.units.Units.MetersPerSecondPerSecond;
 
 /** IO implementation for Pigeon 2. */
 public class GyroIOPigeon2 implements GyroIO {
@@ -67,14 +66,8 @@ public class GyroIOPigeon2 implements GyroIO {
     @Override
     public void updateInputs(GyroIOInputs inputs) {
         inputs.connected = BaseStatusSignal.refreshAll(yaw, yawVelocity).equals(StatusCode.OK);
-        double accelX =
-                pigeon.getAccelerationX()
-                        .getValue()
-                        .in(MetersPerSecondPerSecond);
-        double accelY =
-                pigeon.getAccelerationY()
-                        .getValue()
-                        .in(MetersPerSecondPerSecond);
+        double accelX = pigeon.getAccelerationX().getValue().in(MetersPerSecondPerSecond);
+        double accelY = pigeon.getAccelerationY().getValue().in(MetersPerSecondPerSecond);
         Translation2d accel =
                 new Translation2d(accelX, accelY).rotateBy(Rotation2d.fromDegrees(138.403843 + 90));
         inputs.accelerationX = MetersPerSecondPerSecond.of(accel.getX());

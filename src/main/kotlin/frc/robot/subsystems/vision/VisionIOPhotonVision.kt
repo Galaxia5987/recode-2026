@@ -13,20 +13,20 @@
 
 package frc.robot.subsystems.vision
 
-import org.wpilib.math.geometry.Pose3d
-import org.wpilib.math.geometry.Rotation2d
-import org.wpilib.math.geometry.Transform3d
 import frc.robot.subsystems.vision.VisionIO.PoseObservation
 import frc.robot.subsystems.vision.VisionIO.VisionIOInputs
 import org.photonvision.PhotonCamera
 import org.photonvision.PhotonPoseEstimator
+import org.wpilib.math.geometry.Pose3d
+import org.wpilib.math.geometry.Rotation2d
+import org.wpilib.math.geometry.Transform3d
 
 /** IO implementation for real PhotonVision hardware. */
 open class VisionIOPhotonVision(
     name: String,
     protected val robotToCamera: () -> Transform3d,
     private val botRotation: () -> Rotation2d,
-    private val tagIdsToFilter: () -> List<Int>
+    private val tagIdsToFilter: () -> List<Int>,
 ) : VisionIO {
     protected val camera = PhotonCamera(name)
     private val poseEstimator =
@@ -57,7 +57,7 @@ open class VisionIOPhotonVision(
                     val pose = estimatedPose.get()
                     poseEstimator.resetHeadingData(
                         pose.timestampSeconds,
-                        pose.estimatedPose.rotation
+                        pose.estimatedPose.rotation,
                     )
 
                     val estimatedRobotPose = estimatedPose.get()
@@ -72,7 +72,7 @@ open class VisionIOPhotonVision(
                             estimatedRobotPose.targetsUsed.size,
                             estimatedRobotPose.targetsUsed
                                 .map { it.bestCameraToTarget.translation.norm }
-                                .average()
+                                .average(),
                         )
                 } else {
                     val target = result.targets[0]
@@ -81,7 +81,7 @@ open class VisionIOPhotonVision(
                         val fieldToTarget =
                             Transform3d(
                                 tagPose.get().translation,
-                                tagPose.get().rotation
+                                tagPose.get().rotation,
                             )
                         val cameraToTarget = target.bestCameraToTarget
                         val fieldToCamera =
@@ -93,7 +93,7 @@ open class VisionIOPhotonVision(
                         val robotPose =
                             Pose3d(
                                 fieldToRobot.translation,
-                                fieldToRobot.rotation
+                                fieldToRobot.rotation,
                             )
 
                         observation =

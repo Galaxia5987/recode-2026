@@ -5,6 +5,11 @@ import frc.robot.lib.extensions.toPrimitiveTypeJava
 import frc.robot.lib.ifNotNull
 import frc.robot.lib.logged_output.generated.registerAllLoggedOutputs
 import frc.robot.logLevel
+import java.util.function.*
+import kotlin.reflect.KFunction
+import kotlin.reflect.KProperty0
+import kotlin.reflect.jvm.javaGetter
+import kotlin.reflect.jvm.javaMethod
 import org.littletonrobotics.junction.Logger.recordOutput
 import org.littletonrobotics.junction.Logger.recordOutputMeasure
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d
@@ -20,11 +25,6 @@ import org.wpilib.units.Units.Millisecond
 import org.wpilib.util.Color
 import org.wpilib.util.WPISerializable
 import org.wpilib.util.struct.StructSerializable
-import java.util.function.*
-import kotlin.reflect.KFunction
-import kotlin.reflect.KProperty0
-import kotlin.reflect.jvm.javaGetter
-import kotlin.reflect.jvm.javaMethod
 
 object LoggedOutputManager {
     private val callbacks = mutableListOf<Runnable>()
@@ -37,7 +37,11 @@ object LoggedOutputManager {
         Scheduler.getDefault().addPeriodic {
             val startTime = RobotController.getTime()
             periodic()
-            val totalTime = Millisecond.convertFrom((RobotController.getTime() - startTime).toDouble(),Microsecond)
+            val totalTime =
+                Millisecond.convertFrom(
+                    (RobotController.getTime() - startTime).toDouble(),
+                    Microsecond,
+                )
             recordOutput("LoggedOutput/loopTime", totalTime)
         }
     }
@@ -48,7 +52,7 @@ object LoggedOutputManager {
         key: String,
         path: String = "",
         name: String,
-        declaringClass: String?
+        declaringClass: String?,
     ): String {
         return if (path.isBlank())
             key.ifBlank { "${declaringClass ?: "<unknown>"}/$name" }
@@ -59,7 +63,7 @@ object LoggedOutputManager {
         key: String,
         level: LogLevel,
         property: KProperty0<T>,
-        path: String = ""
+        path: String = "",
     ) {
         val declaringClass = property.javaGetter?.declaringClass?.simpleName
         val actualKey = makeKey(key, path, property.name, declaringClass)
@@ -162,14 +166,14 @@ object LoggedOutputManager {
                                         is Number ->
                                             recordOutput(
                                                 subKey,
-                                                value.toDouble()
+                                                value.toDouble(),
                                             )
                                         is Measure<*> ->
                                             recordOutputMeasure(subKey, value)
                                         else ->
                                             recordOutput(
                                                 subKey,
-                                                value.toString()
+                                                value.toString(),
                                             )
                                     }
                                 } catch (_: Exception) {}
@@ -232,7 +236,7 @@ object LoggedOutputManager {
                                 DriverStationErrors.reportError(
                                     "[LoggedOutputManager] Auto serialization is not supported for type " +
                                         type.getSimpleName(),
-                                    false
+                                    false,
                                 )
                             }
                         }
@@ -290,13 +294,13 @@ object LoggedOutputManager {
 
                                 recordOutput(
                                     key,
-                                    *value() as Array<StructSerializable?>
+                                    *value() as Array<StructSerializable?>,
                                 )
                             } catch (e: ClassCastException) {
                                 DriverStationErrors.reportError(
                                     "[LoggedOutputManager] Auto serialization is not supported for array type " +
                                         componentType.getSimpleName(),
-                                    false
+                                    false,
                                 )
                             }
                         }
@@ -354,13 +358,13 @@ object LoggedOutputManager {
 
                                 recordOutput(
                                     key,
-                                    it as Array<Array<StructSerializable>?>?
+                                    it as Array<Array<StructSerializable>?>?,
                                 )
                             } catch (e: ClassCastException) {
                                 DriverStationErrors.reportError(
                                     ("[LoggedOutputManager] Auto serialization is not supported for 2D array type " +
                                         componentType.getSimpleName()),
-                                    false
+                                    false,
                                 )
                             }
                         }

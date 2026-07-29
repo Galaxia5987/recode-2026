@@ -13,6 +13,7 @@
 
 package frc.robot.subsystems.drive.ModuleIOs;
 
+import static org.wpilib.units.Units.*;
 
 import frc.robot.lib.PhoenixUtil;
 import frc.robot.subsystems.drive.TunerConstants;
@@ -23,8 +24,6 @@ import org.littletonrobotics.junction.Logger;
 import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.util.Units;
-
-import static org.wpilib.units.Units.*;
 
 /**
  * Physics sim implementation of module IO. The sim models are configured using a set of module

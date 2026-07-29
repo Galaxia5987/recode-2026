@@ -8,7 +8,7 @@ class CANRangeIOReal(
     private val port: Int,
     private val canbus: CANBus = CANBus("rio"),
     configuration: CANrangeConfiguration,
-    private val loggingConfig: UnifiedCANRangeLogging
+    private val loggingConfig: UnifiedCANRangeLogging,
 ) : CANRangeIO {
     override val inputs = LoggedSensorInputs()
 

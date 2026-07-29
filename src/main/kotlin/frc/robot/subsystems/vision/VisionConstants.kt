@@ -13,14 +13,14 @@
 
 package frc.robot.subsystems.vision
 
-import org.wpilib.vision.apriltag.AprilTagFieldLayout
-import org.wpilib.vision.apriltag.AprilTagFields
-import org.wpilib.math.geometry.Rotation2d
-import org.wpilib.math.geometry.Rotation3d
-import org.wpilib.math.geometry.Transform3d
 import frc.robot.drive
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.mm
+import org.wpilib.math.geometry.Rotation2d
+import org.wpilib.math.geometry.Rotation3d
+import org.wpilib.math.geometry.Transform3d
+import org.wpilib.vision.apriltag.AprilTagFieldLayout
+import org.wpilib.vision.apriltag.AprilTagFields
 
 const val LOG_PREFIX = "Subsystems/Vision/"
 
@@ -34,7 +34,7 @@ data class CameraConfig(
     val robotToCamera: () -> Transform3d,
     val botRotation: () -> Rotation2d = { drive.gyroRotation },
     val tagIdsToFilter: () -> List<Int>,
-    val stddevFactor: Double
+    val stddevFactor: Double,
 )
 
 // Camera names, must match names configured on coprocessor
@@ -46,17 +46,14 @@ val FRONT_CONFIG =
                 (-174.327).mm,
                 (-309.901).mm,
                 528.733.mm,
-                Rotation3d(0.0.deg, (-20).deg, 0.deg)
+                Rotation3d(0.0.deg, (-20).deg, 0.deg),
             )
         },
         tagIdsToFilter = { listOf() },
-        stddevFactor = 1.0
+        stddevFactor = 1.0,
     )
 
-val OV_NAME_TO_CONFIG =
-    mapOf<String, CameraConfig>(
-        "front" to FRONT_CONFIG,
-    )
+val OV_NAME_TO_CONFIG = mapOf<String, CameraConfig>("front" to FRONT_CONFIG)
 
 // Basic filtering thresholds
 const val MAX_AMBIGUITY = 0.2

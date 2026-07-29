@@ -15,7 +15,7 @@ class CANRangeIOSim(
     subsystemName: String,
     sensorName: String,
     private val usesNumber: Boolean = false,
-    private val loggingConfig: UnifiedCANRangeLogging
+    private val loggingConfig: UnifiedCANRangeLogging,
 ) : CANRangeIO {
 
     override val inputs = LoggedSensorInputs()
@@ -28,14 +28,14 @@ class CANRangeIOSim(
             metersDetected =
                 LoggedNetworkNumber(
                     "/Tuning/$subsystemName/$sensorName/metersDetected",
-                    1.0
+                    1.0,
                 )
             isDetecting = null
         } else {
             isDetecting =
                 LoggedNetworkBoolean(
                     "/Tuning/$subsystemName/$sensorName/IsDetecting",
-                    false
+                    false,
                 )
             metersDetected = null
         }

@@ -1,14 +1,13 @@
 package frc.robot.lib.extensions
 
+import java.util.function.BooleanSupplier
 import org.wpilib.command3.Command
 import org.wpilib.command3.Trigger
 import org.wpilib.units.measure.Time
-import java.util.function.BooleanSupplier
 
 operator fun Trigger.not() = this.negate()
 
-operator fun Trigger.get(time: Time) =
-    this.debounce(time)
+operator fun Trigger.get(time: Time) = this.debounce(time)
 
 fun Trigger.debounce(seconds: Time) = this[seconds]
 

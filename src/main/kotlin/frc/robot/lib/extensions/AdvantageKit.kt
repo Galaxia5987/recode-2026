@@ -1,12 +1,5 @@
 package frc.robot.lib.extensions
 
-import org.wpilib.math.controller.PIDController
-import org.wpilib.math.controller.ProfiledPIDController
-import org.wpilib.math.geometry.*
-import org.wpilib.units.Measure
-import org.wpilib.units.Unit as WPIUnit
-import org.wpilib.util.struct.Struct
-import org.wpilib.util.struct.StructSerializable
 import kotlin.reflect.KProperty
 import org.littletonrobotics.junction.AutoLogOutputManager
 import org.littletonrobotics.junction.LogTable
@@ -16,6 +9,13 @@ import org.littletonrobotics.junction.inputs.LoggableInputs
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d
 import org.wpilib.command3.Command
 import org.wpilib.command3.Trigger
+import org.wpilib.math.controller.PIDController
+import org.wpilib.math.controller.ProfiledPIDController
+import org.wpilib.math.geometry.*
+import org.wpilib.units.Measure
+import org.wpilib.units.Unit as WPIUnit
+import org.wpilib.util.struct.Struct
+import org.wpilib.util.struct.StructSerializable
 
 abstract class AutoLogInputs : LoggableInputs {
     fun log(value: Double, key: String? = null) =
@@ -41,7 +41,7 @@ abstract class AutoLogInputs : LoggableInputs {
             value,
             key,
             { k, v -> put(k, struct, v) },
-            { k, v -> get(k, struct, v) }
+            { k, v -> get(k, struct, v) },
         )
 
     fun <U : WPIUnit> log(value: Measure<U>, key: String? = null) =
@@ -72,6 +72,7 @@ abstract class AutoLogInputs : LoggableInputs {
         private val fromLog: LogTable.(String, T) -> T,
     ) {
         operator fun getValue(thisRef: Any, property: KProperty<*>) = value
+
         operator fun setValue(thisRef: Any, property: KProperty<*>, value: T) {
             this.value = value
         }
@@ -131,7 +132,7 @@ fun Any.log(prefix: String, key: String) {
 }
 
 fun Trigger.logTrigger(key: String): Trigger {
-    val cmd = Command.noRequirements {log(key) }.named("Log$key")
+    val cmd = Command.noRequirements { log(key) }.named("Log$key")
     onTrue(cmd)
     onFalse(cmd)
     return this
@@ -145,7 +146,7 @@ fun PIDController.log(loggingName: String) {
     mapOf(
             "setpoint" to setpoint,
             "error" to error,
-            "atSetpoint" to atSetpoint()
+            "atSetpoint" to atSetpoint(),
         )
         .log(loggingName)
 }
@@ -164,7 +165,7 @@ fun ProfiledPIDController.log(loggingName: String) {
             "maxVelocity" to constraints.maxVelocity,
             "maxAcceleration" to constraints.maxAcceleration,
             "atSetpoint" to atSetpoint(),
-            "atGoal" to atGoal()
+            "atGoal" to atGoal(),
         )
         .log(loggingName)
 }
@@ -180,7 +181,8 @@ fun HolonomicDriveController.log() {
  */
 
 // ```
-// This provides a replacement for the @AutoLog annotation as well as the ability to manually
+// This provides a replacement for the @AutoLog annotation as well as the
+// ability to manually
 // register @AutoLogOutput roots.
 // Here is an example of using auto-logged inputs in kotlin:
 // ```
@@ -202,7 +204,8 @@ fun HolonomicDriveController.log() {
 //    }
 // }
 // ```
-// And here is an example of registering a singleton for the @AutoLogOutput annotation:
+// And here is an example of registering a singleton for the @AutoLogOutput
+// annotation:
 // ```
 // object LoggedSingleton {
 //    init {

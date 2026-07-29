@@ -1,5 +1,8 @@
 package frc.robot.lib.motors;
 
+import static org.wpilib.units.Units.Radians;
+import static org.wpilib.units.Units.Rotation;
+
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.controls.compound.*;
 import frc.robot.lib.math.differential.Derivative;
@@ -11,9 +14,6 @@ import org.wpilib.units.Units;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
-
-import static org.wpilib.units.Units.Radians;
-import static org.wpilib.units.Units.Rotation;
 
 public class TalonFXSim extends SimMotor {
 
@@ -169,8 +169,7 @@ public class TalonFXSim extends SimMotor {
             setControl(reqMotionMagicVelocityDutyCycle);
         else if (request
                 instanceof
-                MotionMagicVelocityTorqueCurrentFOC
-                reqMotionMagicVelocityTorqueCurrentFOC)
+                MotionMagicVelocityTorqueCurrentFOC reqMotionMagicVelocityTorqueCurrentFOC)
             setControl(reqMotionMagicVelocityTorqueCurrentFOC);
     }
 

@@ -7,12 +7,16 @@ import org.wpilib.system.RobotController
 import org.wpilib.units.Units.Microseconds
 import org.wpilib.units.Units.Millisecond
 
-fun Mechanism.addPeriodic(function: Runnable){
+fun Mechanism.addPeriodic(function: Runnable) {
     val timeLogPath = "Subsystems/$name/loopTime"
     Scheduler.getDefault().addPeriodic {
         val startTime = RobotController.getTime()
         function.run()
-        val totalTime = Millisecond.convertFrom((RobotController.getTime() - startTime).toDouble(), Microseconds)
+        val totalTime =
+            Millisecond.convertFrom(
+                (RobotController.getTime() - startTime).toDouble(),
+                Microseconds,
+            )
         Logger.recordOutput(timeLogPath, totalTime)
     }
 }

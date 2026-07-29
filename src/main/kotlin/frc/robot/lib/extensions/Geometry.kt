@@ -41,7 +41,7 @@ fun Pose3d.withRotation(rotation: Rotation3d): Pose3d =
 fun Pose3d.withRotation(
     roll: Double = 0.0,
     pitch: Double = 0.0,
-    yaw: Double = 0.0
+    yaw: Double = 0.0,
 ): Pose3d = Pose3d(this.translation, Rotation3d(roll, pitch, yaw))
 
 fun Pose3d.withRotation(

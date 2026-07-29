@@ -10,7 +10,7 @@ private fun runPath(
     path: String,
     mirror: Boolean = false,
     pathfindBefore: Boolean = false,
-    pathfindingConstraints: PathConstraints? = null
+    pathfindingConstraints: PathConstraints? = null,
 ): Command {
     /*
     var path = PathPlannerPath.fromPathFile(path)
@@ -33,7 +33,7 @@ private fun runPath(
 
 private fun runPathAndReset(
     pathName: String,
-    mirror: Boolean = false
+    mirror: Boolean = false,
 ): Command {
     /*
     val path = PathPlannerPath.fromPathFile(pathName)

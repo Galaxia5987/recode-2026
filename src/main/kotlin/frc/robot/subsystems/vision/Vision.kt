@@ -13,8 +13,6 @@
 
 package frc.robot.subsystems.vision
 
-import org.wpilib.math.geometry.Pose2d
-import org.wpilib.math.geometry.Pose3d
 import frc.robot.lib.BetterPoseEstimator
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.subsystems.vision.VisionIO.PoseObservation
@@ -22,11 +20,13 @@ import kotlin.math.absoluteValue
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
 import org.wpilib.driverstation.Alert
+import org.wpilib.math.geometry.Pose2d
+import org.wpilib.math.geometry.Pose3d
 
 open class Vision(
     private val consumer: (BetterPoseEstimator.VisionObservation) -> Unit,
     private val resetOdometryCallback: (Pose2d) -> Unit,
-    private vararg val ios: VisionIO
+    private vararg val ios: VisionIO,
 ) : Mechanism() {
     private val inputs = Array(ios.size) { VisionIOInputsAutoLogged() }
     private val disconnectedAlerts =
@@ -45,7 +45,7 @@ open class Vision(
 
     private fun PoseObservation.isInvalid(): Boolean =
         tagCount == 0 || // Must have at least one tag
-        (tagCount == 1 &&
+            (tagCount == 1 &&
                 ambiguity > MAX_AMBIGUITY) || // Cannot be high ambiguity
             pose.z.absoluteValue >
                 MAX_Z_ERROR || // Must have realistic Z coordinate
@@ -68,7 +68,7 @@ open class Vision(
             // Update logging
             Logger.processInputs(
                 "Subsystems/Vision/${inputs[i].name}",
-                cameraInputs
+                cameraInputs,
             )
 
             // Update disconnected alert
@@ -93,14 +93,15 @@ open class Vision(
             val angularStdDev =
                 (ANGULAR_STD_DEV_BASELINE * stdFactor) / tagCountDouble
 
-            // Pass raw primitives, avoiding VecBuilder.fill() matrix allocations
+            // Pass raw primitives, avoiding VecBuilder.fill() matrix
+            // allocations
             val observation =
                 BetterPoseEstimator.VisionObservation(
                     estimatedPose.pose,
                     estimatedPose.timestamp,
                     linearStdDev,
                     linearStdDev,
-                    angularStdDev
+                    angularStdDev,
                 )
 
             if (

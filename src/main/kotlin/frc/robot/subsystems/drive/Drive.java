@@ -13,6 +13,8 @@
 
 package frc.robot.subsystems.drive;
 
+import static org.wpilib.units.Units.*;
+
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -26,12 +28,10 @@ import frc.robot.lib.commands.MechanismExtensionsKt;
 import frc.robot.subsystems.drive.ModuleIOs.Module;
 import frc.robot.subsystems.drive.ModuleIOs.ModuleIO;
 import frc.robot.subsystems.drive.gyroIOs.GyroIO;
-
+import frc.robot.subsystems.drive.gyroIOs.GyroIOInputsAutoLogged;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
-
-import frc.robot.subsystems.drive.gyroIOs.GyroIOInputsAutoLogged;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 import org.ironmaple.simulation.drivesims.COTS;
@@ -43,7 +43,6 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
-import org.wpilib.command3.Scheduler;
 import org.wpilib.driverstation.*;
 import org.wpilib.math.geometry.*;
 import org.wpilib.math.kinematics.ChassisVelocities;
@@ -59,8 +58,6 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearAcceleration;
 import org.wpilib.units.measure.Voltage;
-
-import static org.wpilib.units.Units.*;
 
 /*
  * 2027 Changes and problems:
@@ -127,9 +124,9 @@ public class Drive extends Mechanism {
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     public Angle[] SwerveTurnAngle =
-            new Angle[]{Radians.zero(), Radians.zero(), Radians.zero(), Radians.zero()};
+            new Angle[] {Radians.zero(), Radians.zero(), Radians.zero(), Radians.zero()};
     public Angle[] SwerveDriveAngle =
-            new Angle[]{Radians.zero(), Radians.zero(), Radians.zero(), Radians.zero()};
+            new Angle[] {Radians.zero(), Radians.zero(), Radians.zero(), Radians.zero()};
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final Alert gyroDisconnectedAlert =
@@ -139,11 +136,11 @@ public class Drive extends Mechanism {
             new SwerveDriveKinematics(getModuleTranslations());
     private Rotation2d rawGyroRotation = new Rotation2d();
     private final SwerveModulePosition[] lastModulePositions = // For delta tracking
-            new SwerveModulePosition[]{
-                    new SwerveModulePosition(),
-                    new SwerveModulePosition(),
-                    new SwerveModulePosition(),
-                    new SwerveModulePosition()
+            new SwerveModulePosition[] {
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition()
             };
 
     public ChassisVelocities chassisSpeeds = new ChassisVelocities();
@@ -257,8 +254,8 @@ public class Drive extends Mechanism {
             for (var module : modules) {
                 module.stop();
             }
-            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleVelocity[]{});
-            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleVelocity[]{});
+            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleVelocity[] {});
+            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleVelocity[] {});
         }
 
         // Update odometry
@@ -384,7 +381,9 @@ public class Drive extends Mechanism {
         // Calculate module setpoints
         speeds = speeds.discretize(0.02);
         SwerveModuleVelocity[] setpointStates = kinematics.toSwerveModuleVelocities(speeds);
-        setpointStates = SwerveDriveKinematics.desaturateWheelVelocities(setpointStates, TunerConstants.kSpeedAt12Volts);
+        setpointStates =
+                SwerveDriveKinematics.desaturateWheelVelocities(
+                        setpointStates, TunerConstants.kSpeedAt12Volts);
 
         // Log unoptimized setpoints and setpoint speeds
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -401,18 +400,14 @@ public class Drive extends Mechanism {
         Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
     }
 
-    /**
-     * Runs the drive in a straight line with the specified drive output.
-     */
+    /** Runs the drive in a straight line with the specified drive output. */
     public void runCharacterization(double output) {
         for (int i = 0; i < 4; i++) {
             modules[i].runCharacterization(output);
         }
     }
 
-    /**
-     * Stops the drive.
-     */
+    /** Stops the drive. */
     public void stop() {
         runVelocity(new ChassisVelocities());
     }
@@ -436,16 +431,15 @@ public class Drive extends Mechanism {
 
     public Command continousLock() {
         return run((coroutine -> {
-            while (true) {
-                stopWithX();
-                coroutine.yield();
-            }
-        })).named("drive#continousLock");
+                    while (true) {
+                        stopWithX();
+                        coroutine.yield();
+                    }
+                }))
+                .named("drive#continousLock");
     }
 
-    /**
-     * Returns the module states (turn angles and drive velocities) for all of the modules.
-     */
+    /** Returns the module states (turn angles and drive velocities) for all of the modules. */
     @AutoLogOutput(key = "SwerveStates/Measured")
     private SwerveModuleVelocity[] getModuleStates() {
         SwerveModuleVelocity[] states = new SwerveModuleVelocity[4];
@@ -459,9 +453,7 @@ public class Drive extends Mechanism {
         gyroIO.reset(resetHeading);
     }
 
-    /**
-     * Returns the module positions (turn angles and drive positions) for all of the modules.
-     */
+    /** Returns the module positions (turn angles and drive positions) for all of the modules. */
     private SwerveModulePosition[] getModulePositions() {
         SwerveModulePosition[] states = new SwerveModulePosition[4];
         for (int i = 0; i < 4; i++) {
@@ -487,9 +479,7 @@ public class Drive extends Mechanism {
         return gyroInputs.accelerationY;
     }
 
-    /**
-     * Returns the position of each module in radians.
-     */
+    /** Returns the position of each module in radians. */
     public double[] getWheelRadiusCharacterizationPositions() {
         double[] values = new double[4];
         for (int i = 0; i < 4; i++) {
@@ -498,9 +488,7 @@ public class Drive extends Mechanism {
         return values;
     }
 
-    /**
-     * Returns the average velocity of the modules in rotations/sec (Phoenix native units).
-     */
+    /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
     public double getFFCharacterizationVelocity() {
         double output = 0.0;
         for (int i = 0; i < 4; i++) {
@@ -509,9 +497,7 @@ public class Drive extends Mechanism {
         return output;
     }
 
-    /**
-     * Returns the current pose.
-     */
+    /** Returns the current pose. */
     @AutoLogOutput(key = "Odometry/Robot")
     public Pose2d getPose() {
         return BetterPoseEstimator.getInstance().getEstimatedPose();
@@ -529,17 +515,13 @@ public class Drive extends Mechanism {
                                 new Rotation2d()));
     }
 
-    /**
-     * Returns the current odometry pose.
-     */
+    /** Returns the current odometry pose. */
     @AutoLogOutput(key = "Odometry/OdometryPose")
     public Pose2d getOdometryPose() {
         return BetterPoseEstimator.getInstance().getOdometryPose();
     }
 
-    /**
-     * Returns the current odometry rotation.
-     */
+    /** Returns the current odometry rotation. */
     public Rotation2d getRotation() {
         return getPose().getRotation();
     }
@@ -548,40 +530,32 @@ public class Drive extends Mechanism {
         return gyroInputs.yawPosition;
     }
 
-    /**
-     * Resets the current odometry pose. USE BetterPoseEstimator instead!
-     */
+    /** Resets the current odometry pose. USE BetterPoseEstimator instead! */
     public void resetOdometry(Pose2d pose) {
         resetSimulationPoseCallBack.accept(pose);
         BetterPoseEstimator.getInstance().resetPose(pose);
     }
 
-    /**
-     * Returns the maximum linear speed in meters per sec.
-     */
+    /** Returns the maximum linear speed in meters per sec. */
     public double getMaxLinearSpeedMetersPerSec() {
         return TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     }
 
-    /**
-     * Returns the maximum angular speed in radians per sec.
-     */
+    /** Returns the maximum angular speed in radians per sec. */
     public double getMaxAngularSpeedRadPerSec() {
         return getMaxLinearSpeedMetersPerSec() / DRIVE_BASE_RADIUS;
     }
 
-    /**
-     * Returns an array of module translations.
-     */
+    /** Returns an array of module translations. */
     public static Translation2d[] getModuleTranslations() {
-        return new Translation2d[]{
-                new Translation2d(
-                        TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-                new Translation2d(
-                        TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
-                new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-                new Translation2d(
-                        TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+        return new Translation2d[] {
+            new Translation2d(
+                    TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+            new Translation2d(
+                    TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
+            new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+            new Translation2d(
+                    TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
         };
     }
 

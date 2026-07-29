@@ -1,18 +1,17 @@
 package frc.robot.lib
 
-import org.wpilib.math.geometry.Pose2d
-import org.wpilib.math.geometry.Rotation2d
-import org.wpilib.math.geometry.Translation2d
-import org.wpilib.units.measure.Angle
-import org.wpilib.driverstation.GenericHID
-import org.wpilib.util.Color
 import frc.robot.lib.extensions.deg
 import kotlin.math.*
 import org.littletonrobotics.junction.LogTable
 import org.wpilib.command3.Command
 import org.wpilib.command3.button.CommandGamepad
-import org.wpilib.command3.button.CommandNiDsXboxController
+import org.wpilib.driverstation.GenericHID
+import org.wpilib.math.geometry.Pose2d
+import org.wpilib.math.geometry.Rotation2d
+import org.wpilib.math.geometry.Translation2d
 import org.wpilib.math.kinematics.ChassisVelocities
+import org.wpilib.units.measure.Angle
+import org.wpilib.util.Color
 
 fun ChassisVelocities.getNormVelocity(): Double = hypot(vx, vy)
 
@@ -46,7 +45,7 @@ fun LogTable.put(key: String, defaultValue: List<Any>) {
 
 inline fun <reified T : List<Any>> LogTable.get(
     key: String,
-    defaultValue: T
+    defaultValue: T,
 ): T {
     val type = defaultValue::class
 
@@ -75,19 +74,23 @@ fun CommandGamepad.rumbleAll(strength: Double) {
     this.setRumble(GenericHID.RumbleType.LEFT_RUMBLE, strength)
 }
 
-fun CommandGamepad.stopRumble(){
+fun CommandGamepad.stopRumble() {
     rumbleAll(0.0)
 }
 
 fun CommandGamepad.rumbleCommand(): Command {
     return Command.noRequirements {
-        this.rumbleAll(1.0)
-        it.park()
-    }.named("RumbleController").andThen(
-        Command.noRequirements {
-            this.stopRumble()
-        }.named("StopRumbleController")
-    ).withAutomaticName()
+            this.rumbleAll(1.0)
+            it.park()
+        }
+        .named("RumbleController")
+        .andThen(
+            Command.noRequirements {
+                    this.stopRumble()
+                }
+                .named("StopRumbleController")
+        )
+        .withAutomaticName()
 }
 
 fun Any?.ifNotNull(action: (it: Any) -> Unit) {
@@ -105,7 +108,7 @@ fun Color.colorSimilarity(color: Color): Double {
     data class HSVColor(
         val hue: Double,
         val saturation: Double,
-        val value: Double
+        val value: Double,
     )
 
     // --- Convert RGB to HSV ---
@@ -147,7 +150,7 @@ fun Color.colorSimilarity(color: Color): Double {
     val hueDiff =
         min(
             abs(hsvColor1.hue - hsvColor2.hue),
-            1.0 - abs(hsvColor1.hue - hsvColor2.hue)
+            1.0 - abs(hsvColor1.hue - hsvColor2.hue),
         )
     val satDiff = abs(hsvColor1.saturation - hsvColor2.saturation)
     val valDiff = abs(hsvColor1.value - hsvColor2.value)
@@ -161,8 +164,8 @@ fun Color.colorSimilarity(color: Color): Double {
     val distance =
         sqrt(
             (hueWeight * hueDiff).pow(2) +
-                    (satWeight * satDiff).pow(2) +
-                    (valWeight * valDiff).pow(2)
+                (satWeight * satDiff).pow(2) +
+                (valWeight * valDiff).pow(2)
         )
 
     // Normalize distance to a similarity between 0 and 1
@@ -184,7 +187,7 @@ fun <T : Comparable<T>> T.wrapAround(minimumValue: T, maximumValue: T): T {
 }
 
 fun Rotation2d.convertTo360():
-        Rotation2d { // Convert angle from (-180,180) -> (0,360)
+    Rotation2d { // Convert angle from (-180,180) -> (0,360)
     val deg = (this.degrees + 360.0) % 360.0
     return Rotation2d.fromDegrees(deg)
 }
@@ -198,18 +201,12 @@ fun Angle.convertTo360(): Angle { // Convert angle from (-180,180) -> (0,360)
 fun Pose2d.estimateAt(
     seconds: Double,
     fieldRelativeSpeeds: ChassisVelocities,
-    fieldOrientedAcceleration: ChassisVelocities
+    fieldOrientedAcceleration: ChassisVelocities,
 ): Translation2d =
     this.translation +
-            Translation2d(
-                fieldRelativeSpeeds.vx * seconds +
-                        0.5 *
-                        seconds *
-                        seconds *
-                        fieldOrientedAcceleration.vx,
-                fieldRelativeSpeeds.vy * seconds +
-                        0.5 *
-                        seconds *
-                        seconds *
-                        fieldOrientedAcceleration.vx,
-            )
+        Translation2d(
+            fieldRelativeSpeeds.vx * seconds +
+                0.5 * seconds * seconds * fieldOrientedAcceleration.vx,
+            fieldRelativeSpeeds.vy * seconds +
+                0.5 * seconds * seconds * fieldOrientedAcceleration.vx,
+        )

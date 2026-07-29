@@ -41,7 +41,7 @@ object Robot : LoggedRobot() {
                 "Build date" to BuildConstants.BUILD_DATE,
                 "Last commit hash" to BuildConstants.GIT_SHA,
                 "Last commit timestamp" to BuildConstants.GIT_DATE,
-                "Branch" to BuildConstants.GIT_BRANCH
+                "Branch" to BuildConstants.GIT_BRANCH,
             )
             .forEach { (key, value) -> Logger.recordMetadata(key, value) }
         @Suppress("KotlinConstantConditions")
@@ -51,7 +51,7 @@ object Robot : LoggedRobot() {
                 0 -> "All changes committed"
                 1 -> "Uncommitted changes"
                 else -> "Unknown"
-            }
+            },
         )
 
         when (CURRENT_MODE) {
@@ -59,7 +59,7 @@ object Robot : LoggedRobot() {
                 LoggedPowerDistribution.getInstance(
                     0,
                     1,
-                    PowerDistribution.ModuleType.REV
+                    PowerDistribution.ModuleType.REV,
                 )
                 Logger.addDataReceiver(WPILOGWriter())
                 Logger.addDataReceiver(NT4Publisher())
@@ -82,11 +82,11 @@ object Robot : LoggedRobot() {
         LoggedOutputManager
 
         // TODO: Update when PathPlanner works with CommandsV3
-//        Scheduler.getDefault()
-//            .schedule(
-//                FollowPathCommand.warmupCommand(),
-//                PathfindingCommand.warmupCommand()
-//            )
+        //        Scheduler.getDefault()
+        //            .schedule(
+        //                FollowPathCommand.warmupCommand(),
+        //                PathfindingCommand.warmupCommand()
+        //            )
     }
 
     /**
@@ -113,7 +113,8 @@ object Robot : LoggedRobot() {
      * SendableChooser make sure to add them to the chooser code above as well.
      */
     override fun autonomousInit() {
-        // Make sure command is compiled beforehand, otherwise there will be a delay.
+        // Make sure command is compiled beforehand, otherwise there will be a
+        // delay.
         autonomousCommand = RobotContainer.getAutonomousCommand()
 
         // Schedule the autonomous command
@@ -126,7 +127,9 @@ object Robot : LoggedRobot() {
     /** This function is called once when teleop is enabled. */
     override fun teleopInit() {
         if (::autonomousCommand.isInitialized) {
-            autonomousCommand.raceWith(Command.noRequirements {  }.named("CancelAutonomousCommand")) // TODO: Make this less shitty
+            autonomousCommand.raceWith(
+                Command.noRequirements {}.named("CancelAutonomousCommand")
+            ) // TODO: Make this less shitty
         }
     }
 
@@ -146,12 +149,13 @@ object Robot : LoggedRobot() {
                 timestamp,
                 stdDevs.get(0),
                 stdDevs.get(1),
-                stdDevs.get(1)
+                stdDevs.get(1),
             )
 
         BetterPoseEstimator.getInstance().addVisionObservation(observation)
         arena.simulationPeriodic()
     }
+
     /** This function is called periodically during operator control. */
     override fun teleopPeriodic() {}
 

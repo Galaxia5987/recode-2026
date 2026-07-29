@@ -13,6 +13,7 @@
 
 package frc.robot.lib;
 
+import static org.wpilib.units.Units.*;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.hardware.CANcoder;
@@ -29,8 +30,6 @@ import org.wpilib.system.Timer;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Voltage;
-
-import static org.wpilib.units.Units.*;
 
 public final class PhoenixUtil {
     /** Attempts to run the command until no error is produced. */
@@ -94,9 +93,7 @@ public final class PhoenixUtil {
                 new double[SimulatedArena.getSimulationSubTicksIn1Period()];
         for (int i = 0; i < odometryTimeStamps.length; i++) {
             odometryTimeStamps[i] =
-                    Timer.getTimestamp()
-                            - 0.02
-                            + i * SimulatedArena.getSimulationDt().in(Seconds);
+                    Timer.getTimestamp() - 0.02 + i * SimulatedArena.getSimulationDt().in(Seconds);
         }
 
         return odometryTimeStamps;

@@ -1,6 +1,5 @@
 package frc.robot.lib.motors;
 
-
 import org.wpilib.math.system.DCMotor;
 
 public enum TalonType {

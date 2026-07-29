@@ -2,12 +2,6 @@ package frc.robot.lib.universal_motor
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.*
-import org.wpilib.math.controller.PIDController
-import org.wpilib.math.controller.ProfiledPIDController
-import org.wpilib.math.trajectory.TrapezoidProfile
-import org.wpilib.units.measure.Distance
-import org.wpilib.units.measure.MomentOfInertia
-import org.wpilib.system.Timer
 import frc.robot.lib.Gains
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.kg2m
@@ -15,6 +9,12 @@ import frc.robot.lib.extensions.rot
 import frc.robot.lib.extensions.toDistance
 import frc.robot.lib.motors.TalonFXSim
 import frc.robot.lib.motors.TalonType
+import org.wpilib.math.controller.PIDController
+import org.wpilib.math.controller.ProfiledPIDController
+import org.wpilib.math.trajectory.TrapezoidProfile
+import org.wpilib.system.Timer
+import org.wpilib.units.measure.Distance
+import org.wpilib.units.measure.MomentOfInertia
 
 /**
  * Simulated implementation of [MotorIO] for use during robot simulation.
@@ -30,7 +30,7 @@ class MotorIOSim(
     private val simGains: Gains,
     private val gearRatio: Double,
     private val diameter: Distance,
-    private val logConfig: MotorLogConfig
+    private val logConfig: MotorLogConfig,
 ) : MotorIO {
     override val inputs = LoggedMotorInputs()
     private val profiledPIDController =
@@ -40,8 +40,8 @@ class MotorIOSim(
             simGains.kD,
             TrapezoidProfile.Constraints(
                 config.MotionMagic.MotionMagicCruiseVelocity,
-                config.MotionMagic.MotionMagicAcceleration
-            )
+                config.MotionMagic.MotionMagicAcceleration,
+            ),
         )
     private val controller =
         PIDController(simGains.kP, simGains.kI, simGains.kD).apply {

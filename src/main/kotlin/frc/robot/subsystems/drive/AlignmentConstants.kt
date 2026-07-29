@@ -1,13 +1,13 @@
 package frc.robot.subsystems.drive
 
+import frc.robot.lib.extensions.cm
+import frc.robot.lib.extensions.deg
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.trajectory.TrapezoidProfile
 import org.wpilib.units.Units.*
 import org.wpilib.units.measure.AngularAcceleration
 import org.wpilib.units.measure.AngularVelocity
-import frc.robot.lib.extensions.cm
-import frc.robot.lib.extensions.deg
 
 // TODO: AlignCommand.kt isn't currently compatible with WPILib 2027
 
@@ -27,7 +27,7 @@ val MAX_ANGULAR_ACCELERATION: AngularAcceleration =
 val ANGULAR_CONSTRAINTS =
     TrapezoidProfile.Constraints(
         MAX_ANGULAR_VELOCITY.`in`(RadiansPerSecond),
-        MAX_ANGULAR_ACCELERATION.`in`(RadiansPerSecondPerSecond)
+        MAX_ANGULAR_ACCELERATION.`in`(RadiansPerSecondPerSecond),
     )
 
 val TOLERANCE = Pose2d(3.cm, 3.cm, Rotation2d(3.deg))

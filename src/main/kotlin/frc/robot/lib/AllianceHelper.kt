@@ -9,4 +9,4 @@ import org.wpilib.driverstation.MatchState
 val IS_RED: Boolean
     get() =
         MatchState.getAlliance().isPresent &&
-                MatchState.getAlliance().get() == Alliance.RED
+            MatchState.getAlliance().get() == Alliance.RED

@@ -10,7 +10,7 @@ import org.littletonrobotics.junction.Logger
 data class UnifiedCANRangeLogging(
     val distance: Boolean = true,
     val isDetecting: Boolean = true,
-    val signalStrength: Boolean = true
+    val signalStrength: Boolean = true,
 )
 
 class UnifiedCANRange(
@@ -21,7 +21,7 @@ class UnifiedCANRange(
     configuration: CANrangeConfiguration,
     private val loggingConfig: UnifiedCANRangeLogging =
         UnifiedCANRangeLogging(),
-    private val simulationUsesNumber: Boolean = false
+    private val simulationUsesNumber: Boolean = false,
 ) {
     private val sensorIO: CANRangeIO =
         if (CURRENT_MODE == Mode.REAL) {
@@ -31,7 +31,7 @@ class UnifiedCANRange(
                 subsystemName,
                 sensorName,
                 simulationUsesNumber,
-                loggingConfig
+                loggingConfig,
             )
         }
     val isInRange: Boolean

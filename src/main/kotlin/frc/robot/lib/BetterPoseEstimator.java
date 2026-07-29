@@ -7,6 +7,9 @@
 
 package frc.robot.lib;
 
+import static frc.robot.subsystems.drive.Drive.getModuleTranslations;
+
+import java.util.*;
 import org.wpilib.math.geometry.*;
 import org.wpilib.math.interpolation.TimeInterpolatableBuffer;
 import org.wpilib.math.kinematics.ChassisVelocities;
@@ -16,10 +19,6 @@ import org.wpilib.math.linalg.Matrix;
 import org.wpilib.math.linalg.VecBuilder;
 import org.wpilib.math.numbers.N1;
 import org.wpilib.math.numbers.N3;
-
-import static frc.robot.subsystems.drive.Drive.getModuleTranslations;
-
-import java.util.*;
 
 // Taken from 6238 Mechanical Advantage
 public class BetterPoseEstimator {
@@ -130,7 +129,8 @@ public class BetterPoseEstimator {
         if (Math.abs(cosMinusOne) < 1E-9) {
             halfThetaByTanOfHalfDtheta = 1.0 - 1.0 / 12.0 * dtheta * dtheta;
         } else {
-            halfThetaByTanOfHalfDtheta = -(halfDtheta * transform.getRotation().getSin()) / cosMinusOne;
+            halfThetaByTanOfHalfDtheta =
+                    -(halfDtheta * transform.getRotation().getSin()) / cosMinusOne;
         }
 
         Translation2d translationPart =
@@ -141,7 +141,6 @@ public class BetterPoseEstimator {
 
         return new Twist2d(translationPart.getX(), translationPart.getY(), dtheta);
     }
-
 
     public void addOdometryObservation(OdometryObservation observation) {
         Twist2d twist = kinematics.toTwist2d(lastWheelPositions, observation.wheelPositions());
@@ -167,7 +166,7 @@ public class BetterPoseEstimator {
                             observation.yaw().getRadians()));
         }
 
-        Twist2d finalTwist = logPoses(lastOdometryPose,odometryPose);
+        Twist2d finalTwist = logPoses(lastOdometryPose, odometryPose);
         estimatedPose = estimatedPose.plus(finalTwist.exp());
     }
 

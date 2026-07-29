@@ -32,6 +32,7 @@ import frc.robot.lib.LoggedNetworkGains;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.PhoenixOdometryThread;
 import frc.robot.subsystems.drive.TunerConstants;
+import java.util.Queue;
 import org.wpilib.math.filter.Debouncer;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.util.Units;
@@ -39,8 +40,6 @@ import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.Current;
 import org.wpilib.units.measure.Voltage;
-
-import java.util.Queue;
 
 /**
  * Module IO implementation for Talon FX drive motor controller, Talon FX turn motor controller, and
@@ -127,8 +126,8 @@ public class ModuleIOTalonFX implements ModuleIO {
                     case RemoteCANcoder -> FeedbackSensorSourceValue.RemoteCANcoder;
                     case FusedCANcoder -> FeedbackSensorSourceValue.FusedCANcoder;
                     case SyncCANcoder -> FeedbackSensorSourceValue.SyncCANcoder;
-                    default -> throw new IllegalArgumentException(
-                            "Invalid Feedback Sensor Source!!!");
+                    default ->
+                            throw new IllegalArgumentException("Invalid Feedback Sensor Source!!!");
                 };
         turnConfig.Feedback.RotorToSensorRatio = constants.SteerMotorGearRatio;
         turnConfig.MotionMagic.MotionMagicCruiseVelocity = 100.0 / constants.SteerMotorGearRatio;
@@ -263,8 +262,8 @@ public class ModuleIOTalonFX implements ModuleIO {
         driveTalon.setControl(
                 switch (constants.DriveMotorClosedLoopOutput) {
                     case Voltage -> velocityVoltageRequest.withVelocity(velocityRotPerSec);
-                    case TorqueCurrentFOC -> velocityTorqueCurrentRequest.withVelocity(
-                            velocityRotPerSec);
+                    case TorqueCurrentFOC ->
+                            velocityTorqueCurrentRequest.withVelocity(velocityRotPerSec);
                 });
     }
 
@@ -273,8 +272,8 @@ public class ModuleIOTalonFX implements ModuleIO {
         turnTalon.setControl(
                 switch (constants.SteerMotorClosedLoopOutput) {
                     case Voltage -> positionVoltageRequest.withPosition(rotation.getRotations());
-                    case TorqueCurrentFOC -> positionTorqueCurrentRequest.withPosition(
-                            rotation.getRotations());
+                    case TorqueCurrentFOC ->
+                            positionTorqueCurrentRequest.withPosition(rotation.getRotations());
                 });
     }
 }

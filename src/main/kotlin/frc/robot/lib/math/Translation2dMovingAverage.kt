@@ -1,13 +1,13 @@
 package frc.robot.lib.math
 
-import org.wpilib.math.util.Nat
-import org.wpilib.math.linalg.Vector
-import org.wpilib.math.geometry.Translation2d
-import org.wpilib.math.numbers.N2
-import org.wpilib.units.measure.Distance
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.meters
 import java.util.ArrayDeque
+import org.wpilib.math.geometry.Translation2d
+import org.wpilib.math.linalg.Vector
+import org.wpilib.math.numbers.N2
+import org.wpilib.math.util.Nat
+import org.wpilib.units.measure.Distance
 
 class Translation2dMovingAverage(private val windowSize: Int) {
     private val buffer = ArrayDeque<Vector<N2>>()
@@ -40,7 +40,7 @@ class Translation2dExponentialAverage(private val alpha: Double = 0.3) {
             } else {
                 Translation2d(
                     average!!.x * (1 - alpha) + pose.x * alpha,
-                    average!!.y * (1 - alpha) + pose.y * alpha
+                    average!!.y * (1 - alpha) + pose.y * alpha,
                 )
             }
         return average!!
@@ -49,7 +49,7 @@ class Translation2dExponentialAverage(private val alpha: Double = 0.3) {
 
 class Translation2dMultiStabilizer(
     private val windowSize: Int = 5,
-    private val maxDistanceDelta: Distance = 0.5.meters
+    private val maxDistanceDelta: Distance = 0.5.meters,
 ) {
     private var filter = Translation2dMovingAverage(windowSize)
     private var lastEstimatedMeasurement: Translation2d? = null

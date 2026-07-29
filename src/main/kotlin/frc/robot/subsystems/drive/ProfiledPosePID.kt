@@ -1,14 +1,14 @@
 package frc.robot.subsystems.drive
 
-import org.wpilib.math.controller.ProfiledPIDController
-import org.wpilib.math.geometry.Pose2d
-import org.wpilib.math.trajectory.TrapezoidProfile.Constraints
 import frc.robot.lib.LoggedNetworkGains
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import org.team5987.annotation.LogLevel
 import org.team5987.annotation.LoggedOutput
 import org.wpilib.command3.Trigger
+import org.wpilib.math.controller.ProfiledPIDController
+import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.kinematics.ChassisVelocities
+import org.wpilib.math.trajectory.TrapezoidProfile.Constraints
 
 private const val LOGGING_PREFIX = "AutoAlignment"
 private const val TUNING_PATH = "/Tuning/ProfiledPosePID"
@@ -37,7 +37,7 @@ private val rotationalLimits
     get() =
         Constraints(
             rotationalMaxVelocity.get(),
-            rotationalMaxAcceleration.get()
+            rotationalMaxAcceleration.get(),
         )
 
 @LoggedOutput(LogLevel.DISABLED, "X controller", LOGGING_PREFIX)
@@ -46,7 +46,7 @@ var xController =
         xGains.kP.get(),
         xGains.kI.get(),
         xGains.kD.get(),
-        linearLimits
+        linearLimits,
     )
 
 @LoggedOutput(LogLevel.DISABLED, "Y controller", LOGGING_PREFIX)
@@ -55,7 +55,7 @@ var yController =
         yGains.kP.get(),
         yGains.kI.get(),
         yGains.kD.get(),
-        linearLimits
+        linearLimits,
     )
 
 @LoggedOutput(LogLevel.DISABLED, "Theta controller", LOGGING_PREFIX)
@@ -64,7 +64,7 @@ var thetaController =
             thetaGains.kP.get(),
             thetaGains.kI.get(),
             thetaGains.kD.get(),
-            rotationalLimits
+            rotationalLimits,
         )
         .apply { enableContinuousInput(-Math.PI, Math.PI) }
 
@@ -78,13 +78,13 @@ fun updateProfiledPIDGains() {
     mapOf(
             xController to Pair(xGains, linearLimits),
             yController to Pair(yGains, linearLimits),
-            thetaController to Pair(thetaGains, rotationalLimits)
+            thetaController to Pair(thetaGains, rotationalLimits),
         )
         .forEach { (controller, pair) ->
             controller.setPID(
                 pair.first.kP.get(),
                 pair.first.kI.get(),
-                pair.first.kD.get()
+                pair.first.kD.get(),
             )
             println("MAXVELOCITY ${pair.second.maxVelocity}")
             println("MAXACCEL ${pair.second.maxAcceleration}")
@@ -105,7 +105,7 @@ fun resetProfiledPID(botPose: Pose2d, botSpeeds: ChassisVelocities) {
     yController.reset(botPose.y, botSpeeds.vy)
     thetaController.reset(
         botPose.rotation.radians,
-        botSpeeds.omega
+        botSpeeds.omega,
     )
 }
 
@@ -116,13 +116,13 @@ fun setTolerance(pose2d: Pose2d) {
 }
 
 /**
- * Returns field relative chassis speeds to the selected goal.
- * @botPose the current pose of the robot
+ * Returns field relative chassis speeds to the selected goal. @botPose the
+ * current pose of the robot
  */
 fun getSpeedSetpoint(botPose: Pose2d): () -> ChassisVelocities = {
     ChassisVelocities(
         xController.calculate(botPose.x),
         yController.calculate(botPose.y),
-        thetaController.calculate(botPose.rotation.radians)
+        thetaController.calculate(botPose.rotation.radians),
     )
 }

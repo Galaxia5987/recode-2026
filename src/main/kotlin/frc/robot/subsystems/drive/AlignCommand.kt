@@ -1,6 +1,7 @@
 package frc.robot.subsystems.drive
 
-// TODO: HolonomicDriveController was removed in 2027. A replacement is needed. Maybe [AutoPilot](https://therekrab.github.io/autopilot/) would be good.
+// TODO: HolonomicDriveController was removed in 2027. A replacement is needed.
+// Maybe [AutoPilot](https://therekrab.github.io/autopilot/) would be good.
 /*
 import org.wpilib.math.controller.PIDController
 import org.wpilib.math.controller.ProfiledPIDController
