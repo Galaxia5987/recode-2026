@@ -1,8 +1,8 @@
 package frc.robot.lib.unified_canrange
 
-import edu.wpi.first.units.measure.Distance
 import frc.robot.lib.extensions.cm
 import org.team5987.annotation.Logged
+import org.wpilib.units.measure.Distance
 
 interface CANRangeIO {
     val inputs: LoggedSensorInputs
