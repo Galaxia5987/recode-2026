@@ -3,12 +3,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     id "java"
     id("org.wpilib.GradleRIO") version "2027.0.0-alpha-6"
-    id "com.gradleup.shadow" version "9.3.0"
-    id "org.jetbrains.kotlin.jvm" version "2.3.10"
-    id "org.jetbrains.kotlin.kapt" version "2.3.10"
-    id "com.diffplug.spotless" version "6.25.0"
-    id "com.peterabeles.gversion" version "1.10"
-    id "com.google.devtools.ksp" version "2.3.5"
+    id "com.gradleup.shadow" version "9.6.1"
+    id "org.jetbrains.kotlin.jvm" version "2.4.10"
+    id "org.jetbrains.kotlin.kapt" version "2.4.10"
+    id "com.diffplug.spotless" version "8.9.0"
+    id "com.peterabeles.gversion" version "1.11.0"
+    id "com.google.devtools.ksp" version "2.3.10"
     id "idea"
 }
 
@@ -232,7 +232,7 @@ spotless {
             it.setBlockIndent(4)
             it.setContinuationIndent(4)
             it.setMaxWidth(80)
-            it.setRemoveUnusedImport(true)
+            it.setRemoveUnusedImports(true)
         }
     }
 }
