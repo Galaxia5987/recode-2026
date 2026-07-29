@@ -2,12 +2,6 @@ package frc.robot.lib.universal_motor
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.*
-import edu.wpi.first.math.controller.PIDController
-import edu.wpi.first.math.controller.ProfiledPIDController
-import edu.wpi.first.math.trajectory.TrapezoidProfile
-import edu.wpi.first.units.measure.Distance
-import edu.wpi.first.units.measure.MomentOfInertia
-import edu.wpi.first.wpilibj.Timer
 import frc.robot.lib.Gains
 import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.deg
@@ -20,6 +14,12 @@ import frc.robot.lib.extensions.toDistance
 import frc.robot.lib.extensions.volts
 import frc.robot.lib.motors.TalonFXSim
 import frc.robot.lib.motors.TalonType
+import org.wpilib.math.controller.PIDController
+import org.wpilib.math.controller.ProfiledPIDController
+import org.wpilib.math.trajectory.TrapezoidProfile
+import org.wpilib.system.Timer
+import org.wpilib.units.measure.Distance
+import org.wpilib.units.measure.MomentOfInertia
 
 /**
  * Simulated implementation of [MotorIO] for use during robot simulation.
@@ -35,7 +35,7 @@ class MotorIOSim(
     private val simGains: Gains,
     private val gearRatio: Double,
     private val diameter: Distance,
-    private val logConfig: MotorLogConfig
+    private val logConfig: MotorLogConfig,
 ) : MotorIO {
     override val inputs = LoggedMotorInputs()
     private val profiledPIDController =
@@ -45,8 +45,8 @@ class MotorIOSim(
             simGains.kD,
             TrapezoidProfile.Constraints(
                 config.MotionMagic.MotionMagicCruiseVelocity,
-                config.MotionMagic.MotionMagicAcceleration
-            )
+                config.MotionMagic.MotionMagicAcceleration,
+            ),
         )
     private val controller =
         PIDController(simGains.kP, simGains.kI, simGains.kD).apply {
@@ -94,7 +94,7 @@ class MotorIOSim(
     }
 
     override fun updateInputs() {
-        motor.update(Timer.getFPGATimestamp())
+        motor.update(Timer.getTimestamp())
         if (logConfig.current) inputs.current = motor.appliedCurrent
         if (logConfig.statorCurrent)
             inputs.statorCurrent = motor.appliedCurrent * 2.0

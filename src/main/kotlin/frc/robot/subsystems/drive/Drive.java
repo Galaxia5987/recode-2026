@@ -13,44 +13,18 @@
 
 package frc.robot.subsystems.drive;
 
-import static edu.wpi.first.units.Units.*;
+import static org.wpilib.units.Units.*;
 
 import com.ctre.phoenix6.CANBus;
-import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.pathfinding.LocalADStar;
 import com.pathplanner.lib.pathfinding.Pathfinding;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.hal.FRCNetComm.tInstances;
-import edu.wpi.first.hal.FRCNetComm.tResourceType;
-import edu.wpi.first.hal.HAL;
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.LinearAcceleration;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.Alert;
-import edu.wpi.first.wpilibj.Alert.AlertType;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.ConstantsKt;
-import frc.robot.autonomous.AutoCommandsKt;
 import frc.robot.lib.BetterPoseEstimator;
 import frc.robot.lib.Mode;
-import frc.robot.lib.sysid.SysIdable;
+import frc.robot.lib.commands.MechanismExtensionsKt;
 import frc.robot.subsystems.drive.ModuleIOs.Module;
 import frc.robot.subsystems.drive.ModuleIOs.ModuleIO;
 import frc.robot.subsystems.drive.gyroIOs.GyroIO;
@@ -67,8 +41,29 @@ import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.wpilib.command3.Command;
+import org.wpilib.command3.Mechanism;
+import org.wpilib.driverstation.*;
+import org.wpilib.math.geometry.*;
+import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.math.kinematics.SwerveDriveKinematics;
+import org.wpilib.math.kinematics.SwerveModulePosition;
+import org.wpilib.math.kinematics.SwerveModuleVelocity;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.smartdashboard.Field2d;
+import org.wpilib.smartdashboard.SmartDashboard;
+import org.wpilib.system.Timer;
+import org.wpilib.units.Units;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.AngularVelocity;
+import org.wpilib.units.measure.LinearAcceleration;
+import org.wpilib.units.measure.Voltage;
 
-public class Drive extends SubsystemBase implements SysIdable {
+/*
+ * 2027 Changes and problems:
+ * Seems to be a problem with SysId related stuff, removed for now.
+ */
+public class Drive extends Mechanism {
     // TunerConstants doesn't include these constants, so they are declared locally
     public static final double ODOMETRY_FREQUENCY =
             new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
@@ -95,6 +90,7 @@ public class Drive extends SubsystemBase implements SysIdable {
     private static final double ROBOT_MASS_KG = 67.15;
     private static final double ROBOT_MOI = 8.132;
     private static final double WHEEL_COF = 1.0;
+
     private static final RobotConfig PP_CONFIG =
             new RobotConfig(
                     ROBOT_MASS_KG,
@@ -125,7 +121,6 @@ public class Drive extends SubsystemBase implements SysIdable {
                                     Inches.of(2),
                                     KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia),
                                     WHEEL_COF));
-
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     public Angle[] SwerveTurnAngle =
@@ -134,9 +129,8 @@ public class Drive extends SubsystemBase implements SysIdable {
             new Angle[] {Radians.zero(), Radians.zero(), Radians.zero(), Radians.zero()};
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
-    private final SysIdRoutine sysId;
     private final Alert gyroDisconnectedAlert =
-            new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+            new Alert("Disconnected gyro, using kinematics as fallback.", Alert.Level.HIGH);
 
     private final SwerveDriveKinematics kinematics =
             new SwerveDriveKinematics(getModuleTranslations());
@@ -149,13 +143,13 @@ public class Drive extends SubsystemBase implements SysIdable {
                 new SwerveModulePosition()
             };
 
-    public ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
+    public ChassisVelocities chassisSpeeds = new ChassisVelocities();
 
     private final LoggedNetworkBoolean isTuningMode =
             new LoggedNetworkBoolean("/Tuning/Drive/tuningMode", false);
 
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
-    public ChassisSpeeds chassisSpeedsSetpoint = new ChassisSpeeds();
+    public ChassisVelocities chassisSpeedsSetpoint = new ChassisVelocities();
 
     private double lastSkidTimestamp = Double.NaN;
 
@@ -187,10 +181,6 @@ public class Drive extends SubsystemBase implements SysIdable {
         modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
         modules[3] = new Module(brModuleIO, 3, TunerConstants.BackRight);
 
-        // Usage reporting for swerve template
-        HAL.report(
-                tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
-
         // Start odometry thread
         PhoenixOdometryThread.getInstance().start();
 
@@ -210,21 +200,13 @@ public class Drive extends SubsystemBase implements SysIdable {
                     Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
                 });
 
-        // Configure SysId
-        sysId =
-                new SysIdRoutine(
-                        new SysIdRoutine.Config(
-                                null,
-                                null,
-                                null,
-                                (state) ->
-                                        Logger.recordOutput("Drive/SysIdState", state.toString())),
-                        new SysIdRoutine.Mechanism(
-                                (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
         SmartDashboard.putData("Field", fieldPose);
+        MechanismExtensionsKt.addPeriodic(this, this::periodic);
     }
 
     private void configureAutoBuilder() {
+        // TODO: Pathplanner currently doesn't support CommandsV3
+        /*
         AutoBuilder.configure(
                 () -> {
                     if (AutoCommandsKt.getUseOdometryOnlyInAuto()) {
@@ -241,12 +223,12 @@ public class Drive extends SubsystemBase implements SysIdable {
                         TunerConstants.autonomousRotationPID),
                 PP_CONFIG,
                 () ->
-                        DriverStation.getAlliance().isPresent()
-                                && DriverStation.getAlliance().get() == DriverStation.Alliance.Red,
+                        MatchState.getAlliance().isPresent()
+                                && MatchState.getAlliance().get() == Alliance.RED,
                 this);
+         */
     }
 
-    @Override
     public void periodic() {
         odometryLock.lock(); // Prevents odometry updates while reading data
         SwerveTurnAngle[0] = modules[0].getAngle().getMeasure();
@@ -268,19 +250,19 @@ public class Drive extends SubsystemBase implements SysIdable {
 
         // Log empty setpoint states when disabled
         // Stop moving when disabled
-        if (DriverStation.isDisabled()) {
+        if (RobotState.isDisabled()) {
             for (var module : modules) {
                 module.stop();
             }
-            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleState[] {});
-            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleState[] {});
+            Logger.recordOutput("SwerveStates/Setpoints", new SwerveModuleVelocity[] {});
+            Logger.recordOutput("SwerveStates/SetpointsOptimized", new SwerveModuleVelocity[] {});
         }
 
         // Update odometry
         double[] sampleTimestamps = modules[0].getOdometryTimestamps();
         int sampleCount = sampleTimestamps.length;
 
-        chassisSpeeds = kinematics.toChassisSpeeds(getModuleStates());
+        chassisSpeeds = kinematics.toChassisVelocities(getModuleStates());
         Logger.recordOutput("SwerveChassisSpeeds/Measured", chassisSpeeds);
 
         for (int i = 0; i < sampleCount; i++) {
@@ -291,8 +273,8 @@ public class Drive extends SubsystemBase implements SysIdable {
                 modulePositions[moduleIndex] = modules[moduleIndex].getOdometryPositions()[i];
                 moduleDeltas[moduleIndex] =
                         new SwerveModulePosition(
-                                modulePositions[moduleIndex].distanceMeters
-                                        - lastModulePositions[moduleIndex].distanceMeters,
+                                modulePositions[moduleIndex].distance
+                                        - lastModulePositions[moduleIndex].distance,
                                 modulePositions[moduleIndex].angle);
                 lastModulePositions[moduleIndex] = modulePositions[moduleIndex];
             }
@@ -358,7 +340,7 @@ public class Drive extends SubsystemBase implements SysIdable {
         int usedModules = 0;
 
         for (int moduleIndex = 0; moduleIndex < 4; moduleIndex++) {
-            double wheelSpeed = moduleDeltas[moduleIndex].distanceMeters / dt;
+            double wheelSpeed = moduleDeltas[moduleIndex].distance / dt;
 
             Rotation2d azimuth = moduleDeltas[moduleIndex].angle;
             Translation2d vWheel = new Translation2d(wheelSpeed, azimuth);
@@ -395,11 +377,13 @@ public class Drive extends SubsystemBase implements SysIdable {
      *
      * @param speeds Speeds in meters/sec
      */
-    public void runVelocity(ChassisSpeeds speeds) {
+    public void runVelocity(ChassisVelocities speeds) {
         // Calculate module setpoints
-        speeds = ChassisSpeeds.discretize(speeds, 0.02);
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
+        speeds = speeds.discretize(0.02);
+        SwerveModuleVelocity[] setpointStates = kinematics.toSwerveModuleVelocities(speeds);
+        setpointStates =
+                SwerveDriveKinematics.desaturateWheelVelocities(
+                        setpointStates, TunerConstants.kSpeedAt12Volts);
 
         // Log unoptimized setpoints and setpoint speeds
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -425,7 +409,7 @@ public class Drive extends SubsystemBase implements SysIdable {
 
     /** Stops the drive. */
     public void stop() {
-        runVelocity(new ChassisSpeeds());
+        runVelocity(new ChassisVelocities());
     }
 
     /**
@@ -442,31 +426,23 @@ public class Drive extends SubsystemBase implements SysIdable {
     }
 
     public Command lock() {
-        return runOnce(this::stopWithX);
+        return run((_) -> stopWithX()).named("drive#lock");
     }
 
     public Command continousLock() {
-        return run(this::stopWithX);
-    }
-
-    /** Returns a command to run a quasistatic test in the specified direction. */
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return run(() -> runCharacterization(0.0))
-                .withTimeout(1.0)
-                .andThen(sysId.quasistatic(direction));
-    }
-
-    /** Returns a command to run a dynamic test in the specified direction. */
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return run(() -> runCharacterization(0.0))
-                .withTimeout(1.0)
-                .andThen(sysId.dynamic(direction));
+        return run((coroutine -> {
+                    while (true) {
+                        stopWithX();
+                        coroutine.yield();
+                    }
+                }))
+                .named("drive#continousLock");
     }
 
     /** Returns the module states (turn angles and drive velocities) for all of the modules. */
     @AutoLogOutput(key = "SwerveStates/Measured")
-    private SwerveModuleState[] getModuleStates() {
-        SwerveModuleState[] states = new SwerveModuleState[4];
+    private SwerveModuleVelocity[] getModuleStates() {
+        SwerveModuleVelocity[] states = new SwerveModuleVelocity[4];
         for (int i = 0; i < 4; i++) {
             states[i] = modules[i].getState();
         }
@@ -491,9 +467,8 @@ public class Drive extends SubsystemBase implements SysIdable {
     }
 
     @AutoLogOutput(key = "SwerveChassisSpeeds/MeasuredFieldOriented")
-    public ChassisSpeeds getFieldOrientedSpeeds() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(
-                kinematics.toChassisSpeeds(getModuleStates()), getRotation());
+    public ChassisVelocities getFieldOrientedSpeeds() {
+        return kinematics.toChassisVelocities(getModuleStates()).toFieldRelative(getRotation());
     }
 
     public LinearAcceleration getAccelerationX() {
@@ -530,13 +505,13 @@ public class Drive extends SubsystemBase implements SysIdable {
 
     @AutoLogOutput(key = "Odometry/CompensatedRobot")
     public Pose2d getCompensatedPose() {
-        ChassisSpeeds speeds = this.chassisSpeeds;
+        ChassisVelocities speeds = this.chassisSpeeds;
         return getPose()
                 .plus(
                         new Transform2d(
                                 new Translation2d(
-                                        speeds.vxMetersPerSecond * compensationConstant,
-                                        speeds.vyMetersPerSecond * compensationConstant),
+                                        speeds.vx * compensationConstant,
+                                        speeds.vy * compensationConstant),
                                 new Rotation2d()));
     }
 
@@ -584,14 +559,12 @@ public class Drive extends SubsystemBase implements SysIdable {
         };
     }
 
-    @Override
     public void setVoltage(@NotNull Voltage voltage) {
         for (int i = 0; i < 4; i++) {
             modules[i].runCharacterization(voltage.in(Volts));
         }
     }
 
-    @Override
     public @NotNull Function1<Voltage, Unit> getSetVoltageConsumer() {
         return (voltage) -> {
             setVoltage(voltage);

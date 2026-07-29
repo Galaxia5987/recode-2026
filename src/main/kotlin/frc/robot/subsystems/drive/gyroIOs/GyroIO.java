@@ -13,11 +13,11 @@
 
 package frc.robot.subsystems.drive.gyroIOs;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.LinearAcceleration;
 import org.littletonrobotics.junction.AutoLog;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.units.Units;
+import org.wpilib.units.measure.Angle;
+import org.wpilib.units.measure.LinearAcceleration;
 
 public interface GyroIO {
     @AutoLog

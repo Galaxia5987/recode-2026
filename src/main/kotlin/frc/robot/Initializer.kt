@@ -1,7 +1,5 @@
 package frc.robot
 
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
 import frc.robot.lib.BetterPoseEstimator
 import frc.robot.lib.Mode
 import frc.robot.subsystems.drive.Drive
@@ -15,6 +13,8 @@ import frc.robot.subsystems.drive.gyroIOs.GyroIOSim
 import frc.robot.subsystems.vision.*
 import org.ironmaple.simulation.SimulatedArena
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation
+import org.wpilib.math.geometry.Pose2d
+import org.wpilib.math.geometry.Rotation2d
 
 val MAPLE_SIM_STARTING_POSE = Pose2d(3.0, 3.0, Rotation2d())
 
@@ -36,7 +36,7 @@ private val driveModuleIOs =
             TunerConstants.FrontLeft,
             TunerConstants.FrontRight,
             TunerConstants.BackLeft,
-            TunerConstants.BackRight
+            TunerConstants.BackRight,
         )
         .mapIndexed { index, module ->
             when (CURRENT_MODE) {
@@ -62,7 +62,7 @@ val drive =
     Drive(
         gyroIO,
         driveModuleIOs,
-        driveSimulation?.let { it::setSimulationWorldPose } ?: { _: Pose2d -> }
+        driveSimulation?.let { it::setSimulationWorldPose } ?: { _: Pose2d -> },
     )
 
 private val visionIOs =
@@ -74,7 +74,7 @@ private val visionIOs =
                     it.key,
                     config.robotToCamera,
                     config.botRotation,
-                    config.tagIdsToFilter
+                    config.tagIdsToFilter,
                 )
             }
         Mode.SIM ->
@@ -96,5 +96,5 @@ val vision =
     Vision(
         BetterPoseEstimator.getInstance()::addVisionObservation,
         drive::resetOdometry,
-        *visionIOs
+        *visionIOs,
     )

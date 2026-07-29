@@ -1,20 +1,19 @@
 package frc.robot.lib
 
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Translation2d
-import edu.wpi.first.math.kinematics.ChassisSpeeds
-import edu.wpi.first.units.measure.Angle
-import edu.wpi.first.wpilibj.GenericHID
-import edu.wpi.first.wpilibj.util.Color
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController
 import frc.robot.lib.extensions.deg
 import kotlin.math.*
 import org.littletonrobotics.junction.LogTable
+import org.wpilib.command3.Command
+import org.wpilib.command3.button.CommandGamepad
+import org.wpilib.driverstation.GenericHID
+import org.wpilib.math.geometry.Pose2d
+import org.wpilib.math.geometry.Rotation2d
+import org.wpilib.math.geometry.Translation2d
+import org.wpilib.math.kinematics.ChassisVelocities
+import org.wpilib.units.measure.Angle
+import org.wpilib.util.Color
 
-fun ChassisSpeeds.getSpeed() = hypot(vxMetersPerSecond, vyMetersPerSecond)
+fun ChassisVelocities.getNormVelocity(): Double = hypot(vx, vy)
 
 fun List<Any>.toDoubleArray(): DoubleArray {
     return this.map { it as Double }.toTypedArray().toDoubleArray()
@@ -32,9 +31,11 @@ fun LogTable.put(key: String, defaultValue: List<Any>) {
     when {
         defaultValue.all { it is Double } ->
             put(key, defaultValue.toDoubleArray())
+
         defaultValue.all { it is Int } -> put(key, defaultValue.toIntArray())
         defaultValue.all { it is Boolean } ->
             put(key, defaultValue.toBooleanArray())
+
         else ->
             throw IllegalArgumentException(
                 "Unsupported List type: ${defaultValue::class.simpleName}"
@@ -44,7 +45,7 @@ fun LogTable.put(key: String, defaultValue: List<Any>) {
 
 inline fun <reified T : List<Any>> LogTable.get(
     key: String,
-    defaultValue: T
+    defaultValue: T,
 ): T {
     val type = defaultValue::class
 
@@ -52,10 +53,13 @@ inline fun <reified T : List<Any>> LogTable.get(
         when {
             defaultValue.all { it is Double } ->
                 get(key, defaultValue.toDoubleArray()).toList()
+
             defaultValue.all { it is Int } ->
                 get(key, defaultValue.toIntArray()).toList()
+
             defaultValue.all { it is Boolean } ->
                 get(key, defaultValue.toBooleanArray()).toList()
+
             else ->
                 throw IllegalArgumentException(
                     "Unable to LogTable.get List of type: ${type.simpleName}"
@@ -65,12 +69,28 @@ inline fun <reified T : List<Any>> LogTable.get(
     else result as T
 }
 
-fun CommandXboxController.setRumble(strength: Double) {
-    this.hid.setRumble(GenericHID.RumbleType.kBothRumble, strength)
+fun CommandGamepad.rumbleAll(strength: Double) {
+    this.setRumble(GenericHID.RumbleType.RIGHT_RUMBLE, strength)
+    this.setRumble(GenericHID.RumbleType.LEFT_RUMBLE, strength)
 }
 
-fun CommandXboxController.rumbleCommand(): Command {
-    return Commands.startEnd({ this.setRumble(1.0) }, { this.setRumble(0.0) })
+fun CommandGamepad.stopRumble() {
+    rumbleAll(0.0)
+}
+
+fun CommandGamepad.rumbleCommand(): Command {
+    return Command.noRequirements {
+            this.rumbleAll(1.0)
+            it.park()
+        }
+        .named("RumbleController")
+        .andThen(
+            Command.noRequirements {
+                    this.stopRumble()
+                }
+                .named("StopRumbleController")
+        )
+        .withAutomaticName()
 }
 
 fun Any?.ifNotNull(action: (it: Any) -> Unit) {
@@ -88,7 +108,7 @@ fun Color.colorSimilarity(color: Color): Double {
     data class HSVColor(
         val hue: Double,
         val saturation: Double,
-        val value: Double
+        val value: Double,
     )
 
     // --- Convert RGB to HSV ---
@@ -130,7 +150,7 @@ fun Color.colorSimilarity(color: Color): Double {
     val hueDiff =
         min(
             abs(hsvColor1.hue - hsvColor2.hue),
-            1.0 - abs(hsvColor1.hue - hsvColor2.hue)
+            1.0 - abs(hsvColor1.hue - hsvColor2.hue),
         )
     val satDiff = abs(hsvColor1.saturation - hsvColor2.saturation)
     val valDiff = abs(hsvColor1.value - hsvColor2.value)
@@ -180,19 +200,13 @@ fun Angle.convertTo360(): Angle { // Convert angle from (-180,180) -> (0,360)
 // NO ROTATION ESTIMATION!!
 fun Pose2d.estimateAt(
     seconds: Double,
-    fieldRelativeSpeeds: ChassisSpeeds,
-    fieldOrientedAcceleration: ChassisSpeeds
+    fieldRelativeSpeeds: ChassisVelocities,
+    fieldOrientedAcceleration: ChassisVelocities,
 ): Translation2d =
     this.translation +
         Translation2d(
-            fieldRelativeSpeeds.vxMetersPerSecond * seconds +
-                0.5 *
-                    seconds *
-                    seconds *
-                    fieldOrientedAcceleration.vxMetersPerSecond,
-            fieldRelativeSpeeds.vyMetersPerSecond * seconds +
-                0.5 *
-                    seconds *
-                    seconds *
-                    fieldOrientedAcceleration.vxMetersPerSecond,
+            fieldRelativeSpeeds.vx * seconds +
+                0.5 * seconds * seconds * fieldOrientedAcceleration.vx,
+            fieldRelativeSpeeds.vy * seconds +
+                0.5 * seconds * seconds * fieldOrientedAcceleration.vx,
         )

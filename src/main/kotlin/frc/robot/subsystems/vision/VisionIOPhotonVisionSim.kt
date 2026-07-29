@@ -13,12 +13,12 @@
 
 package frc.robot.subsystems.vision
 
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Rotation2d
-import edu.wpi.first.math.geometry.Transform3d
 import org.photonvision.simulation.PhotonCameraSim
 import org.photonvision.simulation.SimCameraProperties
 import org.photonvision.simulation.VisionSystemSim
+import org.wpilib.math.geometry.Pose2d
+import org.wpilib.math.geometry.Rotation2d
+import org.wpilib.math.geometry.Transform3d
 
 /** IO implementation for physics sim using PhotonVision simulator. */
 class VisionIOPhotonVisionSim(
@@ -26,7 +26,7 @@ class VisionIOPhotonVisionSim(
     robotToCamera: () -> Transform3d,
     botRotation: () -> Rotation2d,
     tagIdsToFilter: () -> List<Int>,
-    private val poseSupplier: () -> Pose2d
+    private val poseSupplier: () -> Pose2d,
 ) : VisionIOPhotonVision(name, robotToCamera, botRotation, tagIdsToFilter) {
 
     private val cameraSim: PhotonCameraSim

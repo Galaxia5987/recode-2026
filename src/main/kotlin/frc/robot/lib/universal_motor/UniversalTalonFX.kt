@@ -3,9 +3,6 @@ package frc.robot.lib.universal_motor
 import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.ControlRequest
-import edu.wpi.first.units.measure.Angle
-import edu.wpi.first.units.measure.Distance
-import edu.wpi.first.units.measure.MomentOfInertia
 import frc.robot.CURRENT_MODE
 import frc.robot.lib.Gains
 import frc.robot.lib.Mode
@@ -15,6 +12,9 @@ import frc.robot.lib.extensions.m
 import frc.robot.lib.getFileNameFromStack
 import frc.robot.lib.unit_test.allMotorsFromPorts
 import org.littletonrobotics.junction.Logger
+import org.wpilib.units.measure.Angle
+import org.wpilib.units.measure.Distance
+import org.wpilib.units.measure.MomentOfInertia
 
 /**
  * Represents a universal wrapper for a motor, which abstracts the real and
@@ -25,9 +25,10 @@ import org.littletonrobotics.junction.Logger
  * @param config Configuration for the TalonFX motor controller.
  * @param momentOfInertia The moment of inertia used in simulation.
  * @param gearRatio The gear ratio between the motor and the mechanism (default
- * is 1.0).
+ *   is 1.0).
  * @param linearSystemWheelDiameter The diameter of the wheel or spool for
- * linear mechanisms.
+ *   linear mechanisms.
+ *
  * ```
  *        Do Not pass this parameter if the motor does not actuate a linear mechanism (e.g., elevator or a linear intake).
  * ```
@@ -43,7 +44,7 @@ class UniversalTalonFX(
     private val gearRatio: Double = 1.0,
     private val linearSystemWheelDiameter: Distance = 0.m,
     private val absoluteEncoderOffset: Angle = 0.deg,
-    private val logConfig: MotorLogConfig = MotorLogConfig()
+    private val logConfig: MotorLogConfig = MotorLogConfig(),
 ) {
     init {
         if (CURRENT_MODE == Mode.SIM) {
@@ -60,7 +61,7 @@ class UniversalTalonFX(
                 gearRatio,
                 linearSystemWheelDiameter,
                 absoluteEncoderOffset,
-                logConfig
+                logConfig,
             )
         else {
             MotorIOSim(
@@ -69,7 +70,7 @@ class UniversalTalonFX(
                 simGains,
                 gearRatio,
                 linearSystemWheelDiameter,
-                logConfig
+                logConfig,
             )
         }
     val inputs: LoggedMotorInputs = motorIO.inputs

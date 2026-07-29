@@ -1,16 +1,16 @@
 package frc.robot.lib.unit_test
 
-import edu.wpi.first.hal.HAL
-import edu.wpi.first.units.measure.Time
-import edu.wpi.first.wpilibj.simulation.DriverStationSim
-import edu.wpi.first.wpilibj.simulation.SimHooks
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.CommandScheduler
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.sec
 import frc.robot.lib.universal_motor.LoggedMotorInputs
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.junit.jupiter.api.AfterEach
+import org.wpilib.command3.Command
+import org.wpilib.command3.Scheduler
+import org.wpilib.hardware.hal.HAL
+import org.wpilib.simulation.DriverStationSim
+import org.wpilib.simulation.SimHooks
+import org.wpilib.units.measure.Time
 
 private const val PERIODIC_TIME: Double = 0.02
 
@@ -20,17 +20,17 @@ fun getInputs(port: Int, canbus: String = "rio"): LoggedMotorInputs =
     allMotorsFromPorts[port to canbus]!!.inputs
 
 object SubsystemSimRuntime {
-    val scheduler: CommandScheduler = CommandScheduler.getInstance()
+    val scheduler: Scheduler = Scheduler.getDefault()
 
     fun addCommands(vararg commands: Command): SubsystemSimRuntime {
         commands.forEach {
-            it.requirements.forEach { subsystem ->
+            it.requirements().forEach { subsystem ->
                 if (subsystem is SimulationResettable) {
                     registerSimulationResettable(subsystem)
                 }
             }
+            scheduler.schedule(it)
         }
-        scheduler.schedule(*commands)
         return this
     }
 
@@ -69,7 +69,6 @@ object SubsystemSimRuntime {
 
     fun reset() {
         scheduler.cancelAll()
-        scheduler.clearComposedCommands()
     }
 
     fun restartInputs() {

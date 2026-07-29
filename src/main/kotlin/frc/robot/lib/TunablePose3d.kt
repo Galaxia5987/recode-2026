@@ -1,19 +1,19 @@
 package frc.robot.lib
 
-import edu.wpi.first.math.geometry.Pose3d
-import edu.wpi.first.math.geometry.Rotation3d
-import edu.wpi.first.math.geometry.Translation3d
-import edu.wpi.first.units.measure.Angle
-import edu.wpi.first.units.measure.Distance
 import frc.robot.lib.extensions.*
 import frc.robot.lib.extensions.get
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
+import org.wpilib.math.geometry.Pose3d
+import org.wpilib.math.geometry.Rotation3d
+import org.wpilib.math.geometry.Translation3d
+import org.wpilib.units.measure.Angle
+import org.wpilib.units.measure.Distance
 
 class TunableTranslation3d(
     key: String,
     x: Distance = 0.mm,
     y: Distance = 0.mm,
-    z: Distance = 0.mm
+    z: Distance = 0.mm,
 ) {
     private val tunableX = LoggedNetworkNumber("$key/x_mm", x[mm])
     private val tunableY = LoggedNetworkNumber("$key/y_mm", y[mm])
@@ -27,7 +27,7 @@ class TunableRotation3d(
     key: String,
     roll: Angle = 0.deg,
     pitch: Angle = 0.deg,
-    yaw: Angle = 0.deg
+    yaw: Angle = 0.deg,
 ) {
     private val tunableRoll = LoggedNetworkNumber("$key/roll_deg", roll[deg])
     private val tunablePitch = LoggedNetworkNumber("$key/pitch_deg", pitch[deg])
@@ -37,18 +37,18 @@ class TunableRotation3d(
         Rotation3d(
             tunableRoll.get().deg,
             tunablePitch.get().deg,
-            tunableYaw.get().deg
+            tunableYaw.get().deg,
         )
 }
 
 class TunablePose3d(
     key: String,
     translation: Translation3d = Translation3d(),
-    rotation: Rotation3d = Rotation3d()
+    rotation: Rotation3d = Rotation3d(),
 ) {
     constructor(
         key: String,
-        pose: Pose3d
+        pose: Pose3d,
     ) : this(key, pose.translation, pose.rotation)
 
     private val tunableTranslation =
@@ -56,7 +56,7 @@ class TunablePose3d(
             "$key/translation",
             translation.x.meters,
             translation.y.meters,
-            translation.z.meters
+            translation.z.meters,
         )
 
     private val tunableRotation =
@@ -64,7 +64,7 @@ class TunablePose3d(
             "$key/rotation",
             rotation.measureX,
             rotation.measureY,
-            rotation.measureZ
+            rotation.measureZ,
         )
 
     fun get(): Pose3d = Pose3d(tunableTranslation.get(), tunableRotation.get())

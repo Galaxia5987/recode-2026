@@ -1,14 +1,14 @@
 package frc.robot.lib.motors;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N2;
-import edu.wpi.first.math.system.LinearSystem;
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import java.util.function.DoubleSupplier;
+import org.wpilib.math.controller.PIDController;
+import org.wpilib.math.controller.ProfiledPIDController;
+import org.wpilib.math.numbers.N1;
+import org.wpilib.math.numbers.N2;
+import org.wpilib.math.system.DCMotor;
+import org.wpilib.math.system.LinearSystem;
+import org.wpilib.math.system.Models;
+import org.wpilib.simulation.DCMotorSim;
 
 public class SimMotor {
 
@@ -33,7 +33,7 @@ public class SimMotor {
     public SimMotor(
             DCMotor motor, double jKgMetersSquared, double gearing, double conversionFactor) {
         this(
-                LinearSystemId.createDCMotorSystem(motor, jKgMetersSquared, gearing),
+                Models.singleJointedArmFromPhysicalConstants(motor, jKgMetersSquared, gearing),
                 motor,
                 gearing,
                 conversionFactor);

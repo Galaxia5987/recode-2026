@@ -1,11 +1,11 @@
 package frc.robot
 
-import edu.wpi.first.wpilibj.DriverStation
-import edu.wpi.first.wpilibj2.command.button.Trigger
 import frc.robot.lib.Mode
 import org.littletonrobotics.junction.LoggedRobot
 import org.team5987.annotation.LogLevel
 import org.team5987.annotation.LoggedOutput
+import org.wpilib.command3.Trigger
+import org.wpilib.driverstation.RobotState
 
 const val LOOP_TIME = 0.02 // [s]
 
@@ -26,6 +26,6 @@ val CURRENT_MODE: Mode
 
 val isSim = Trigger { CURRENT_MODE == Mode.SIM }
 
-val isAuto = Trigger { DriverStation.isAutonomous() }
+val isAuto = Trigger { RobotState.isAutonomous() } // TODO!!!
 
-val isEnabled = Trigger { DriverStation.isEnabled() }
+val isEnabled = Trigger { RobotState.isEnabled() } // TODO!!

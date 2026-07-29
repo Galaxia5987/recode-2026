@@ -13,9 +13,9 @@
 
 package frc.robot.subsystems.drive.ModuleIOs;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.lib.LoggedNetworkGains;
 import org.littletonrobotics.junction.AutoLog;
+import org.wpilib.math.geometry.Rotation2d;
 
 public interface ModuleIO {
     @AutoLog

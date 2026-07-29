@@ -1,10 +1,10 @@
 package frc.robot.subsystems.drive.gyroIOs;
 
-import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static org.wpilib.units.Units.RadiansPerSecond;
 
-import edu.wpi.first.math.util.Units;
 import frc.robot.lib.PhoenixUtil;
 import org.ironmaple.simulation.drivesims.GyroSimulation;
+import org.wpilib.math.util.Units;
 
 public class GyroIOSim implements GyroIO {
     private final GyroSimulation gyroSimulation;

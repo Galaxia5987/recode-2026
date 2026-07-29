@@ -7,5 +7,5 @@ data class MotorLogConfig(
     val velocity: Boolean = true,
     val absoluteEncoder: Boolean = true,
     val voltage: Boolean = true,
-    val controlRequest: Boolean = false // TODO: Change after mock comp
+    val controlRequest: Boolean = false, // TODO: Change after mock comp
 )

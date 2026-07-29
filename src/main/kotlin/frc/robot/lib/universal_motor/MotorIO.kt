@@ -2,13 +2,13 @@ package frc.robot.lib.universal_motor
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.ControlRequest
-import edu.wpi.first.units.measure.Angle
-import edu.wpi.first.units.measure.AngularVelocity
-import edu.wpi.first.units.measure.Current
-import edu.wpi.first.units.measure.Distance
-import edu.wpi.first.units.measure.Voltage
 import frc.robot.lib.extensions.*
 import org.team5987.annotation.Logged
+import org.wpilib.units.measure.Angle
+import org.wpilib.units.measure.AngularVelocity
+import org.wpilib.units.measure.Current
+import org.wpilib.units.measure.Distance
+import org.wpilib.units.measure.Voltage
 
 /**
  * Interface that defines the common motor input/output operations for both real

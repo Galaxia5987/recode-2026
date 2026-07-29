@@ -1,17 +1,17 @@
 package frc.robot.lib
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs
-import edu.wpi.first.units.measure.Current
-import edu.wpi.first.units.measure.Time
 import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.sec
+import org.wpilib.units.measure.Current
+import org.wpilib.units.measure.Time
 
 fun createCurrentLimits(
     supplyCurrentLimit: Current = 30.amps,
     supplyCurrentPeakDifference: Current = 5.0.amps,
     supplyCurrentLowerTime: Time = 0.4.sec,
-    statorCurrentLimit: Current? = null
+    statorCurrentLimit: Current? = null,
 ): CurrentLimitsConfigs =
     CurrentLimitsConfigs().apply {
         SupplyCurrentLimitEnable = true

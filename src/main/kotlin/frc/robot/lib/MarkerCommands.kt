@@ -1,22 +1,21 @@
 package frc.robot.lib
 
-import edu.wpi.first.wpilibj.DataLogManager
-import edu.wpi.first.wpilibj2.command.Command
-import edu.wpi.first.wpilibj2.command.Commands
+import frc.robot.lib.extensions.sec
 import org.littletonrobotics.junction.AutoLogOutput
+import org.wpilib.command3.Command
+import org.wpilib.system.DataLogManager
 
 const val ABNORMAL_EVENT_NAME = "### [Error] DRIVER PROBLEM REPORTED ###"
 
 @AutoLogOutput private var marked = false
 
 private fun markEvent(eventName: String): Command =
-    Commands.sequence(
-        Commands.runOnce({
+    Command.noRequirements {
             DataLogManager.log(eventName)
             marked = true
-        }),
-        Commands.waitSeconds(5.0),
-        Commands.runOnce({ marked = false })
-    )
+            it.wait(5.0.sec)
+            marked = false
+        }
+        .named("MarkEvent")
 
 fun markAbnormalEvent(): Command = markEvent(ABNORMAL_EVENT_NAME)

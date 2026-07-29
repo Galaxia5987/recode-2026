@@ -1,6 +1,6 @@
 package frc.robot.lib.math.differential;
 
-import edu.wpi.first.wpilibj.Timer;
+import org.wpilib.system.Timer;
 
 /*
 This class contains an integral.
@@ -41,7 +41,7 @@ public class Integral {
      * @param newValue The new value to integrate.
      */
     public void update(double newValue) {
-        update(newValue, Timer.getFPGATimestamp());
+        update(newValue, Timer.getTimestamp());
     }
 
     /**

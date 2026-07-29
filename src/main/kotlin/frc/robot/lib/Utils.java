@@ -2,12 +2,14 @@ package frc.robot.lib;
 
 import static frc.robot.ConstantsKt.LOOP_TIME;
 
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.measure.Angle;
 import java.util.Comparator;
 import java.util.List;
+import org.wpilib.math.geometry.Pose2d;
+import org.wpilib.math.geometry.Rotation2d;
+import org.wpilib.math.geometry.Translation2d;
+import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.units.Units;
+import org.wpilib.units.measure.Angle;
 
 public class Utils {
     public static final double EPSILON = 1e-9;
@@ -55,12 +57,12 @@ public class Utils {
     }
 
     /** Logical inverse of the above. */
-    public static ChassisSpeeds log(final ChassisSpeeds speeds) {
+    public static ChassisVelocities log(final ChassisVelocities speeds) {
         var transform =
                 new Pose2d(
-                        speeds.vxMetersPerSecond * LOOP_TIME,
-                        speeds.vyMetersPerSecond * LOOP_TIME,
-                        new Rotation2d(speeds.omegaRadiansPerSecond * LOOP_TIME));
+                        speeds.vx * LOOP_TIME,
+                        speeds.vy * LOOP_TIME,
+                        new Rotation2d(speeds.omega * LOOP_TIME));
         final double dtheta = transform.getRotation().getRadians();
         final double half_dtheta = 0.5 * dtheta;
         final double cos_minus_one = transform.getRotation().getCos() - 1.0;
@@ -75,7 +77,7 @@ public class Utils {
                 transform
                         .getTranslation()
                         .rotateBy(new Rotation2d(halftheta_by_tan_of_halfdtheta, -half_dtheta));
-        return new ChassisSpeeds(
+        return new ChassisVelocities(
                 translation_part.getX() / LOOP_TIME,
                 translation_part.getY() / LOOP_TIME,
                 dtheta / LOOP_TIME);
