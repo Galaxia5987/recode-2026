@@ -34,6 +34,9 @@ import java.util.function.Consumer;
 import frc.robot.subsystems.drive.gyroIOs.GyroIOInputsAutoLogged;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.jetbrains.annotations.NotNull;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -105,8 +108,6 @@ public class Drive extends Mechanism {
                             1),
                     getModuleTranslations());
 
-// TODO: Uncomment when MapleSim 2027 is available
-/*
     public static final DriveTrainSimulationConfig mapleSimConfig =
             DriveTrainSimulationConfig.Default()
                     .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
@@ -123,9 +124,6 @@ public class Drive extends Mechanism {
                                     Inches.of(2),
                                     KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia),
                                     WHEEL_COF));
-
- */
-
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     public Angle[] SwerveTurnAngle =
