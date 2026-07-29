@@ -22,7 +22,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import frc.robot.ConstantsKt;
 import frc.robot.lib.BetterPoseEstimator;
 import frc.robot.lib.Mode;
-import frc.robot.lib.sysid.SysIdable;
+import frc.robot.lib.commands.MechanismExtensionsKt;
 import frc.robot.subsystems.drive.ModuleIOs.Module;
 import frc.robot.subsystems.drive.ModuleIOs.ModuleIO;
 import frc.robot.subsystems.drive.gyroIOs.GyroIO;
@@ -40,6 +40,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
+import org.wpilib.command3.Scheduler;
 import org.wpilib.driverstation.*;
 import org.wpilib.math.geometry.*;
 import org.wpilib.math.kinematics.ChassisVelocities;
@@ -49,7 +50,6 @@ import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.smartdashboard.Field2d;
 import org.wpilib.smartdashboard.SmartDashboard;
-import org.wpilib.sysid.SysIdRoutineLog;
 import org.wpilib.system.Timer;
 import org.wpilib.units.Units;
 import org.wpilib.units.measure.Angle;
@@ -206,6 +206,7 @@ public class Drive extends Mechanism {
                 });
 
         SmartDashboard.putData("Field", fieldPose);
+        MechanismExtensionsKt.addPeriodic(this, this::periodic);
     }
 
     private void configureAutoBuilder() {
@@ -233,7 +234,6 @@ public class Drive extends Mechanism {
          */
     }
 
-    @Override
     public void periodic() {
         odometryLock.lock(); // Prevents odometry updates while reading data
         SwerveTurnAngle[0] = modules[0].getAngle().getMeasure();
