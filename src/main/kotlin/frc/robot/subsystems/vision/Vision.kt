@@ -13,26 +13,30 @@
 
 package frc.robot.subsystems.vision
 
-import edu.wpi.first.math.geometry.Pose2d
-import edu.wpi.first.math.geometry.Pose3d
-import edu.wpi.first.wpilibj.Alert
-import edu.wpi.first.wpilibj.Alert.AlertType
-import edu.wpi.first.wpilibj2.command.SubsystemBase
+import org.wpilib.math.geometry.Pose2d
+import org.wpilib.math.geometry.Pose3d
 import frc.robot.lib.BetterPoseEstimator
+import frc.robot.lib.commands.addPeriodic
 import frc.robot.subsystems.vision.VisionIO.PoseObservation
 import kotlin.math.absoluteValue
 import org.littletonrobotics.junction.Logger
+import org.wpilib.command3.Mechanism
+import org.wpilib.driverstation.Alert
 
 open class Vision(
     private val consumer: (BetterPoseEstimator.VisionObservation) -> Unit,
     private val resetOdometryCallback: (Pose2d) -> Unit,
     private vararg val ios: VisionIO
-) : SubsystemBase() {
+) : Mechanism() {
     private val inputs = Array(ios.size) { VisionIOInputsAutoLogged() }
     private val disconnectedAlerts =
         Array(ios.size) { index ->
-            Alert("Vision camera $index is disconnected.", AlertType.kWarning)
+            Alert("Vision camera $index is disconnected.", Alert.Level.MEDIUM)
         }
+
+    init {
+        addPeriodic(::periodic)
+    }
 
     private val invalidPosesBuffer = arrayOfNulls<Pose3d>(ios.size)
     private val emptyPoseArray = emptyArray<Pose3d>()
@@ -50,7 +54,7 @@ open class Vision(
                 pose.y in 0.0..APRILTAG_LAYOUT.fieldWidth) ||
             averageTagDistance > MAX_DISTANCE_METERS
 
-    override fun periodic() {
+    fun periodic() {
         var invalidPosesCount = 0
 
         // Standard indexed loop prevents Iterator and List/Pair allocations
