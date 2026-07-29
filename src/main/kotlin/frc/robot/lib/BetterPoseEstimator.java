@@ -7,17 +7,18 @@
 
 package frc.robot.lib;
 
+import org.wpilib.math.geometry.*;
+import org.wpilib.math.interpolation.TimeInterpolatableBuffer;
+import org.wpilib.math.kinematics.ChassisVelocities;
+import org.wpilib.math.kinematics.SwerveDriveKinematics;
+import org.wpilib.math.kinematics.SwerveModulePosition;
+import org.wpilib.math.linalg.Matrix;
+import org.wpilib.math.linalg.VecBuilder;
+import org.wpilib.math.numbers.N1;
+import org.wpilib.math.numbers.N3;
+
 import static frc.robot.subsystems.drive.Drive.getModuleTranslations;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.interpolation.TimeInterpolatableBuffer;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import java.util.*;
 
 // Taken from 6238 Mechanical Advantage
@@ -49,8 +50,8 @@ public class BetterPoseEstimator {
             };
     private Rotation2d gyroOffset = Rotation2d.kZero;
 
-    private ChassisSpeeds robotVelocity = new ChassisSpeeds();
-    private ChassisSpeeds robotSetpointVelocity = new ChassisSpeeds();
+    private ChassisVelocities robotVelocity = new ChassisVelocities();
+    private ChassisVelocities robotSetpointVelocity = new ChassisVelocities();
 
     private static BetterPoseEstimator instance;
 
@@ -67,19 +68,19 @@ public class BetterPoseEstimator {
         kinematics = new SwerveDriveKinematics(getModuleTranslations());
     }
 
-    public ChassisSpeeds getRobotVelocity() {
+    public ChassisVelocities getRobotVelocity() {
         return robotVelocity;
     }
 
-    public void setRobotVelocity(ChassisSpeeds robotVelocity) {
+    public void setRobotVelocity(ChassisVelocities robotVelocity) {
         this.robotVelocity = robotVelocity;
     }
 
-    public ChassisSpeeds getRobotSetpointVelocity() {
+    public ChassisVelocities getRobotSetpointVelocity() {
         return robotSetpointVelocity;
     }
 
-    public void setRobotSetpointVelocity(ChassisSpeeds robotSetpointVelocity) {
+    public void setRobotSetpointVelocity(ChassisVelocities robotSetpointVelocity) {
         this.robotSetpointVelocity = robotSetpointVelocity;
     }
 
@@ -110,19 +111,43 @@ public class BetterPoseEstimator {
         return estimatedPose.getRotation();
     }
 
-    public ChassisSpeeds getFieldVelocity() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(robotVelocity, getRotation());
+    public ChassisVelocities getFieldVelocity() {
+        return robotVelocity.toFieldRelative(getRotation());
     }
 
-    public ChassisSpeeds getFieldSetpointVelocity() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(robotSetpointVelocity, getRotation());
+    public ChassisVelocities getFieldSetpointVelocity() {
+        return robotSetpointVelocity.toFieldRelative(getRotation());
     }
+
+    private static Twist2d logPoses(Pose2d start, Pose2d end) {
+        final var transform = end.relativeTo(start);
+        final var dtheta = transform.getRotation().getRadians();
+        final var halfDtheta = dtheta / 2.0;
+
+        final var cosMinusOne = transform.getRotation().getCos() - 1;
+
+        double halfThetaByTanOfHalfDtheta;
+        if (Math.abs(cosMinusOne) < 1E-9) {
+            halfThetaByTanOfHalfDtheta = 1.0 - 1.0 / 12.0 * dtheta * dtheta;
+        } else {
+            halfThetaByTanOfHalfDtheta = -(halfDtheta * transform.getRotation().getSin()) / cosMinusOne;
+        }
+
+        Translation2d translationPart =
+                transform
+                        .getTranslation()
+                        .rotateBy(new Rotation2d(halfThetaByTanOfHalfDtheta, -halfDtheta))
+                        .times(Math.hypot(halfThetaByTanOfHalfDtheta, halfDtheta));
+
+        return new Twist2d(translationPart.getX(), translationPart.getY(), dtheta);
+    }
+
 
     public void addOdometryObservation(OdometryObservation observation) {
         Twist2d twist = kinematics.toTwist2d(lastWheelPositions, observation.wheelPositions());
         lastWheelPositions = observation.wheelPositions();
         Pose2d lastOdometryPose = odometryPose;
-        odometryPose = odometryPose.exp(twist);
+        odometryPose = odometryPose.plus(twist.exp());
 
         if (observation.yaw() != null) {
             Rotation2d angle = observation.yaw().plus(gyroOffset);
@@ -142,8 +167,8 @@ public class BetterPoseEstimator {
                             observation.yaw().getRadians()));
         }
 
-        Twist2d finalTwist = lastOdometryPose.log(odometryPose);
-        estimatedPose = estimatedPose.exp(finalTwist);
+        Twist2d finalTwist = logPoses(lastOdometryPose,odometryPose);
+        estimatedPose = estimatedPose.plus(finalTwist.exp());
     }
 
     public void addVisionObservation(VisionObservation observation) {
