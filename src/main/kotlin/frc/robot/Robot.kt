@@ -14,6 +14,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import org.wpilib.command3.Command
 import org.wpilib.command3.Scheduler
+import org.wpilib.driverstation.DriverStationErrors
+import org.wpilib.driverstation.internal.DriverStationBackend
 import org.wpilib.hardware.power.PowerDistribution
 import org.wpilib.math.linalg.VecBuilder
 import org.wpilib.system.Timer
@@ -25,7 +27,7 @@ import org.wpilib.system.Timer
  * creating this project, you must also update the build.gradle file in the
  * project.
  */
-object Robot : LoggedRobot() {
+class Robot : LoggedRobot() {
     private lateinit var autonomousCommand: Command
 
     /**
@@ -80,6 +82,8 @@ object Robot : LoggedRobot() {
         enableAutoLogOutputFor(this)
 
         LoggedOutputManager
+
+        DriverStationBackend.silenceJoystickConnectionWarning(true)
 
         // TODO: Update when PathPlanner works with CommandsV3
         //        Scheduler.getDefault()
