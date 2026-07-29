@@ -103,6 +103,7 @@ class Robot : LoggedRobot() {
      */
     override fun robotPeriodic() {
         Scheduler.getDefault().run()
+        Logger.recordOutput("Scheduler", Scheduler.getDefault())
     }
 
     /**
