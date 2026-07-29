@@ -1,6 +1,7 @@
 package frc.robot.lib.commands
 
 import org.wpilib.command3.Command
+import org.wpilib.command3.Coroutine
 
 fun parallel(vararg commands: Command): Command {
     require(commands.size >= 2)
@@ -15,3 +16,6 @@ fun sequence(vararg commands: Command): Command {
     }
     return head.withAutomaticName()
 }
+
+fun emptyCommand() =
+    Command.noRequirements(Coroutine::park).withPriority(Command.LOWEST_PRIORITY).named("EmptyCommand")
