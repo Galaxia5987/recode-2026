@@ -6,8 +6,12 @@ name: Build, tests, formatting
 on:
   push:
     branches: [ "main", "*/main"]
+    paths:
+      - "src/*"
   pull_request:
     branches: [ "main", "*/main"]
+    paths:
+      - "src/*"
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
