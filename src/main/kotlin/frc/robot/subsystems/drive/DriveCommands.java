@@ -301,7 +301,7 @@ public class DriveCommands {
         SlewRateLimiter limiter = new SlewRateLimiter(WHEEL_RADIUS_RAMP_RATE);
         WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
 
-        return CommandExtensionsKt.parallel(
+        return Command.parallel(
                 // Drive control sequence
                 drive.run(
                                 (coroutine) -> {
@@ -316,7 +316,7 @@ public class DriveCommands {
                                 })
                         .named("RunVelocity"),
                 // Measurement sequence
-                CommandExtensionsKt.sequence(
+                Command.sequence(
                         // Wait for modules to fully orient before starting measurement
                         Command.waitFor(Second.of(1.0)).named("WaitOneSecond"),
 
@@ -374,7 +374,7 @@ public class DriveCommands {
                                                                             wheelRadius))
                                                             + " inches");
                                         })
-                                .named("Characterize")));
+                                .named("Characterize")).withAutomaticName()).withAutomaticName();
     }
 
     public static Command stop() {
