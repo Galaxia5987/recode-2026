@@ -27,3 +27,5 @@ inline operator fun Mechanism.invoke(crossinline block: Coroutine.() -> Unit): N
         coroutine.block()
     }
 }
+
+operator fun Coroutine.not() = yield()
