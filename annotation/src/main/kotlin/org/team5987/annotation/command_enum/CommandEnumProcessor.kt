@@ -43,7 +43,8 @@ class CreateCommandProcessor(
         entries: List<String>
     ): FileSpec {
         val enumClass = ClassName(pkg, enumName)
-        val commandClass = ClassName("edu.wpi.first.wpilibj2.command", "Command")
+        val commandClass = ClassName("org.wpilib.command3", "Command")
+        val namedBuilderClass = ClassName("org.wpilib.command3", "NeedsNameBuilderStage")
 
         // generate all default entry functions
         val entryFunctions = entries.map { entry ->
@@ -51,7 +52,7 @@ class CreateCommandProcessor(
             FunSpec.builder(camelEntry)
                 .returns(commandClass)
                 .addStatement(
-                    "return setTarget(%T.%L).withName(%S)",
+                    "return setTarget(%T.%L).named(%S)",
                     enumClass,
                     entry,
                     "${pkg.substringAfterLast(".")}/$camelEntry",
@@ -62,7 +63,7 @@ class CreateCommandProcessor(
         // abstract setTarget function
         val setTargetFun = FunSpec.builder("setTarget")
             .addParameter("value", enumClass)
-            .returns(commandClass)
+            .returns(namedBuilderClass)
             .addModifiers(KModifier.ABSTRACT)
             .build()
 
