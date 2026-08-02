@@ -2,22 +2,8 @@ package frc.robot.lib.commands
 
 import org.wpilib.command3.Command
 import org.wpilib.command3.Coroutine
-
-fun parallel(vararg commands: Command): Command {
-    require(commands.size >= 2)
-    return commands[0]
-        .alongWith(*commands.drop(1).toTypedArray())
-        .withAutomaticName()
-}
-
-fun sequence(vararg commands: Command): Command {
-    require(commands.size >= 2)
-    var head = commands[0].andThen(commands[1])
-    for (command in commands.drop(2)) {
-        head = head.andThen(command)
-    }
-    return head.withAutomaticName()
-}
+import org.wpilib.command3.Mechanism
+import org.wpilib.command3.NeedsNameBuilderStage
 
 fun emptyCommand(): Command =
     Command.noRequirements(Coroutine::park)
@@ -26,3 +12,18 @@ fun emptyCommand(): Command =
 
 context(coroutine: Coroutine)
 operator fun Command.unaryPlus() = coroutine.await(this)
+
+context(coroutine: Coroutine)
+operator fun List<Command>.unaryPlus() = coroutine.awaitAll(*(this.toTypedArray()))
+
+inline fun noRequirements(crossinline block: Coroutine.() -> Unit): NeedsNameBuilderStage {
+    return Command.noRequirements { coroutine ->
+        coroutine.block()
+    }
+}
+
+inline operator fun Mechanism.invoke(crossinline block: Coroutine.() -> Unit): NeedsNameBuilderStage {
+    return this.run { coroutine ->
+        coroutine.block()
+    }
+}
