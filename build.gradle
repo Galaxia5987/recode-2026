@@ -168,6 +168,7 @@ kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.@Companion.fromTarget(javaVersion.toString()))
         jvmToolchain(Integer.valueOf(javaVersion.toString()))
+        freeCompilerArgs.add("-Xcollection-literals")
     }
 }
 
