@@ -17,6 +17,7 @@ import kotlin.reflect.KProperty
  * val someProperty by periodic {
  *     // Expensive calculation...
  * }
+ * ```
  */
 class PeriodicDelegate<T>(private val calculation: () -> T) :
     ReadOnlyProperty<Any?, T> {
