@@ -6,8 +6,8 @@ import org.wpilib.command3.Mechanism
 import org.wpilib.command3.NeedsNameBuilderStage
 
 /**
- * A typealias for a command that hasn't finished it's building.
- * This command cannot be scheduled and `.named` must be called.
+ * A typealias for a command that hasn't finished it's building. This command
+ * cannot be scheduled and `.named` must be called.
  */
 typealias UnnamedCommand = NeedsNameBuilderStage
 
