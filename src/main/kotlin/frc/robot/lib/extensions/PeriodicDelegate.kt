@@ -1,15 +1,20 @@
 package frc.robot.lib.extensions
 
+import java.util.Collections
+import java.util.WeakHashMap
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
-/*
- * A delegate to process a certain variable once per loop.
- * This is to avoid getter hell, where an expensive getter is called multiple times per loop, often even nested inside other getters.
+/**
+ * A delegate to process a variable once per loop execution.
  *
- * USAGE:
- * val someProperty by periodic {
- *   // Expensive calculation...
+ * Prevents "getter hell", where an expensive getter calculation is repeatedly called
+ * within a single loop iteration (including nested getter calls).
+ *
+ * ### Example
+ * ```kotlin
+ * val someProperty by periodic { 
+ *     // Expensive calculation... 
  * }
  */
 
@@ -25,7 +30,7 @@ class PeriodicDelegate<T> (
     }
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        if(isDirty || cachedValue == null){
+        if(isDirty){
             cachedValue = calculation()
             isDirty = false
         }
@@ -37,10 +42,10 @@ class PeriodicDelegate<T> (
 }
 
 object CacheManager {
-    private val delegates = mutableListOf<PeriodicDelegate<*>>()
+    private val delegates: MutableSet<PeriodicDelegate<*>> = Collections.newSetFromMap(WeakHashMap())
 
     fun register(delegate: PeriodicDelegate<*>) {
-        delegates.add(delegate)
+        delegates += delegate
     }
 
     fun invalidateAll() {
@@ -50,8 +55,7 @@ object CacheManager {
     }
 }
 
-fun <T> periodic(calculation: ()->T) : PeriodicDelegate<T> {
-    return PeriodicDelegate(calculation).also {
+fun <T> periodic(calculation: () -> T): PeriodicDelegate<T> =
+    PeriodicDelegate(calculation).also {
         CacheManager.register(it)
     }
-}
