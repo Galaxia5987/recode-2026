@@ -9,12 +9,12 @@ This file contains instructions for reviewing Kotlin-based FRC code using the cu
 
 This project uses a custom coroutine-based command framework (CommandV3).
 
-* **Execution Blocking:** Most commands inside mechanisms should be written to block (using a `while` loop with a `!this` yield) until they meet their setpoint. This ensures sequential composition works correctly by default. Callers can use `.fork()` if they wish to run the command asynchronously.
+* **Execution Blocking:** Most commands inside mechanisms should be written to block (using a `while` loop with a yield) until they meet their setpoint. This ensures sequential composition works correctly by default. Callers can use `.fork()` if they wish to run the command asynchronously.
 * **One-Shot Commands:** Use one-shot commands (no loop, finishes immediately) only when semantically appropriate, such as toggling a solenoid or setting a boolean flag.
-* **Yielding:** Any continuous action or waiting loop inside a command *must* call `!this` (which translates to `coroutine.yield()`) at the end of each iteration to prevent locking the main thread.
+* **Yielding:** Any continuous action or waiting loop inside a command *must* call `yield()` at the end of each iteration to prevent locking the main thread.
 * **Command Naming:** Every command must end with `.named("...")`. Enforce naming conventions that reflect the file, subsystem, and action (e.g., `.named("Elevator/SetToScoringPosition")`).
 * **Trigger Locality:** Prefer triggers nested inside commands over globally defined triggers whenever possible. This encapsulates behavior and prevents unpredictable state changes.
-* **Composition:** Ensure proper use of `+` for sequential execution and `+[]` for parallel execution within a `noRequirements` or mechanism block.
+* **Composition:** Ensure proper use of `+` for sequential execution and `+[]` for parallel execution within a `command` or mechanism block.
 
 ## 3. Mechanism and Subsystem Design
 

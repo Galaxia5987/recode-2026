@@ -15,15 +15,13 @@ This makes it possible to write loops inside function that seem like it will blo
 We can look at the following simple example of creating a simple `run` command. This is equivilant to `Commands.run` from CommandV2.
 ```kotlin
 // CommandV3
-fun command(): Command = noRequirements {
+fun command(): Command = command {
     while(true){
         // Do work
-        !this
+        yield()
     }
 }.named("SomeCommand")
 ```
-
-> `!this` is the yield function 
 
 This command will run this loop at 50Hz. This is the same as writing this in CommandV2:
 ```kotlin
@@ -36,7 +34,7 @@ fun command(): Command = Commands.run {
 We can also make commands that only runs once.
 ```kotlin
 // CommandV3
-fun command(): Command = noRequirements {
+fun command(): Command = command {
     // Do work
 }
 ```
@@ -70,7 +68,7 @@ object Intake : Mechanism() {
 
 ### Continuous Actions (`run` Equivalent)
 
-If a command needs to continuously run. use an infinite loop and call `!this` at the end of each iteration.
+If a command needs to continuously run. use an infinite loop and call `yield()` at the end of each iteration.
 
 ```kotlin
 object Intake : Mechanism() {
@@ -78,7 +76,7 @@ object Intake : Mechanism() {
     fun runIntake() = this {
         while (true) {
             motor.set(1.0)
-            !this 
+            yield() 
         }
     }.named("Run Intake Continuously")
     
@@ -96,7 +94,7 @@ object Intake : Mechanism() {
     fun intakeUntilNote() = this {
         while (!stopButtonPressed.get()) {
             motor.set(1.0)
-            !this
+            yield()
         }
         motor.set(0.0) 
     }.named("Intake Until Note")
@@ -118,7 +116,7 @@ CommandV3 eliminates the need for `SequentialCommandGroup` and `.andThen()`. Bec
 To run commands one after another, place them on sequential lines preceded by `+`. Scheduling an inner command automatically handles mechanism requirements safely.
 
 ```kotlin
-fun scoreRoutine() = noRequirements {
+fun scoreRoutine() = command {
     +Intake.open()
     +Shooter.setVelocity(30.0)
     +Intake.close()
@@ -131,7 +129,7 @@ fun scoreRoutine() = noRequirements {
 To run a few commands in parallel we can use a collection literal.
 
 ```kotlin
-fun prepareToScore(intake: IntakeMechanism, shooter: ShooterMechanism, elevator: ElevatorMechanism) = noRequirements {
+fun prepareToScore(intake: IntakeMechanism, shooter: ShooterMechanism, elevator: ElevatorMechanism) = command {
     +[intake.deploy(), shooter.spinUp(), elevator.moveToScoringPosition()]
     
     +intake.feedShooter()

@@ -17,7 +17,7 @@ context(coroutine: Coroutine)
 operator fun List<Command>.unaryPlus() =
     coroutine.awaitAll(*(this.toTypedArray()))
 
-inline fun noRequirements(
+inline fun command(
     crossinline block: Coroutine.() -> Unit
 ): NeedsNameBuilderStage {
     return Command.noRequirements { coroutine ->
@@ -32,5 +32,3 @@ inline operator fun Mechanism.invoke(
         coroutine.block()
     }
 }
-
-operator fun Coroutine.not() = yield()
