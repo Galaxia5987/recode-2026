@@ -14,15 +14,20 @@ context(coroutine: Coroutine)
 operator fun Command.unaryPlus() = coroutine.await(this)
 
 context(coroutine: Coroutine)
-operator fun List<Command>.unaryPlus() = coroutine.awaitAll(*(this.toTypedArray()))
+operator fun List<Command>.unaryPlus() =
+    coroutine.awaitAll(*(this.toTypedArray()))
 
-inline fun noRequirements(crossinline block: Coroutine.() -> Unit): NeedsNameBuilderStage {
+inline fun noRequirements(
+    crossinline block: Coroutine.() -> Unit
+): NeedsNameBuilderStage {
     return Command.noRequirements { coroutine ->
         coroutine.block()
     }
 }
 
-inline operator fun Mechanism.invoke(crossinline block: Coroutine.() -> Unit): NeedsNameBuilderStage {
+inline operator fun Mechanism.invoke(
+    crossinline block: Coroutine.() -> Unit
+): NeedsNameBuilderStage {
     return this.run { coroutine ->
         coroutine.block()
     }

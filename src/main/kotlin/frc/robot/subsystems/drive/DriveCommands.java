@@ -20,7 +20,6 @@ import static org.wpilib.units.Units.Second;
 import com.pathplanner.lib.config.PIDConstants;
 import frc.robot.InitializerKt;
 import frc.robot.lib.*;
-import frc.robot.lib.commands.CommandExtensionsKt;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.LinkedList;
@@ -302,79 +301,98 @@ public class DriveCommands {
         WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
 
         return Command.parallel(
-                // Drive control sequence
-                drive.run(
-                                (coroutine) -> {
-                                    // Reset acceleration limiter
-                                    limiter.reset(0.0);
-                                    // Turn in place, accelerating up to full speed
-                                    while (true) {
-                                        double speed = limiter.calculate(WHEEL_RADIUS_MAX_VELOCITY);
-                                        drive.runVelocity(new ChassisVelocities(0.0, 0.0, speed));
-                                        coroutine.yield();
-                                    }
-                                })
-                        .named("RunVelocity"),
-                // Measurement sequence
-                Command.sequence(
-                        // Wait for modules to fully orient before starting measurement
-                        Command.waitFor(Second.of(1.0)).named("WaitOneSecond"),
-
-                        // Record starting measurement
-                        Command.noRequirements(
+                        // Drive control sequence
+                        drive.run(
                                         (coroutine) -> {
-                                            state.positions =
-                                                    drive.getWheelRadiusCharacterizationPositions();
-                                            state.lastAngle = drive.getRotation();
-                                            state.gyroDelta = 0.0;
+                                            // Reset acceleration limiter
+                                            limiter.reset(0.0);
+                                            // Turn in place, accelerating up to full speed
                                             while (true) {
-                                                // Update gyro delta
-                                                var rotation = drive.getRotation();
-                                                state.gyroDelta +=
-                                                        Math.abs(
-                                                                rotation.minus(state.lastAngle)
-                                                                        .getRadians());
-                                                state.lastAngle = rotation;
+                                                double speed =
+                                                        limiter.calculate(
+                                                                WHEEL_RADIUS_MAX_VELOCITY);
+                                                drive.runVelocity(
+                                                        new ChassisVelocities(0.0, 0.0, speed));
                                                 coroutine.yield();
                                             }
                                         })
-                                .named("RecordGyro"),
-                        Command.noRequirements(
-                                        (_) -> {
-                                            // When cancelled, calculate and print results
-                                            double[] positions =
-                                                    drive.getWheelRadiusCharacterizationPositions();
-                                            double wheelDelta = 0.0;
-                                            for (int i = 0; i < 4; i++) {
-                                                wheelDelta +=
-                                                        Math.abs(positions[i] - state.positions[i])
-                                                                / 4.0;
-                                            }
-                                            double wheelRadius =
-                                                    (state.gyroDelta * DRIVE_BASE_RADIUS)
-                                                            / wheelDelta;
+                                .named("RunVelocity"),
+                        // Measurement sequence
+                        Command.sequence(
+                                        // Wait for modules to fully orient before starting
+                                        // measurement
+                                        Command.waitFor(Second.of(1.0)).named("WaitOneSecond"),
 
-                                            NumberFormat formatter = new DecimalFormat("#0.000");
-                                            System.out.println(
-                                                    "********** Wheel Radius Characterization Results **********");
-                                            System.out.println(
-                                                    "\tWheel Delta: "
-                                                            + formatter.format(wheelDelta)
-                                                            + " radians");
-                                            System.out.println(
-                                                    "\tGyro Delta: "
-                                                            + formatter.format(state.gyroDelta)
-                                                            + " radians");
-                                            System.out.println(
-                                                    "\tWheel Radius: "
-                                                            + formatter.format(wheelRadius)
-                                                            + " meters, "
-                                                            + formatter.format(
-                                                                    Units.metersToInches(
-                                                                            wheelRadius))
-                                                            + " inches");
-                                        })
-                                .named("Characterize")).withAutomaticName()).withAutomaticName();
+                                        // Record starting measurement
+                                        Command.noRequirements(
+                                                        (coroutine) -> {
+                                                            state.positions =
+                                                                    drive
+                                                                            .getWheelRadiusCharacterizationPositions();
+                                                            state.lastAngle = drive.getRotation();
+                                                            state.gyroDelta = 0.0;
+                                                            while (true) {
+                                                                // Update gyro delta
+                                                                var rotation = drive.getRotation();
+                                                                state.gyroDelta +=
+                                                                        Math.abs(
+                                                                                rotation.minus(
+                                                                                                state.lastAngle)
+                                                                                        .getRadians());
+                                                                state.lastAngle = rotation;
+                                                                coroutine.yield();
+                                                            }
+                                                        })
+                                                .named("RecordGyro"),
+                                        Command.noRequirements(
+                                                        (_) -> {
+                                                            // When cancelled, calculate and print
+                                                            // results
+                                                            double[] positions =
+                                                                    drive
+                                                                            .getWheelRadiusCharacterizationPositions();
+                                                            double wheelDelta = 0.0;
+                                                            for (int i = 0; i < 4; i++) {
+                                                                wheelDelta +=
+                                                                        Math.abs(
+                                                                                        positions[i]
+                                                                                                - state.positions[
+                                                                                                        i])
+                                                                                / 4.0;
+                                                            }
+                                                            double wheelRadius =
+                                                                    (state.gyroDelta
+                                                                                    * DRIVE_BASE_RADIUS)
+                                                                            / wheelDelta;
+
+                                                            NumberFormat formatter =
+                                                                    new DecimalFormat("#0.000");
+                                                            System.out.println(
+                                                                    "********** Wheel Radius Characterization Results **********");
+                                                            System.out.println(
+                                                                    "\tWheel Delta: "
+                                                                            + formatter.format(
+                                                                                    wheelDelta)
+                                                                            + " radians");
+                                                            System.out.println(
+                                                                    "\tGyro Delta: "
+                                                                            + formatter.format(
+                                                                                    state.gyroDelta)
+                                                                            + " radians");
+                                                            System.out.println(
+                                                                    "\tWheel Radius: "
+                                                                            + formatter.format(
+                                                                                    wheelRadius)
+                                                                            + " meters, "
+                                                                            + formatter.format(
+                                                                                    Units
+                                                                                            .metersToInches(
+                                                                                                    wheelRadius))
+                                                                            + " inches");
+                                                        })
+                                                .named("Characterize"))
+                                .withAutomaticName())
+                .withAutomaticName();
     }
 
     public static Command stop() {
