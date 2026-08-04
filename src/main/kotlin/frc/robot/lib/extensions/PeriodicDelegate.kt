@@ -8,19 +8,18 @@ import kotlin.reflect.KProperty
 /**
  * A delegate to process a variable once per loop execution.
  *
- * Prevents "getter hell", where an expensive getter calculation is repeatedly called
- * within a single loop iteration (including nested getter calls).
+ * Prevents "getter hell", where an expensive getter calculation is repeatedly
+ * called within a single loop iteration (including nested getter calls).
  *
  * ### Example
+ *
  * ```kotlin
- * val someProperty by periodic { 
- *     // Expensive calculation... 
+ * val someProperty by periodic {
+ *     // Expensive calculation...
  * }
  */
-
-class PeriodicDelegate<T> (
-    private val calculation: () -> T
-) : ReadOnlyProperty<Any?, T>{
+class PeriodicDelegate<T>(private val calculation: () -> T) :
+    ReadOnlyProperty<Any?, T> {
 
     private var isDirty: Boolean = true
     private var cachedValue: T? = null
@@ -30,7 +29,7 @@ class PeriodicDelegate<T> (
     }
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        if(isDirty){
+        if (isDirty) {
             cachedValue = calculation()
             isDirty = false
         }
@@ -38,11 +37,11 @@ class PeriodicDelegate<T> (
         @Suppress("UNCHECKED_CAST")
         return cachedValue as T
     }
-
 }
 
 object CacheManager {
-    private val delegates: MutableSet<PeriodicDelegate<*>> = Collections.newSetFromMap(WeakHashMap())
+    private val delegates: MutableSet<PeriodicDelegate<*>> =
+        Collections.newSetFromMap(WeakHashMap())
 
     fun register(delegate: PeriodicDelegate<*>) {
         delegates += delegate
