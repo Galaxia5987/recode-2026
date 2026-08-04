@@ -4,6 +4,7 @@
 package frc.robot
 
 import frc.robot.lib.BetterPoseEstimator
+import frc.robot.lib.extensions.CacheManager
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.extensions.toPose3d
 import frc.robot.lib.logged_output.LoggedOutputManager
@@ -101,6 +102,7 @@ class Robot : LoggedRobot() {
      * LiveWindow and SmartDashboard integrated updating.
      */
     override fun robotPeriodic() {
+        CacheManager.invalidateAll()
         Scheduler.getDefault().run()
         Logger.recordOutput("Scheduler", Scheduler.getDefault())
     }
