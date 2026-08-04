@@ -23,9 +23,7 @@ context(coroutine: Coroutine)
 operator fun List<Command>.unaryPlus() =
     coroutine.awaitAll(*(this.toTypedArray()))
 
-inline fun command(
-    crossinline block: Coroutine.() -> Unit
-): NeedsNameBuilderStage {
+inline fun command(crossinline block: Coroutine.() -> Unit): UnnamedCommand {
     return Command.noRequirements { coroutine ->
         coroutine.block()
     }
@@ -33,7 +31,7 @@ inline fun command(
 
 inline operator fun Mechanism.invoke(
     crossinline block: Coroutine.() -> Unit
-): NeedsNameBuilderStage {
+): UnnamedCommand {
     return this.run { coroutine ->
         coroutine.block()
     }
