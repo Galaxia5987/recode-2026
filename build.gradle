@@ -56,6 +56,7 @@ deploy {
 }
 
 def deployArtifact = deploy.targets.systemcore.artifacts.wpilibJava
+deployArtifact.dependsOn(createVersionFile)
 
 wpi.java.debugJni = false
 
@@ -153,8 +154,10 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
 
-project.compileKotlin.dependsOn(createVersionFile)
-project.compileJava.dependsOn(createVersionFile)
+if (!file("${projectDir}/src/main/kotlin/frc/robot/BuildConstants.java").exists()) {
+    project.compileKotlin.dependsOn(createVersionFile)
+}
+
 gversion {
     srcDir       = "src/main/kotlin/"
     classPackage = "frc.robot"
@@ -219,17 +222,19 @@ spotless {
     format 'misc', {
         target '*gradle*', '.gitattributes', '.gitignore'
         trimTrailingWhitespace()
-        indentWithSpaces(4)
+        leadingTabsToSpaces(4)
         endWithNewline()
     }
     java {
+        target 'src/main/java/**/*.java', 'src/test/java/**/*.java'
         targetExclude('**/BuildConstants.java')
         googleJavaFormat().aosp()
         trimTrailingWhitespace()
         endWithNewline()
     }
     kotlin {
-        targetExclude('build/')
+        target 'src/**/*.kt', 'annotation/src/**/*.kt'
+        targetExclude('**/BuildConstants.kt', '**/build/**')
         ktfmt().googleStyle().configure {
             it.setBlockIndent(4)
             it.setContinuationIndent(4)
