@@ -1,0 +1,8 @@
+#!/bin/sh
+# Git pre-commit hook to run Spotless before every commit
+
+echo "Running Spotless code formatting..."
+./gradlew spotlessApply --daemon
+
+# Re-stage any files modified by Spotless
+git update-index --again

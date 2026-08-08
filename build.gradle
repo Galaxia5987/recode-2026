@@ -250,3 +250,16 @@ spotless {
         }
     }
 }
+
+tasks.register('setupGitHooks') {
+    onlyIf {
+        def currentHooks = 'git config --get core.hooksPath'.execute().text.trim()
+        return currentHooks != '.githooks'
+    }
+    doLast {
+        exec {
+            commandLine 'git', 'config', 'core.hooksPath', '.githooks'
+        }
+    }
+}
+tasks.named('build') { dependsOn('setupGitHooks') }
