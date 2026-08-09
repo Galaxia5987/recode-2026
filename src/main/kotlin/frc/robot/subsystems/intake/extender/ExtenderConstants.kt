@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import frc.robot.lib.Gains
 import frc.robot.lib.extensions.cm
 import frc.robot.lib.extensions.deg_ps
+import frc.robot.lib.extensions.meters
 import frc.robot.lib.extensions.volts
 import org.wpilib.units.measure.AngularVelocity
 
@@ -21,7 +22,11 @@ val CLOSING_MIN_VELOCITY: AngularVelocity = 1.0.deg_ps
 val CONFIG = TalonFXConfiguration()
 
 enum class ExtenderState {
-    OPENING, CLOSING, IDLE
+    OPEN, CLOSE, IDLE
 }
 
+val TOLERANCE = 3.cm
+
 val CLOSING_VOLTAGE = 1.volts
+
+val OPEN_POSITION = 0.304.meters
