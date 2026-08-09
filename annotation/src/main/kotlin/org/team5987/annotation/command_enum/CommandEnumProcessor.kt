@@ -7,20 +7,19 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.writeTo
 
-const val ANNOTATION_PACKAGE = "org.team5987.annotation.command_enum.CommandEnum"
+const val ANNOTATION_PACKAGE =
+    "org.team5987.annotation.command_enum.CommandEnum"
 
 val snakeRegex = "_[a-zA-Z]".toRegex()
 
 fun String.snakeToCamelCase(): String {
     return snakeRegex.replace(lowercase()) {
-        it.value.replace("_", "")
-            .uppercase()
+        it.value.replace("_", "").uppercase()
     }
 }
 
-class CreateCommandProcessor(
-    env: SymbolProcessorEnvironment
-) : SymbolProcessor {
+class CreateCommandProcessor(env: SymbolProcessorEnvironment) :
+    SymbolProcessor {
     private val code = env.codeGenerator
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -40,11 +39,12 @@ class CreateCommandProcessor(
         pkg: String,
         fileName: String,
         enumName: String,
-        entries: List<String>
+        entries: List<String>,
     ): FileSpec {
         val enumClass = ClassName(pkg, enumName)
         val commandClass = ClassName("org.wpilib.command3", "Command")
-        val namedBuilderClass = ClassName("org.wpilib.command3", "NeedsNameBuilderStage")
+        val namedBuilderClass =
+            ClassName("org.wpilib.command3", "NeedsNameBuilderStage")
 
         // generate all default entry functions
         val entryFunctions = entries.map { entry ->
@@ -61,44 +61,48 @@ class CreateCommandProcessor(
         }
 
         // abstract setTarget function
-        val setTargetFun = FunSpec.builder("setTarget")
-            .addParameter("value", enumClass)
-            .returns(namedBuilderClass)
-            .addModifiers(KModifier.ABSTRACT)
-            .build()
+        val setTargetFun =
+            FunSpec.builder("setTarget")
+                .addParameter("value", enumClass)
+                .returns(namedBuilderClass)
+                .addModifiers(KModifier.ABSTRACT)
+                .build()
 
         // the interface
-        val interfaceSpec = TypeSpec.interfaceBuilder(fileName)
-            .addFunctions(entryFunctions)
-            .addFunction(setTargetFun)
-            .build()
+        val interfaceSpec =
+            TypeSpec.interfaceBuilder(fileName)
+                .addFunctions(entryFunctions)
+                .addFunction(setTargetFun)
+                .build()
 
         // final file
-        return FileSpec.builder(pkg, fileName)
-            .addType(interfaceSpec)
-            .build()
+        return FileSpec.builder(pkg, fileName).addType(interfaceSpec).build()
     }
-
 
     private fun generateForEnum(enumDecl: KSClassDeclaration) {
         val pkg = enumDecl.packageName.asString()
         val enumName = enumDecl.simpleName.asString()
 
-        val entries = enumDecl.declarations
-            .filterIsInstance<KSClassDeclaration>()
-            .filter { it.classKind == ClassKind.ENUM_ENTRY }
-            .map { it.simpleName.asString() }.toList()
+        val entries =
+            enumDecl.declarations
+                .filterIsInstance<KSClassDeclaration>()
+                .filter { it.classKind == ClassKind.ENUM_ENTRY }
+                .map { it.simpleName.asString() }
+                .toList()
 
         val fileName = "${enumName}CommandFactory"
 
-        val generated: FileSpec = generateInterface(pkg, fileName, enumName, entries)
+        val generated: FileSpec =
+            generateInterface(pkg, fileName, enumName, entries)
 
         generated.writeTo(code, Dependencies(false))
     }
 }
 
 class CommandEnumProcessorProvider : SymbolProcessorProvider {
-    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
+    override fun create(
+        environment: SymbolProcessorEnvironment
+    ): SymbolProcessor {
         return CreateCommandProcessor(environment)
     }
 }

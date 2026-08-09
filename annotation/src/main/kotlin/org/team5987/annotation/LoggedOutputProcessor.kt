@@ -10,14 +10,16 @@ import com.squareup.kotlinpoet.ksp.writeTo
 
 class LoggedOutputProcessor(
     private val codeGenerator: CodeGenerator,
-    private val logger: KSPLogger
+    private val logger: KSPLogger,
 ) : SymbolProcessor {
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("LoggedOutputProcessor started processing...")
         val symbols =
             resolver
-                .getSymbolsWithAnnotation("org.team5987.annotation.LoggedOutput")
+                .getSymbolsWithAnnotation(
+                    "org.team5987.annotation.LoggedOutput"
+                )
                 .toList()
 
         if (symbols.isEmpty()) {
@@ -28,59 +30,82 @@ class LoggedOutputProcessor(
 
         logger.info("Found ${symbols.size} @LoggedOutput symbols.")
 
-        val fileSpecBuilder = FileSpec.builder("frc.robot.lib.logged_output.generated", "LoggedRegistry")
-        val funSpecBuilder = FunSpec.builder("registerAllLoggedOutputs")
-            .addStatement("// [LoggedOutputManager] registers all LoggedOutput fields and methods")
+        val fileSpecBuilder =
+            FileSpec.builder(
+                "frc.robot.lib.logged_output.generated",
+                "LoggedRegistry",
+            )
+        val funSpecBuilder =
+            FunSpec.builder("registerAllLoggedOutputs")
+                .addStatement(
+                    "// [LoggedOutputManager] registers all LoggedOutput fields and methods"
+                )
 
-        fileSpecBuilder.addImport("frc.robot.lib.logged_output", "LoggedOutputManager")
+        fileSpecBuilder.addImport(
+            "frc.robot.lib.logged_output",
+            "LoggedOutputManager",
+        )
 
         for (symbol in symbols) {
-            val baseVal = symbol.annotations
-                .first { it.shortName.asString() == "LoggedOutput" }
-                .arguments
-            var key = baseVal
-                .firstOrNull { it.name?.asString() == "key" }
-                ?.value
-                ?.toString()
+            val baseVal =
+                symbol.annotations
+                    .first { it.shortName.asString() == "LoggedOutput" }
+                    .arguments
+            var key =
+                baseVal
+                    .firstOrNull { it.name?.asString() == "key" }
+                    ?.value
+                    ?.toString()
 
-            var path = baseVal
-                .firstOrNull { it.name?.asString() == "path" }
-                ?.value
-                ?.toString()
+            var path =
+                baseVal
+                    .firstOrNull { it.name?.asString() == "path" }
+                    ?.value
+                    ?.toString()
 
-            val logLevel = baseVal
-                .firstOrNull { it.name?.asString() == "level" }
-                ?.value
-                ?.toString()
-                ?.substringAfterLast(".")
-                ?: "COMP"
+            val logLevel =
+                baseVal
+                    .firstOrNull { it.name?.asString() == "level" }
+                    ?.value
+                    ?.toString()
+                    ?.substringAfterLast(".") ?: "COMP"
 
             when (symbol) {
                 is KSPropertyDeclaration -> { // or is property getter
-                    val className = symbol.parentDeclaration?.qualifiedName?.asString()
+                    val className =
+                        symbol.parentDeclaration?.qualifiedName?.asString()
                     if (className != null) {
                         val packageName = className.substringBeforeLast(".")
                         val simpleName = className.substringAfterLast(".")
                         val classType = ClassName(packageName, simpleName)
                         val fieldName = symbol.simpleName.asString()
-                        val owner = symbol.parentDeclaration as? KSClassDeclaration
+                        val owner =
+                            symbol.parentDeclaration as? KSClassDeclaration
                         owner?.superTypes?.forEach { classes ->
                             val resolvedType = classes.resolve()
-                            val decl = resolvedType.declaration as? KSClassDeclaration
-                            if (decl?.qualifiedName?.asString()?.substringAfterLast(".") == "SubsystemBase") {
+                            val decl =
+                                resolvedType.declaration as? KSClassDeclaration
+                            if (
+                                decl
+                                    ?.qualifiedName
+                                    ?.asString()
+                                    ?.substringAfterLast(".") == "SubsystemBase"
+                            ) {
                                 if (path.isNullOrEmpty())
                                     path = "Subsystems/$simpleName"
                             }
                         }
-                        if (key.isNullOrEmpty())
-                            key = ""
+                        if (key.isNullOrEmpty()) key = ""
 
                         if (path.isNullOrEmpty() && key.isBlank())
                             path = simpleName
 
-                        logger.info("Registering field: $className.$fieldName with key=$key")
+                        logger.info(
+                            "Registering field: $className.$fieldName with key=$key"
+                        )
 
-                        // LoggedOutputManager.registerField("key", MyClass::myField)
+                        // LoggedOutputManager.registerField("key",
+                        // MyClass::myField)
                         funSpecBuilder.addStatement(
                             "LoggedOutputManager.registerField(%S, %T.%L, %T::%L, %S)",
                             key,
@@ -88,19 +113,19 @@ class LoggedOutputProcessor(
                             logLevel,
                             classType,
                             fieldName,
-                            path!!
+                            path!!,
                         )
                     } else {
                         val methodName = symbol.simpleName.asString()
                         // TOP-LEVEL FUNCTION
-                        val pkg = symbol.containingFile?.packageName?.asString() ?: continue
+                        val pkg =
+                            symbol.containingFile?.packageName?.asString()
+                                ?: continue
                         val member = MemberName(pkg, methodName)
-                        if (key.isNullOrEmpty())
-                            key = ""
+                        if (key.isNullOrEmpty()) key = ""
 
                         if (path.isNullOrEmpty() && key.isBlank())
                             path = methodName
-
 
                         funSpecBuilder.addStatement(
                             "LoggedOutputManager.registerField(%S, %T.%L, ::%M,%S)",
@@ -108,9 +133,11 @@ class LoggedOutputProcessor(
                             LogLevel::class,
                             logLevel,
                             member,
-                            path!!
+                            path!!,
                         )
-                        logger.info("Registering field: $pkg.$methodName with key=$key")
+                        logger.info(
+                            "Registering field: $pkg.$methodName with key=$key"
+                        )
                     }
                 }
 
@@ -120,16 +147,19 @@ class LoggedOutputProcessor(
 
                     if (parentDecl == null) {
                         // TOP-LEVEL FUNCTION
-                        val pkg = symbol.containingFile?.packageName?.asString() ?: continue
+                        val pkg =
+                            symbol.containingFile?.packageName?.asString()
+                                ?: continue
                         val member = MemberName(pkg, methodName)
 
-                        if (key.isNullOrEmpty())
-                            key = ""
+                        if (key.isNullOrEmpty()) key = ""
 
                         if (path.isNullOrEmpty() && key.isBlank())
                             path = methodName
 
-                        logger.info("Registering TOP-LEVEL method: $pkg.$methodName with key=$key")
+                        logger.info(
+                            "Registering TOP-LEVEL method: $pkg.$methodName with key=$key"
+                        )
 
                         // LoggedOutputManager.registerMethod("key", ::testFun)
                         funSpecBuilder.addStatement(
@@ -138,25 +168,28 @@ class LoggedOutputProcessor(
                             LogLevel::class,
                             logLevel,
                             member,
-                            path!!
+                            path!!,
                         )
                     } else {
-                        // METHOD INSIDE TYPE (object/companion/@JvmStatic works as KFunction0 if no receiver)
-                        val classFqName = parentDecl.qualifiedName?.asString() ?: continue
+                        // METHOD INSIDE TYPE (object/companion/@JvmStatic works
+                        // as KFunction0 if no receiver)
+                        val classFqName =
+                            parentDecl.qualifiedName?.asString() ?: continue
                         val packageName = classFqName.substringBeforeLast(".")
                         val simpleName = classFqName.substringAfterLast(".")
                         val classType = ClassName(packageName, simpleName)
 
-
-                        if (key.isNullOrEmpty())
-                            key = ""
+                        if (key.isNullOrEmpty()) key = ""
 
                         if (path.isNullOrEmpty() && key.isBlank())
                             path = simpleName
 
-                        logger.info("Registering MEMBER method: $classFqName.$methodName with key=$key")
+                        logger.info(
+                            "Registering MEMBER method: $classFqName.$methodName with key=$key"
+                        )
 
-                        // LoggedOutputManager.registerMethod("key", MyType::methodName)
+                        // LoggedOutputManager.registerMethod("key",
+                        // MyType::methodName)
                         funSpecBuilder.addStatement(
                             "LoggedOutputManager.registerMethod(%S, %T.%L, %T::%L, %S)",
                             key,
@@ -164,14 +197,16 @@ class LoggedOutputProcessor(
                             logLevel,
                             classType,
                             methodName,
-                            path!!
+                            path!!,
                         )
                     }
                 }
 
                 is KSClassDeclaration -> {
 
-                    val pkg = symbol.containingFile?.packageName?.asString() ?: continue
+                    val pkg =
+                        symbol.containingFile?.packageName?.asString()
+                            ?: continue
 
                     val className = symbol.simpleName.asString()
                     val classType = ClassName(pkg, className)
@@ -179,8 +214,7 @@ class LoggedOutputProcessor(
                         val methodName = it.simpleName.asString()
                         val pkg = it.containingFile?.packageName?.asString()
 
-                        if (key.isNullOrEmpty())
-                            key = ""
+                        if (key.isNullOrEmpty()) key = ""
 
                         if (path.isNullOrEmpty() && key!!.isBlank())
                             path = methodName
@@ -204,46 +238,62 @@ class LoggedOutputProcessor(
 
         logger.info("Writing generated file: LoggedRegistry.kt")
 
-        val file = codeGenerator.createNewFile(
-            Dependencies.ALL_FILES,
-            "frc.robot.lib.logged_output.generated",
-            "LoggedRegistry"
-        )
+        val file =
+            codeGenerator.createNewFile(
+                Dependencies.ALL_FILES,
+                "frc.robot.lib.logged_output.generated",
+                "LoggedRegistry",
+            )
 
         file.bufferedWriter().use { writer ->
             fileSpecBuilder.build().writeTo(writer)
         }
 
-        logger.info("LoggedOutputProcessor finished generating LoggedRegistry.kt")
+        logger.info(
+            "LoggedOutputProcessor finished generating LoggedRegistry.kt"
+        )
 
         return emptyList()
     }
 }
 
-private fun generateEmptyFile(codeGenerator: CodeGenerator, resolver: Resolver) {
+private fun generateEmptyFile(
+    codeGenerator: CodeGenerator,
+    resolver: Resolver,
+) {
     try {
         val pkg = "frc.robot.lib.logged_output.generated"
         val name = "LoggedRegistry"
-        val file = FileSpec.builder(pkg, name)
-            .addImport("frc.robot.lib.logged_output", "LoggedOutputManager")
-            .addFunction(
-                FunSpec.builder("registerAllLoggedOutputs")
-                    .addKdoc("Auto-generated stub. Safe to call even if no @LoggedOutput symbols were found.\n")
-                    .addStatement("// [LoggedOutputManager] registers all LoggedOutput fields and methods")
-                    .build()
+        val file =
+            FileSpec.builder(pkg, name)
+                .addImport("frc.robot.lib.logged_output", "LoggedOutputManager")
+                .addFunction(
+                    FunSpec.builder("registerAllLoggedOutputs")
+                        .addKdoc(
+                            "Auto-generated stub. Safe to call even if no @LoggedOutput symbols were found.\n"
+                        )
+                        .addStatement(
+                            "// [LoggedOutputManager] registers all LoggedOutput fields and methods"
+                        )
+                        .build()
+                )
+                .build()
+        val deps =
+            Dependencies(
+                aggregating = true,
+                *resolver.getAllFiles().toList().toTypedArray(),
             )
-            .build()
-        val deps = Dependencies(
-            aggregating = true,
-            *resolver.getAllFiles().toList().toTypedArray()
-        )
         file.writeTo(codeGenerator, deps)
-    } catch (e: FileAlreadyExistsException) {
-    }
+    } catch (e: FileAlreadyExistsException) {}
 }
 
 class LoggedOutputProcessorProvider : SymbolProcessorProvider {
-    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-        return LoggedOutputProcessor(environment.codeGenerator, environment.logger)
+    override fun create(
+        environment: SymbolProcessorEnvironment
+    ): SymbolProcessor {
+        return LoggedOutputProcessor(
+            environment.codeGenerator,
+            environment.logger,
+        )
     }
 }
