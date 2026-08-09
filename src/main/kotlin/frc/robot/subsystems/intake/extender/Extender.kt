@@ -55,7 +55,9 @@ object Extender : Mechanism()
         {
             io.setControl(voltageOut.withOutput(0.0))
         }
-    }.named("Subsystems/Extender/Pump")
+    }.withPriority(Command.LOWEST_PRIORITY)
+        .named("Subsystems/Extender/Pump")
+
 
     fun open() : Command = this {
         setpoint = OPEN_POSITION
@@ -66,7 +68,8 @@ object Extender : Mechanism()
         )
 
         waitUntil(atSetpoint)
-    }.named("Subsystems/Extender/Open")
+    }.withPriority(Command.DEFAULT_PRIORITY)
+        .named("Subsystems/Extender/Open")
 
     fun close() : Command = this {
         io.setControl(voltageOut.withOutput(CLOSING_VOLTAGE))
@@ -90,7 +93,8 @@ object Extender : Mechanism()
         waitWhile { it <= CLOSING_MIN_VELOCITY }
 
         +stop()
-    }.named("Subsystems/Extender/Close")
+    }.withPriority(Command.DEFAULT_PRIORITY)
+        .named("Subsystems/Extender/Close")
 
     fun stop() : Command = this {
         io.setControl(voltageOut.withOutput(0.0))
