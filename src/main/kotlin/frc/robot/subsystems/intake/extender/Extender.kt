@@ -27,41 +27,16 @@ import kotlin.math.abs
 
 object Extender : Mechanism()
 {
-    private val motor =
-        UniversalTalonFX(
-            port = PORT,
-            config = CONFIG,
-            simGains = SIM_GAINS,
-            gearRatio = GEAR_RATIO,
-            linearSystemWheelDiameter = DIAMETER,
-            logConfig =
-                MotorLogConfig(
-                    current = false,
-                    velocity = true,
-                    absoluteEncoder = false,
-                    controlRequest = true
-                )
-        )
+    private val io = ExtenderIOSim()
 
-    val inputs: LoggedMotorInputs
-        get() {
-            if(CURRENT_MODE == Mode.SIM) {
-                if (motor.inputs.position <= 0.deg) {
-                    motor.inputs.position = 0.deg
-                    motor.inputs.velocity = 0.deg_ps
-                }
-            }
-            return motor.inputs
-        }
+    private val voltageOut = VoltageOut(0.0)
+    private val positionVoltage = PositionVoltage(0.0)
 
-    val atSetpoint = Trigger { inputs.distance.isNear(setpoint, TOLERANCE) }
+    val atSetpoint = Trigger { io.inputs.distance.isNear(setpoint, TOLERANCE) }
     var setpoint = 0.meters
       private set
     var extenderState = ExtenderState.IDLE
       private set
-
-    private val voltageOut = VoltageOut(0.0)
-    private val positionVoltage = PositionVoltage(0.0)
 
     init {
         addPeriodic(::periodic)
@@ -78,7 +53,7 @@ object Extender : Mechanism()
         }
         finally
         {
-            motor.setControl(voltageOut.withOutput(0.0))
+            io.setControl(voltageOut.withOutput(0.0))
         }
     }.named("Subsystems/Extender/Pump")
 
@@ -86,7 +61,7 @@ object Extender : Mechanism()
         setpoint = OPEN_POSITION
         extenderState = ExtenderState.OPEN
 
-        motor.setControl(positionVoltage.withPosition(
+        io.setControl(positionVoltage.withPosition(
             OPEN_POSITION.toAngle(DIAMETER, GEAR_RATIO))
         )
 
@@ -94,37 +69,36 @@ object Extender : Mechanism()
     }.named("Subsystems/Extender/Open")
 
     fun close() : Command = this {
-        motor.setControl(voltageOut.withOutput(CLOSING_VOLTAGE))
+        io.setControl(voltageOut.withOutput(CLOSING_VOLTAGE))
         extenderState = ExtenderState.CLOSE
         setpoint = 0.meters
 
         val filter = LinearFilter.movingAverage(5)
         var velocity = 0.deg_ps
 
-        while (velocity >= CLOSING_MIN_VELOCITY)
-        {
-            velocity = filter.calculate(inputs.velocity[deg_ps]).deg_ps
-            Logger.recordOutput("Subsystems/Extender/velocity", velocity)
-            yield()
+        fun waitWhile(condition: (velocity: AngularVelocity) -> Boolean) {
+            while (true) {
+                val currentVelocity = filter.calculate(io.inputs.velocity[deg_ps]).deg_ps
+                Logger.recordOutput("Subsystems/Extender/velocity", currentVelocity)
+
+                if (!condition(currentVelocity)) break
+                yield()
+            }
         }
 
-        while (velocity <= CLOSING_MIN_VELOCITY)
-        {
-            velocity = filter.calculate(inputs.velocity[deg_ps]).deg_ps
-            Logger.recordOutput("Subsystems/Extender/velocity", velocity)
-            yield()
-        }
+        waitWhile { it >= CLOSING_MIN_VELOCITY }
+        waitWhile { it <= CLOSING_MIN_VELOCITY }
 
         +stop()
     }.named("Subsystems/Extender/Close")
 
     fun stop() : Command = this {
-        motor.setControl(voltageOut.withOutput(0.0))
+        io.setControl(voltageOut.withOutput(0.0))
         extenderState = ExtenderState.IDLE
     }.named("Subsystems/Extender/Stop")
 
     fun periodic() {
-        motor.periodic()
+        io.updateInputs()
 
         Logger.recordOutput(
             "Subsystems/Extender/atSetpoint",
