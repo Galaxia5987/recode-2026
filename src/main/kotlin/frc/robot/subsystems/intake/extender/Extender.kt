@@ -47,8 +47,8 @@ object Extender : Mechanism()
         get() {
             if(CURRENT_MODE == Mode.SIM) {
                 if (motor.inputs.position <= 0.deg) {
-                    motor.inputs.position = 0.0.deg
-                    motor.inputs.velocity = 0.0.deg_ps
+                    motor.inputs.position = 0.deg
+                    motor.inputs.velocity = 0.deg_ps
                 }
             }
             return motor.inputs
@@ -56,7 +56,9 @@ object Extender : Mechanism()
 
     val atSetpoint = Trigger { inputs.distance.isNear(setpoint, TOLERANCE) }
     var setpoint = 0.meters
+      private set
     var extenderState = ExtenderState.IDLE
+      private set
 
     val voltageOut = VoltageOut(0.0)
     val positionVoltage = PositionVoltage(0.0)
@@ -82,7 +84,7 @@ object Extender : Mechanism()
             OPEN_POSITION.toAngle(DIAMETER, GEAR_RATIO))
         )
 
-        waitUntil { atSetpoint.asBoolean }
+        waitUntil(atSetpoint)
     }.named("Extender/Open")
 
     fun close() : Command = this {
