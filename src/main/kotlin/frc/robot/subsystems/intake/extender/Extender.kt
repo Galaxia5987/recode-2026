@@ -63,38 +63,6 @@ object Extender : Mechanism()
         motor.setControl(voltageOut.withOutput(0.0))
     }.named("Extender/Close")
 
-//    fun close() : Command = this {
-//        motor.setControl(voltageOut.withOutput(CLOSING_VOLTAGE))
-//
-//        val velocityBuffer = ArrayDeque<Double>(5)
-//        var absoluteVelocity: AngularVelocity = CLOSING_MIN_VELOCITY
-//
-//        Timer.getTimestamp()
-//
-//        velocityBuffer.forEachIndexed { index, i ->
-//            velocityBuffer[index] = motor.inputs.velocity[deg_ps]
-//            yield()
-//        }
-//
-//        while (absoluteVelocity >= CLOSING_MIN_VELOCITY)
-//        {
-//            absoluteVelocity = calculateAbsoluteVelocity(velocityBuffer)
-//
-//            yield()
-//        }
-//
-//        motor.setControl(voltageOut.withOutput(0.0))
-//    }.named("CloseExtender")
-
-//
-//    private fun calculateAbsoluteVelocity(velocityBuffer: Array<Double>): AngularVelocity {
-//        var angleSum: Double = 0.0
-//        velocityBuffer.forEach { angle ->
-//            angleSum += angle
-//        }
-//        return (angleSum / velocityBuffer.size).deg_ps
-//    }
-
     fun periodic() {
 
     }
