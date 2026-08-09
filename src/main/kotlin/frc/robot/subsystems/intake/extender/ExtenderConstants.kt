@@ -5,6 +5,7 @@ import frc.robot.lib.Gains
 import frc.robot.lib.extensions.cm
 import frc.robot.lib.extensions.deg_ps
 import frc.robot.lib.extensions.meters
+import frc.robot.lib.extensions.sec
 import frc.robot.lib.extensions.volts
 import org.wpilib.units.measure.AngularVelocity
 
@@ -18,7 +19,7 @@ val GEAR_RATIO = 1 / 0.5
 
 val DIAMETER = 1.cm
 
-val CLOSING_MIN_START_VELOCITY = -1.deg_ps
+val CLOSING_TIMEOUT = 10.sec
 val CLOSING_MIN_VELOCITY: AngularVelocity = -1.deg_ps
 
 val CONFIG = TalonFXConfiguration().apply {
