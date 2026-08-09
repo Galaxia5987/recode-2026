@@ -56,7 +56,6 @@ deploy {
 }
 
 def deployArtifact = deploy.targets.systemcore.artifacts.wpilibJava
-deployArtifact.dependsOn(createVersionFile)
 
 wpi.java.debugJni = false
 
@@ -154,8 +153,16 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
 
-if (!file("${projectDir}/src/main/kotlin/frc/robot/BuildConstants.java").exists()) {
-    project.compileKotlin.dependsOn(createVersionFile)
+tasks.named("compileJava").configure {
+    dependsOn("createVersionFile")
+}
+
+tasks.named("compileKotlin").configure {
+    dependsOn("createVersionFile")
+}
+
+tasks.named("shadowJar").configure {
+    dependsOn("createVersionFile")
 }
 
 gversion {
