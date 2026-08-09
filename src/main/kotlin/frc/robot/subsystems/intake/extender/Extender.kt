@@ -68,11 +68,17 @@ object Extender : Mechanism()
     }
 
     fun pump() : Command = this {
-        while (true)
+        try {
+            while (true)
+            {
+                +open()
+                +close()
+                yield()
+            }
+        }
+        finally
         {
-            +open()
-            +close()
-            yield()
+            motor.setControl(voltageOut.withOutput(0.0))
         }
     }.named("Subsystems/Extender/Pump")
 
