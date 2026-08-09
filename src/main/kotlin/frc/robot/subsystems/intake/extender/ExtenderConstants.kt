@@ -21,7 +21,9 @@ val DIAMETER = 1.cm
 val CLOSING_MIN_START_VELOCITY = -1.deg_ps
 val CLOSING_MIN_VELOCITY: AngularVelocity = -1.deg_ps
 
-val CONFIG = TalonFXConfiguration()
+val CONFIG = TalonFXConfiguration().apply {
+    Slot0 = REAL_GAINS.toSlotConfig()
+}
 
 enum class ExtenderState {
     OPEN, CLOSE, IDLE
