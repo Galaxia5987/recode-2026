@@ -11,6 +11,7 @@ import frc.robot.lib.extensions.meters
 import frc.robot.lib.extensions.toAngle
 import frc.robot.lib.universal_motor.MotorLogConfig
 import frc.robot.lib.universal_motor.UniversalTalonFX
+import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
@@ -71,11 +72,12 @@ object Extender : Mechanism()
         setpoint = 0.meters
 
         val filter = LinearFilter.movingAverage(5)
-        var speed = CLOSING_MIN_VELOCITY
+        var velocity = CLOSING_MIN_VELOCITY
 
-        while (speed >= CLOSING_MIN_VELOCITY)
+        while (velocity >= CLOSING_MIN_VELOCITY)
         {
-            speed = filter.calculate(motor.inputs.velocity[deg_ps]).deg_ps
+            velocity = filter.calculate(motor.inputs.velocity[deg_ps]).deg_ps
+            Logger.recordOutput("Subsystems/Extender/velocity", velocity)
             yield()
         }
 
@@ -85,9 +87,24 @@ object Extender : Mechanism()
     fun stop() : Command = this {
         motor.setControl(voltageOut.withOutput(0.0))
         extenderState = ExtenderState.IDLE
-    }.named("Extender/Stop")
+    }.named("Subsystems/Extender/Stop")
 
     fun periodic() {
+        motor.periodic()
 
+        Logger.recordOutput(
+            "Subsystems/Extender/atSetpoint",
+            atSetpoint
+        )
+
+        Logger.recordOutput(
+            "Subsystems/Extender/setpoint",
+            setpoint
+        )
+
+        Logger.recordOutput(
+            "Subsystems/Extender/extenderState",
+            extenderState
+        )
     }
 }
