@@ -97,19 +97,11 @@ object Extender : Mechanism()
     fun periodic() {
         io.updateInputs()
 
-        Logger.recordOutput(
-            "Subsystems/Extender/atSetpoint",
-            atSetpoint
-        )
-
-        Logger.recordOutput(
-            "Subsystems/Extender/setpoint",
-            setpoint
-        )
-
-        Logger.recordOutput(
-            "Subsystems/Extender/extenderState",
-            extenderState
-        )
+        mapOf(
+                "atSetpoint" to atSetpoint,
+                "setpoint" to setpoint,
+                "extender" to motor,
+            )
+            .forEach { (key, value) -> value.log("Subsystems/Extender", key) }
     }
 }
