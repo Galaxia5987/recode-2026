@@ -2,13 +2,19 @@ package frc.robot.subsystems.intake.extender
 
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VoltageOut
+import frc.robot.CURRENT_MODE
+import frc.robot.lib.Mode
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.unaryPlus
+import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.deg_ps
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.meters
+import frc.robot.lib.extensions.seconds
 import frc.robot.lib.extensions.toAngle
+import frc.robot.lib.math.differential.Derivative
+import frc.robot.lib.universal_motor.LoggedMotorInputs
 import frc.robot.lib.universal_motor.MotorLogConfig
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
@@ -16,6 +22,8 @@ import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
 import org.wpilib.math.filter.LinearFilter
+import org.wpilib.units.measure.AngularVelocity
+import kotlin.math.abs
 
 object Extender : Mechanism()
 {
@@ -29,13 +37,24 @@ object Extender : Mechanism()
             logConfig =
                 MotorLogConfig(
                     current = false,
-                    velocity = false,
+                    velocity = true,
                     absoluteEncoder = false,
                     controlRequest = true
                 )
         )
 
-    val atSetpoint = Trigger { motor.inputs.distance.isNear(setpoint, TOLERANCE) }
+    val inputs: LoggedMotorInputs
+        get() {
+            if(CURRENT_MODE == Mode.SIM) {
+                if (motor.inputs.position <= 0.deg) {
+                    motor.inputs.position = 0.0.deg
+                    motor.inputs.velocity = 0.0.deg_ps
+                }
+            }
+            return motor.inputs
+        }
+
+    val atSetpoint = Trigger { inputs.distance.isNear(setpoint, TOLERANCE) }
     var setpoint = 0.meters
     var extenderState = ExtenderState.IDLE
 
@@ -72,11 +91,18 @@ object Extender : Mechanism()
         setpoint = 0.meters
 
         val filter = LinearFilter.movingAverage(5)
-        var velocity = CLOSING_MIN_VELOCITY
+        var velocity = 0.deg_ps
 
         while (velocity >= CLOSING_MIN_VELOCITY)
         {
-            velocity = filter.calculate(motor.inputs.velocity[deg_ps]).deg_ps
+            velocity = filter.calculate(inputs.velocity[deg_ps]).deg_ps
+            Logger.recordOutput("Subsystems/Extender/velocity", velocity)
+            yield()
+        }
+
+        while (velocity <= CLOSING_MIN_VELOCITY)
+        {
+            velocity = filter.calculate(inputs.velocity[deg_ps]).deg_ps
             Logger.recordOutput("Subsystems/Extender/velocity", velocity)
             yield()
         }
