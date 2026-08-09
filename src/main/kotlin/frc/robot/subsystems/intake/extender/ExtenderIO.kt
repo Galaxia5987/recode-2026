@@ -59,12 +59,12 @@ class ExtenderIOSim : ExtenderIO {
         get() = motor.inputs
 
     override fun updateInputs() {
+        motor.periodic()
+
         if (motor.inputs.position <= 0.deg) {
             motor.inputs.position = 0.deg
             motor.inputs.velocity = 0.deg_ps
         }
-
-        motor.periodic()
     }
 
     override fun setControl(request: ControlRequest) {
