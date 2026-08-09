@@ -2,28 +2,21 @@ package frc.robot.subsystems.intake.extender
 
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VoltageOut
-import frc.robot.CURRENT_MODE
-import frc.robot.lib.Mode
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.unaryPlus
-import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.deg_ps
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.meters
-import frc.robot.lib.extensions.seconds
+import frc.robot.lib.extensions.sec
 import frc.robot.lib.extensions.toAngle
-import frc.robot.lib.math.differential.Derivative
-import frc.robot.lib.universal_motor.LoggedMotorInputs
-import frc.robot.lib.universal_motor.MotorLogConfig
-import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
 import org.wpilib.math.filter.LinearFilter
+import org.wpilib.system.Timer
 import org.wpilib.units.measure.AngularVelocity
-import kotlin.math.abs
 
 object Extender : Mechanism()
 {
@@ -77,10 +70,11 @@ object Extender : Mechanism()
         setpoint = 0.meters
 
         val filter = LinearFilter.movingAverage(5)
-        var velocity = 0.deg_ps
+        var filterVelocity = 0.deg_ps
 
         fun waitWhile(condition: (velocity: AngularVelocity) -> Boolean) {
-            while (true) {
+            val startTimestamp = Timer.getTimestamp()
+            while (Timer.getTimestamp() - startTimestamp < CLOSING_TIMEOUT[sec]) {
                 val currentVelocity = filter.calculate(io.inputs.velocity[deg_ps]).deg_ps
                 Logger.recordOutput("Subsystems/Extender/velocity", currentVelocity)
 
@@ -91,7 +85,6 @@ object Extender : Mechanism()
 
         waitWhile { it >= CLOSING_MIN_VELOCITY }
         waitWhile { it <= CLOSING_MIN_VELOCITY }
-
         +stop()
     }.withPriority(Command.DEFAULT_PRIORITY)
         .named("Subsystems/Extender/Close")
