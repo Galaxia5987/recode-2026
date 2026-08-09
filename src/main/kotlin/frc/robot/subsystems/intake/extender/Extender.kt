@@ -74,7 +74,7 @@ object Extender : Mechanism()
             +close()
             yield()
         }
-    }.named("Extender/Pump")
+    }.named("Subsystems/Extender/Pump")
 
     fun open() : Command = this {
         setpoint = OPEN_POSITION
@@ -85,7 +85,7 @@ object Extender : Mechanism()
         )
 
         waitUntil(atSetpoint)
-    }.named("Extender/Open")
+    }.named("Subsystems/Extender/Open")
 
     fun close() : Command = this {
         motor.setControl(voltageOut.withOutput(CLOSING_VOLTAGE))
