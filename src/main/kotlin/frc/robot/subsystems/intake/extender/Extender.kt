@@ -60,8 +60,8 @@ object Extender : Mechanism()
     var extenderState = ExtenderState.IDLE
       private set
 
-    val voltageOut = VoltageOut(0.0)
-    val positionVoltage = PositionVoltage(0.0)
+    private val voltageOut = VoltageOut(0.0)
+    private val positionVoltage = PositionVoltage(0.0)
 
     init {
         addPeriodic(::periodic)
@@ -110,7 +110,7 @@ object Extender : Mechanism()
         }
 
         +stop()
-    }.named("Extender/Close")
+    }.named("Subsystems/Extender/Close")
 
     fun stop() : Command = this {
         motor.setControl(voltageOut.withOutput(0.0))
