@@ -10,22 +10,35 @@ import frc.robot.lib.extensions.toAngle
 import frc.robot.lib.extensions.volts
 import org.wpilib.units.measure.AngularVelocity
 
-val PORT = 1
+const val PORT = 1
 
 val SIM_GAINS = Gains(kP = 1.4, kD = 0.3)
 
 val REAL_GAINS = Gains(kP = 3.5, kI = 2.0, kS = 2.0, kV = 2.5)
 
-val GEAR_RATIO = 1 / 0.5
+const val GEAR_RATIO = 1 / 0.5
 
 val DIAMETER = 1.cm
 
 val CLOSING_TIMEOUT = 10.sec
-val CLOSING_MIN_VELOCITY: AngularVelocity = -1.deg_ps
+val CLOSING_MIN_VELOCITY: AngularVelocity = (-1).deg_ps
 
 val CONFIG =
     TalonFXConfiguration().apply {
+        MotorOutput =
+            MotorOutputConfigs().apply {
+                NeutralMode = NeutralModeValue.Brake
+                Inverted = InvertedValue.CounterClockwise_Positive
+            }
         Slot0 = REAL_GAINS.toSlotConfig()
+        SoftwareLimitSwitch =
+            SoftwareLimitSwitchConfigs().apply {
+                ForwardSoftLimitEnable = true
+                ReverseSoftLimitEnable = true
+                ForwardSoftLimitThreshold = CLOSE_POSITION_ANGLE[rot]
+                ReverseSoftLimitThreshold = 0
+            }
+        CurrentLimits = createCurrentLimits(25.amps, 5.amps)
     }
 
 enum class ExtenderState {
@@ -36,7 +49,7 @@ enum class ExtenderState {
 
 val TOLERANCE = 3.cm
 
-val CLOSING_VOLTAGE = -1.volts
+val CLOSING_VOLTAGE = (-1).volts
 
 val OPEN_POSITION = 0.304.meters
 val OPEN_POSITION_ANGLE = OPEN_POSITION.toAngle(DIAMETER, GEAR_RATIO)

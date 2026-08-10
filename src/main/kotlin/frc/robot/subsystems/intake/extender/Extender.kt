@@ -21,7 +21,13 @@ import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Voltage
 
 object Extender : Mechanism() {
-    private val io = ExtenderIOSim()
+    private val io = when(CURRENT_MODE) {
+        Mode.REAL -> ExtenderIOReal()
+        Mode.SIM -> ExtenderIOSim()
+        Mode.REPLAY -> object : ExtenderIO {
+            override val inputs: LoggedMotorInputs = LoggedMotorInputs()
+        }
+    }
     private val voltageOut = VoltageOut(0.0)
     private val positionVoltage = PositionVoltage(0.0)
 
@@ -45,7 +51,7 @@ object Extender : Mechanism() {
                         yield()
                     }
                 } finally {
-                    io.setControl(voltageOut.withOutput(0.0))
+                    setVoltage(0.volts)
                 }
             }
             .withPriority(Command.LOWEST_PRIORITY)
@@ -101,7 +107,7 @@ object Extender : Mechanism() {
 
     fun stop(): Command =
         this {
-                io.setControl(voltageOut.withOutput(0.0))
+                setVoltage(0.volts)
                 extenderState = ExtenderState.IDLE
             }
             .named("Subsystems/Extender/Stop")
