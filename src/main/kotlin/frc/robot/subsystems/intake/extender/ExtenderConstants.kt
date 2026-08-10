@@ -1,10 +1,18 @@
 package frc.robot.subsystems.intake.extender
 
+import com.ctre.phoenix6.configs.MotorOutputConfigs
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
+import com.ctre.phoenix6.signals.InvertedValue
+import com.ctre.phoenix6.signals.NeutralModeValue
 import frc.robot.lib.Gains
+import frc.robot.lib.createCurrentLimits
+import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.cm
 import frc.robot.lib.extensions.deg_ps
+import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.meters
+import frc.robot.lib.extensions.rot
 import frc.robot.lib.extensions.sec
 import frc.robot.lib.extensions.toAngle
 import frc.robot.lib.extensions.volts
@@ -23,6 +31,8 @@ val DIAMETER = 1.cm
 val CLOSING_TIMEOUT = 10.sec
 val CLOSING_MIN_VELOCITY: AngularVelocity = (-1).deg_ps
 
+val CLOSE_POSITION_ANGLE = 12.15.rot
+
 val CONFIG =
     TalonFXConfiguration().apply {
         MotorOutput =
@@ -36,7 +46,7 @@ val CONFIG =
                 ForwardSoftLimitEnable = true
                 ReverseSoftLimitEnable = true
                 ForwardSoftLimitThreshold = CLOSE_POSITION_ANGLE[rot]
-                ReverseSoftLimitThreshold = 0
+                ReverseSoftLimitThreshold = 0.0
             }
         CurrentLimits = createCurrentLimits(25.amps, 5.amps)
     }

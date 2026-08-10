@@ -2,6 +2,8 @@ package frc.robot.subsystems.intake.extender
 
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.controls.VoltageOut
+import frc.robot.CURRENT_MODE
+import frc.robot.lib.Mode
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.unaryPlus
@@ -10,6 +12,8 @@ import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.log
 import frc.robot.lib.extensions.meters
 import frc.robot.lib.extensions.sec
+import frc.robot.lib.extensions.volts
+import frc.robot.lib.universal_motor.LoggedMotorInputs
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
@@ -21,13 +25,15 @@ import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Voltage
 
 object Extender : Mechanism() {
-    private val io = when(CURRENT_MODE) {
-        Mode.REAL -> ExtenderIOReal()
-        Mode.SIM -> ExtenderIOSim()
-        Mode.REPLAY -> object : ExtenderIO {
-            override val inputs: LoggedMotorInputs = LoggedMotorInputs()
+    private val io =
+        when (CURRENT_MODE) {
+            Mode.REAL -> ExtenderIOReal()
+            Mode.SIM -> ExtenderIOSim()
+            Mode.REPLAY ->
+                object : ExtenderIO {
+                    override val inputs: LoggedMotorInputs = LoggedMotorInputs()
+                }
         }
-    }
     private val voltageOut = VoltageOut(0.0)
     private val positionVoltage = PositionVoltage(0.0)
 
@@ -44,15 +50,14 @@ object Extender : Mechanism() {
 
     fun pump(): Command =
         this {
-                try {
-                    while (true) {
-                        +open()
-                        +close()
-                        yield()
-                    }
-                } finally {
-                    setVoltage(0.volts)
+                while (true) {
+                    +open()
+                    +close()
+                    yield()
                 }
+            }
+            .whenCanceled {
+                setVoltage(0.volts)
             }
             .withPriority(Command.LOWEST_PRIORITY)
             .named("Subsystems/Extender/Pump")
