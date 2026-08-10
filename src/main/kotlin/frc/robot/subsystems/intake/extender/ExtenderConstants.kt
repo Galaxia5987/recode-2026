@@ -6,6 +6,7 @@ import frc.robot.lib.extensions.cm
 import frc.robot.lib.extensions.deg_ps
 import frc.robot.lib.extensions.meters
 import frc.robot.lib.extensions.sec
+import frc.robot.lib.extensions.toAngle
 import frc.robot.lib.extensions.volts
 import org.wpilib.units.measure.AngularVelocity
 
@@ -35,3 +36,4 @@ val TOLERANCE = 3.cm
 val CLOSING_VOLTAGE = -1.volts
 
 val OPEN_POSITION = 0.304.meters
+val OPEN_POSITION_ANGLE = OPEN_POSITION.toAngle(DIAMETER, GEAR_RATIO)

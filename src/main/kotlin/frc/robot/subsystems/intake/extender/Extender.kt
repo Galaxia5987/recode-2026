@@ -17,7 +17,9 @@ import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
 import org.wpilib.math.filter.LinearFilter
 import org.wpilib.system.Timer
+import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
+import org.wpilib.units.measure.Voltage
 
 object Extender : Mechanism()
 {
@@ -55,21 +57,19 @@ object Extender : Mechanism()
         setpoint = OPEN_POSITION
         extenderState = ExtenderState.OPEN
 
-        io.setControl(positionVoltage.withPosition(
-            OPEN_POSITION.toAngle(DIAMETER, GEAR_RATIO))
-        )
+        setPosition(OPEN_POSITION_ANGLE)
 
         waitUntil(atSetpoint)
     }.withPriority(Command.DEFAULT_PRIORITY)
         .named("Subsystems/Extender/Open")
 
     fun close() : Command = this {
-        io.setControl(voltageOut.withOutput(CLOSING_VOLTAGE))
+        setVoltage(CLOSING_VOLTAGE)
+
         extenderState = ExtenderState.CLOSE
         setpoint = 0.meters
 
         val filter = LinearFilter.movingAverage(5)
-        var filterVelocity = 0.deg_ps
 
         fun waitWhile(condition: (velocity: AngularVelocity) -> Boolean) {
             val startTimestamp = Timer.getTimestamp()
@@ -92,6 +92,12 @@ object Extender : Mechanism()
         io.setControl(voltageOut.withOutput(0.0))
         extenderState = ExtenderState.IDLE
     }.named("Subsystems/Extender/Stop")
+
+    private fun setPosition(position: Angle) =
+        io.setControl(positionVoltage.withPosition(position))
+
+    private fun setVoltage(voltage: Voltage) =
+        io.setControl(voltageOut.withOutput(voltage))
 
     fun periodic() {
         io.updateInputs()
