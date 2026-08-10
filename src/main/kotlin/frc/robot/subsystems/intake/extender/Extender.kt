@@ -10,7 +10,6 @@ import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.log
 import frc.robot.lib.extensions.meters
 import frc.robot.lib.extensions.sec
-import frc.robot.lib.extensions.toAngle
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
@@ -21,77 +20,91 @@ import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Voltage
 
-object Extender : Mechanism()
-{
+object Extender : Mechanism() {
     private val io = ExtenderIOSim()
     private val voltageOut = VoltageOut(0.0)
     private val positionVoltage = PositionVoltage(0.0)
 
     val atSetpoint = Trigger { io.inputs.distance.isNear(setpoint, TOLERANCE) }
     var setpoint = 0.meters
-      private set
+        private set
+
     var extenderState = ExtenderState.IDLE
-      private set
+        private set
 
     init {
         addPeriodic(::periodic)
     }
 
-    fun pump() : Command = this {
-        try {
-            while (true)
-            {
-                +open()
-                +close()
-                yield()
+    fun pump(): Command =
+        this {
+                try {
+                    while (true) {
+                        +open()
+                        +close()
+                        yield()
+                    }
+                } finally {
+                    io.setControl(voltageOut.withOutput(0.0))
+                }
             }
-        }
-        finally
-        {
-            io.setControl(voltageOut.withOutput(0.0))
-        }
-    }.withPriority(Command.LOWEST_PRIORITY)
-        .named("Subsystems/Extender/Pump")
+            .withPriority(Command.LOWEST_PRIORITY)
+            .named("Subsystems/Extender/Pump")
 
-    fun open() : Command = this {
-        setpoint = OPEN_POSITION
-        extenderState = ExtenderState.OPEN
+    fun open(): Command =
+        this {
+                setpoint = OPEN_POSITION
+                extenderState = ExtenderState.OPEN
 
-        setPosition(OPEN_POSITION_ANGLE)
+                setPosition(OPEN_POSITION_ANGLE)
 
-        waitUntil(atSetpoint)
-    }.withPriority(Command.DEFAULT_PRIORITY)
-        .named("Subsystems/Extender/Open")
-
-    fun close() : Command = this {
-        setVoltage(CLOSING_VOLTAGE)
-
-        extenderState = ExtenderState.CLOSE
-        setpoint = 0.meters
-
-        val filter = LinearFilter.movingAverage(5)
-
-        fun waitWhile(condition: (velocity: AngularVelocity) -> Boolean) {
-            val startTimestamp = Timer.getTimestamp()
-            while (Timer.getTimestamp() - startTimestamp < CLOSING_TIMEOUT[sec]) {
-                val currentVelocity = filter.calculate(io.inputs.velocity[deg_ps]).deg_ps
-                Logger.recordOutput("Subsystems/Extender/filteredVelocity", currentVelocity)
-
-                if (!condition(currentVelocity)) break
-                yield()
+                waitUntil(atSetpoint)
             }
-        }
+            .withPriority(Command.DEFAULT_PRIORITY)
+            .named("Subsystems/Extender/Open")
 
-        waitWhile { it >= CLOSING_MIN_VELOCITY }
-        waitWhile { it <= CLOSING_MIN_VELOCITY }
-        +stop()
-    }.withPriority(Command.DEFAULT_PRIORITY)
-        .named("Subsystems/Extender/Close")
+    fun close(): Command =
+        this {
+                setVoltage(CLOSING_VOLTAGE)
 
-    fun stop() : Command = this {
-        io.setControl(voltageOut.withOutput(0.0))
-        extenderState = ExtenderState.IDLE
-    }.named("Subsystems/Extender/Stop")
+                extenderState = ExtenderState.CLOSE
+                setpoint = 0.meters
+
+                val filter = LinearFilter.movingAverage(5)
+
+                fun waitWhile(
+                    condition: (velocity: AngularVelocity) -> Boolean
+                ) {
+                    val startTimestamp = Timer.getTimestamp()
+                    while (
+                        Timer.getTimestamp() - startTimestamp <
+                            CLOSING_TIMEOUT[sec]
+                    ) {
+                        val currentVelocity =
+                            filter.calculate(io.inputs.velocity[deg_ps]).deg_ps
+                        Logger.recordOutput(
+                            "Subsystems/Extender/filteredVelocity",
+                            currentVelocity,
+                        )
+
+                        if (!condition(currentVelocity)) break
+                        yield()
+                    }
+                }
+
+                waitWhile { it >= CLOSING_MIN_VELOCITY }
+                waitWhile { it <= CLOSING_MIN_VELOCITY }
+                +stop()
+            }
+            .withPriority(Command.DEFAULT_PRIORITY)
+            .named("Subsystems/Extender/Close")
+
+    fun stop(): Command =
+        this {
+                io.setControl(voltageOut.withOutput(0.0))
+                extenderState = ExtenderState.IDLE
+            }
+            .named("Subsystems/Extender/Stop")
 
     private fun setPosition(position: Angle) =
         io.setControl(positionVoltage.withPosition(position))

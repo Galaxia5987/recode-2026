@@ -9,24 +9,28 @@ import frc.robot.lib.universal_motor.UniversalTalonFX
 
 interface ExtenderIO {
     val inputs: LoggedMotorInputs
+
     fun updateInputs() {}
+
     fun setControl(request: ControlRequest) {}
 }
 
 open class ExtenderIOReal : ExtenderIO {
-    protected val motor = UniversalTalonFX(
-        port = PORT,
-        config = CONFIG,
-        simGains = SIM_GAINS,
-        gearRatio = GEAR_RATIO,
-        linearSystemWheelDiameter = DIAMETER,
-        logConfig = MotorLogConfig(
-            current = false,
-            velocity = true,
-            absoluteEncoder = false,
-            controlRequest = true
+    protected val motor =
+        UniversalTalonFX(
+            port = PORT,
+            config = CONFIG,
+            simGains = SIM_GAINS,
+            gearRatio = GEAR_RATIO,
+            linearSystemWheelDiameter = DIAMETER,
+            logConfig =
+                MotorLogConfig(
+                    current = false,
+                    velocity = true,
+                    absoluteEncoder = false,
+                    controlRequest = true,
+                ),
         )
-    )
 
     override val inputs: LoggedMotorInputs
         get() = motor.inputs
