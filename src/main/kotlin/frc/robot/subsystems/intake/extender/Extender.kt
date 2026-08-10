@@ -75,7 +75,7 @@ object Extender : Mechanism()
             val startTimestamp = Timer.getTimestamp()
             while (Timer.getTimestamp() - startTimestamp < CLOSING_TIMEOUT[sec]) {
                 val currentVelocity = filter.calculate(io.inputs.velocity[deg_ps]).deg_ps
-                Logger.recordOutput("Subsystems/Extender/velocity", currentVelocity)
+                Logger.recordOutput("Subsystems/Extender/filteredVelocity", currentVelocity)
 
                 if (!condition(currentVelocity)) break
                 yield()
