@@ -101,6 +101,8 @@ val mps
 
 val mps_ps
     get() = Units.MetersPerSecondPerSecond
+val deg_ps
+    get() = Units.DegreesPerSecond
 val deg_ps_ps
     get() = Units.DegreesPerSecondPerSecond
 
