@@ -27,6 +27,7 @@ val REGULAR_CURRENT_LIMITS =
         supplyCurrentPeakDifference = 5.amps
     )
 
+
 val MOTOR_CONFIG =
     TalonFXConfiguration().apply {
         MotorOutput =
@@ -34,7 +35,7 @@ val MOTOR_CONFIG =
                 NeutralMode = NeutralModeValue.Coast
                 Inverted = InvertedValue.Clockwise_Positive
             }
-        Feedback = FeedbackConfigs().apply { GEAR_RATIO }
+        Feedback = FeedbackConfigs().apply { SensorToMechanismRatio = GEAR_RATIO }
         Slot0 = REAL_GAINS.toSlotConfig()
 
         CurrentLimits = REGULAR_CURRENT_LIMITS
@@ -43,8 +44,8 @@ val MOTOR_CONFIG =
 val MOTOR_LOG_CONFIG = MotorLogConfig(
     position = false,
     statorCurrent = false,
-    current = false,
-    velocity = false,
+    current = true,
+    velocity = true,
     absoluteEncoder = false,
     voltage = true
 )
