@@ -17,51 +17,53 @@ import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Velocity
 
 object Flywheel : Mechanism() {
-    val motors: Array<UniversalTalonFX> = arrayOf(
-        UniversalTalonFX(
+    val mainMotor = UniversalTalonFX(
             port = MAIN_MOTOR_PORT,
             config = MOTOR_CONFIG,
             logConfig = MOTOR_LOG_CONFIG
-        ),
-        UniversalTalonFX(
+        )
+
+    val auxMotor1 = UniversalTalonFX(
             port = FIRST_AUX_MOTOR_PORT,
             config = MOTOR_CONFIG,
             logConfig = MOTOR_LOG_CONFIG
-        ),
-        UniversalTalonFX(
+        )
+    val auxMotor2 = UniversalTalonFX(
             port = SECOND_AUX_MOTOR_PORT,
             config = MOTOR_CONFIG,
             logConfig = MOTOR_LOG_CONFIG
 
         )
-    )
-    val mainMotor = motors[0]
 
     var setpoint = 0.deg_ps
     val atSetpoint = Trigger {
-        motors.all { motor ->
-            motor.inputs.velocity.isNear(setpoint, TOLERANCE)
-        }
+        mainMotor.inputs.velocity.isNear(setpoint, TOLERANCE)
     }
 
     private val velocityVoltage = VelocityVoltage(0.0)
 
     init {
         addPeriodic(::periodic)
-        motors[1].setControl(Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Aligned))
-        motors[2].setControl(Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Aligned))
+        auxMotor1.setControl(Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Aligned))
+        auxMotor2.setControl(Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Aligned))
     }
 
-    fun setVelocity(velocity: AngularVelocity) : Command =
+    fun updateVelocity(velocity: AngularVelocity) : Command =
         this {
-            setpoint = velocity
-            mainMotor.setControl(velocityVoltage.withVelocity(velocity))
-
+            setVelocity(velocity)
             waitUntil(atSetpoint)
-        }.named("Subsystems/Flywheel/setVelocity")
+        }.named("Subsystems/Flywheel/updateVelocity")
+
+    private fun setVelocity(velocity: AngularVelocity)
+    {
+        setpoint = velocity
+        mainMotor.setControl(velocityVoltage.withVelocity(velocity))
+    }
 
     fun periodic() {
-        motors.forEach { motor -> motor.periodic() }
+        mainMotor.periodic()
+        auxMotor1.periodic()
+        auxMotor2.periodic()
 
         mapOf(
             "atSetpoint" to atSetpoint,

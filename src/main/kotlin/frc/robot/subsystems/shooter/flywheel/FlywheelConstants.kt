@@ -16,17 +16,9 @@ const val MAIN_MOTOR_PORT = 2
 const val FIRST_AUX_MOTOR_PORT = 3
 const val SECOND_AUX_MOTOR_PORT = 4
 
-
 const val GEAR_RATIO = 1.33
 val REAL_GAINS = Gains(kP = 0.3, kS = 0.3, kV = 0.115)
 val SIM_GAINS = Gains(kP = 1.0, kV = 0.12)
-
-val REGULAR_CURRENT_LIMITS =
-    createCurrentLimits(
-        supplyCurrentLimit = 30.amps,
-        supplyCurrentPeakDifference = 5.amps
-    )
-
 
 val MOTOR_CONFIG =
     TalonFXConfiguration().apply {
@@ -38,7 +30,10 @@ val MOTOR_CONFIG =
         Feedback = FeedbackConfigs().apply { SensorToMechanismRatio = GEAR_RATIO }
         Slot0 = REAL_GAINS.toSlotConfig()
 
-        CurrentLimits = REGULAR_CURRENT_LIMITS
+        CurrentLimits = createCurrentLimits(
+            supplyCurrentLimit = 30.amps,
+            supplyCurrentPeakDifference = 5.amps
+        )
     }
 
 val MOTOR_LOG_CONFIG = MotorLogConfig(
