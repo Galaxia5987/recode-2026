@@ -58,6 +58,8 @@ object Flywheel : Mechanism() {
         this {
                 setpoint = velocity
                 mainMotor.setControl(velocityVoltage.withVelocity(velocity))
+
+                yield()
                 waitUntil(atSetpoint)
             }
             .named("Subsystems/Flywheel/setVelocity")
