@@ -54,17 +54,13 @@ object Flywheel : Mechanism() {
         )
     }
 
-    fun updateVelocity(velocity: AngularVelocity): Command =
+    fun setVelocity(velocity: AngularVelocity): Command =
         this {
-                setVelocity(velocity)
+                setpoint = velocity
+                mainMotor.setControl(velocityVoltage.withVelocity(velocity))
                 waitUntil(atSetpoint)
             }
-            .named("Subsystems/Flywheel/updateVelocity")
-
-    private fun setVelocity(velocity: AngularVelocity) {
-        setpoint = velocity
-        mainMotor.setControl(velocityVoltage.withVelocity(velocity))
-    }
+            .named("Subsystems/Flywheel/setVelocity")
 
     fun periodic() {
         mainMotor.periodic()
@@ -74,7 +70,8 @@ object Flywheel : Mechanism() {
         mapOf(
                 "atSetpoint" to atSetpoint,
                 "setpoint" to setpoint,
+                "setpointError" to setpoint - mainMotor.inputs.velocity
             )
-            .forEach { (key, value) -> value.log("Subsystem/Flywheel", key) }
+            .log("Subsystem/Flywheel")
     }
 }
