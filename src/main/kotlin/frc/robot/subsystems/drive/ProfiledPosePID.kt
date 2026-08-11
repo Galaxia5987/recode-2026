@@ -43,27 +43,27 @@ private val rotationalLimits
 @LoggedOutput(LogLevel.DISABLED, "X controller", LOGGING_PREFIX)
 var xController =
     ProfiledPIDController(
-        xGains.kP.get(),
-        xGains.kI.get(),
-        xGains.kD.get(),
+        xGains.lKP.get(),
+        xGains.lKI.get(),
+        xGains.lKD.get(),
         linearLimits,
     )
 
 @LoggedOutput(LogLevel.DISABLED, "Y controller", LOGGING_PREFIX)
 var yController =
     ProfiledPIDController(
-        yGains.kP.get(),
-        yGains.kI.get(),
-        yGains.kD.get(),
+        yGains.lKP.get(),
+        yGains.lKI.get(),
+        yGains.lKD.get(),
         linearLimits,
     )
 
 @LoggedOutput(LogLevel.DISABLED, "Theta controller", LOGGING_PREFIX)
 var thetaController =
     ProfiledPIDController(
-            thetaGains.kP.get(),
-            thetaGains.kI.get(),
-            thetaGains.kD.get(),
+            thetaGains.lKP.get(),
+            thetaGains.lKI.get(),
+            thetaGains.lKD.get(),
             rotationalLimits,
         )
         .apply { enableContinuousInput(-Math.PI, Math.PI) }
@@ -82,9 +82,9 @@ fun updateProfiledPIDGains() {
         )
         .forEach { (controller, pair) ->
             controller.setPID(
-                pair.first.kP.get(),
-                pair.first.kI.get(),
-                pair.first.kD.get(),
+                pair.first.lKP.get(),
+                pair.first.lKI.get(),
+                pair.first.lKD.get(),
             )
             println("MAXVELOCITY ${pair.second.maxVelocity}")
             println("MAXACCEL ${pair.second.maxAcceleration}")

@@ -209,6 +209,8 @@ val Number.mps_ps: LinearAcceleration
 // Angular acceleration
 val Number.deg_ps_ps: AngularAcceleration
     get() = toUnit(Units.DegreesPerSecondPerSecond::of)
+val Number.rad_ps_ps: AngularAcceleration
+    get() = toUnit(Units.RadiansPerSecondPerSecond::of)
 
 //
 val Number.rps_squared: AngularAcceleration
