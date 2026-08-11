@@ -5,6 +5,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.signals.MotorAlignmentValue
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
+import frc.robot.lib.commands.waitUntil
 import frc.robot.lib.extensions.deg_ps
 import frc.robot.lib.extensions.log
 import frc.robot.lib.universal_motor.UniversalTalonFX
@@ -59,8 +60,7 @@ object Flywheel : Mechanism() {
                 setpoint = velocity
                 mainMotor.setControl(velocityVoltage.withVelocity(velocity))
 
-                yield()
-                waitUntil(atSetpoint)
+                atSetpoint.waitUntil()
             }
             .named("Subsystems/Flywheel/setVelocity")
 
