@@ -74,6 +74,6 @@ object Flywheel : Mechanism() {
                 "setpoint" to setpoint,
                 "setpointError" to setpoint - mainMotor.inputs.velocity,
             )
-            .log("Subsystem/Flywheel")
+            .log("Subsystems/Flywheel")
     }
 }
