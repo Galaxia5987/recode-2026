@@ -9,7 +9,6 @@ import frc.robot.lib.Gains
 import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.deg_ps
-import frc.robot.lib.extensions.mps
 import frc.robot.lib.universal_motor.MotorLogConfig
 
 const val MAIN_MOTOR_PORT = 2
@@ -27,22 +26,25 @@ val MOTOR_CONFIG =
                 NeutralMode = NeutralModeValue.Coast
                 Inverted = InvertedValue.Clockwise_Positive
             }
-        Feedback = FeedbackConfigs().apply { SensorToMechanismRatio = GEAR_RATIO }
+        Feedback =
+            FeedbackConfigs().apply { SensorToMechanismRatio = GEAR_RATIO }
         Slot0 = REAL_GAINS.toSlotConfig()
 
-        CurrentLimits = createCurrentLimits(
-            supplyCurrentLimit = 30.amps,
-            supplyCurrentPeakDifference = 5.amps
-        )
+        CurrentLimits =
+            createCurrentLimits(
+                supplyCurrentLimit = 30.amps,
+                supplyCurrentPeakDifference = 5.amps,
+            )
     }
 
-val MOTOR_LOG_CONFIG = MotorLogConfig(
-    position = false,
-    statorCurrent = false,
-    current = true,
-    velocity = true,
-    absoluteEncoder = false,
-    voltage = true
-)
+val MOTOR_LOG_CONFIG =
+    MotorLogConfig(
+        position = false,
+        statorCurrent = false,
+        current = true,
+        velocity = true,
+        absoluteEncoder = false,
+        voltage = true,
+    )
 
 val TOLERANCE = 1.deg_ps
