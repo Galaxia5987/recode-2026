@@ -70,7 +70,7 @@ object Flywheel : Mechanism() {
         mapOf(
                 "atSetpoint" to atSetpoint,
                 "setpoint" to setpoint,
-                "setpointError" to setpoint - mainMotor.inputs.velocity
+                "setpointError" to setpoint - mainMotor.inputs.velocity,
             )
             .log("Subsystem/Flywheel")
     }
