@@ -18,6 +18,7 @@ object Flywheel : Mechanism() {
         UniversalTalonFX(
             port = MAIN_MOTOR_PORT,
             config = MOTOR_CONFIG,
+            gearRatio = GEAR_RATIO,
             logConfig = MOTOR_LOG_CONFIG,
         )
 
@@ -25,12 +26,14 @@ object Flywheel : Mechanism() {
         UniversalTalonFX(
             port = FIRST_AUX_MOTOR_PORT,
             config = MOTOR_CONFIG,
+            gearRatio = GEAR_RATIO,
             logConfig = MOTOR_LOG_CONFIG,
         )
     val auxMotor2 =
         UniversalTalonFX(
             port = SECOND_AUX_MOTOR_PORT,
             config = MOTOR_CONFIG,
+            gearRatio = GEAR_RATIO,
             logConfig = MOTOR_LOG_CONFIG,
         )
 
