@@ -100,11 +100,17 @@ class CreateCommandProcessor(env: SymbolProcessorEnvironment) :
                 .toList()
 
         val priorityPropertyName: String? =
-            enumDecl.primaryConstructor?.parameters?.firstOrNull { param ->
-                val paramType = param.type.resolve()
-                paramType.declaration.simpleName.asString() == "Priority" &&
-                        paramType.declaration.packageName.asString() == "org.team5987.annotation.command_enum"
-            }?.name?.asString()
+            enumDecl.primaryConstructor
+                ?.parameters
+                ?.firstOrNull { param ->
+                    val paramType = param.type.resolve()
+                    paramType.declaration.simpleName.asString() == "Priority" &&
+                        paramType.declaration.packageName.asString() ==
+                            "org.team5987.annotation.command_enum" &&
+                        (param.isVal || param.isVar)
+                }
+                ?.name
+                ?.asString()
 
         val fileName = "${enumName}CommandFactory"
 
