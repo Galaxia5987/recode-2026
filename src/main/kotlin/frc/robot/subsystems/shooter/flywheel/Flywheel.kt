@@ -53,7 +53,7 @@ object Flywheel {
         )
     )
 
-    val setpoint = 0.deg_ps
+    var setpoint = 0.deg_ps
     val atSetpoint = Trigger {
         motors.all { motor ->
             motor.inputs.velocity.isNear(setpoint, TOLERANCE)
@@ -63,6 +63,7 @@ object Flywheel {
     private val velocityVoltage = VelocityVoltage(0.0)
 
     fun setVelocity(velocity: AngularVelocity) {
+        setpoint = velocity
         motors.forEach { motor ->
             motor.setControl(velocityVoltage.withVelocity(velocity))
         }
