@@ -58,7 +58,7 @@ object Flywheel : Mechanism() {
             mainMotor.setControl(velocityVoltage.withVelocity(velocity))
 
             waitUntil(atSetpoint)
-        }.named("Subsystems/Flywheel")
+        }.named("Subsystems/Flywheel/setVelocity")
 
     fun periodic() {
         motors.forEach { motor -> motor.periodic() }
