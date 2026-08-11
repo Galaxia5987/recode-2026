@@ -10,6 +10,7 @@ import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.deg_ps
 import frc.robot.lib.extensions.mps
+import frc.robot.lib.universal_motor.MotorLogConfig
 
 const val MAIN_MOTOR_PORT = 2
 const val FIRST_AUX_MOTOR_PORT = 3
@@ -38,5 +39,14 @@ val MOTOR_CONFIG =
 
         CurrentLimits = REGULAR_CURRENT_LIMITS
     }
+
+val MOTOR_LOG_CONFIG = MotorLogConfig(
+    position = false,
+    statorCurrent = false,
+    current = false,
+    velocity = false,
+    absoluteEncoder = false,
+    voltage = true
+)
 
 val TOLERANCE = 1.deg_ps
