@@ -5,6 +5,7 @@ import frc.robot.lib.commands.emptyCommand
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.subsystems.drive.DriveCommands
+import frc.robot.subsystems.spindexer.Spindexer
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
@@ -45,6 +46,8 @@ object RobotContainer {
 
     private fun configureButtonBindings() {
         driverController.create().onTrue(DriveCommands.resetGyro())
+        driverController.square().onTrue(Spindexer.stop())
+        driverController.cross().onTrue(Spindexer.convey())
     }
 
     fun getAutonomousCommand(): Command = autoChooser.get()
