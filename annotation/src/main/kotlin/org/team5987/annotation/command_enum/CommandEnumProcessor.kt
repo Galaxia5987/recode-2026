@@ -40,23 +40,24 @@ class CreateCommandProcessor(env: SymbolProcessorEnvironment) :
         fileName: String,
         enumName: String,
         entries: List<String>,
-        hasPriority: Boolean,
+        priorityPropertyName: String?,
     ): FileSpec {
         val enumClass = ClassName(pkg, enumName)
         val commandClass = ClassName("org.wpilib.command3", "Command")
-        val namedBuilderClass =
-            ClassName("org.wpilib.command3", "NeedsNameBuilderStage")
+        val unnamedCommandClass =
+            ClassName("frc.robot.lib.commands", "UnnamedCommand")
 
         val entryFunctions = entries.map { entry ->
             val camelEntry = entry.snakeToCamelCase()
             val funBuilder = FunSpec.builder(camelEntry).returns(commandClass)
 
-            if (hasPriority) {
+            if (priorityPropertyName != null) {
                 funBuilder.addStatement(
-                    "return setTarget(%1T.%2L).withPriority(%1T.%2L.priority.priority).named(%3S)",
+                    "return setTarget(%1T.%2L).withPriority(%1T.%2L.%4L.priority).named(%3S)",
                     enumClass,
                     entry,
                     "${pkg.substringAfterLast(".")}/$camelEntry",
+                    priorityPropertyName,
                 )
             } else {
                 funBuilder.addStatement(
@@ -74,7 +75,7 @@ class CreateCommandProcessor(env: SymbolProcessorEnvironment) :
         val setTargetFun =
             FunSpec.builder("setTarget")
                 .addParameter("value", enumClass)
-                .returns(namedBuilderClass)
+                .returns(unnamedCommandClass)
                 .addModifiers(KModifier.ABSTRACT)
                 .build()
 
@@ -98,13 +99,12 @@ class CreateCommandProcessor(env: SymbolProcessorEnvironment) :
                 .map { it.simpleName.asString() }
                 .toList()
 
-        val hasPriorityProperty =
-            enumDecl.primaryConstructor?.parameters?.any { param ->
+        val priorityPropertyName: String? =
+            enumDecl.primaryConstructor?.parameters?.firstOrNull { param ->
                 val paramType = param.type.resolve()
                 paramType.declaration.simpleName.asString() == "Priority" &&
-                    paramType.declaration.packageName.asString() ==
-                        "org.team5987.annotation.command_enum"
-            } ?: false
+                        paramType.declaration.packageName.asString() == "org.team5987.annotation.command_enum"
+            }?.name?.asString()
 
         val fileName = "${enumName}CommandFactory"
 
@@ -114,7 +114,7 @@ class CreateCommandProcessor(env: SymbolProcessorEnvironment) :
                 fileName,
                 enumName,
                 entries,
-                hasPriorityProperty,
+                priorityPropertyName,
             )
 
         generated.writeTo(code, Dependencies(false))
