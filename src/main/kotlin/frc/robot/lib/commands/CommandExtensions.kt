@@ -42,5 +42,5 @@ context(coroutine: Coroutine)
 fun Trigger.waitUntil() {
     do {
         coroutine.yield()
-    } while (!this.asBoolean);
+    } while (!this.asBoolean)
 }
