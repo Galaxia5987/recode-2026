@@ -256,6 +256,7 @@ fun Slot0Configs.toLoggedNetworkGains(
         acceleration = motionMagicConfigs.MotionMagicAcceleration.rps_squared,
         jerk = motionMagicConfigs.MotionMagicJerk,
         key = subsystem,
+        enableTune = motorGainTunability
     )
 
 fun Gains.toNetworkLogged(
@@ -277,4 +278,5 @@ fun Gains.toNetworkLogged(
         cruiseVelocity = motionMagicConfigs.MotionMagicCruiseVelocity.rps,
         acceleration = motionMagicConfigs.MotionMagicAcceleration.rps_squared,
         jerk = motionMagicConfigs.MotionMagicJerk,
+        enableTune = motorGainTunability
     )
