@@ -4,6 +4,7 @@ import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.ControlRequest
 import com.ctre.phoenix6.hardware.TalonFX
+import frc.robot.lib.MotorGainTunability
 import frc.robot.lib.extensions.toDistance
 import frc.robot.lib.toLoggedNetworkGains
 import org.wpilib.units.measure.Angle
@@ -29,7 +30,8 @@ class MotorIOReal(
     private val diameter: Distance,
     private val absoluteEncoderOffset: Angle,
     private val logConfig: MotorLogConfig,
-) : MotorIO {
+    private val logGainConfig: MotorGainTunability = MotorGainTunability(),
+    ) : MotorIO {
     override val inputs = LoggedMotorInputs()
     private val motor = TalonFX(port, canBus)
 
@@ -38,6 +40,7 @@ class MotorIOReal(
             name = "$motorName/RealGains",
             subsystem = subsystem,
             motionMagicConfigs = config.MotionMagic,
+            motorGainTunability = logGainConfig
         )
 
     init {

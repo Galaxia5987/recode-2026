@@ -29,7 +29,7 @@ enum class GainsEnum(val displayedName: String, val type: GainType) {
     JERK("jerk", GainType.MOTION_MAGIC)
 }
 
-data class Tunable(
+data class MotorGainTunability(
     val pidTune: Boolean = true,
     val feedForwardTune: Boolean = false,
     val motionMagicTune: Boolean = false,
@@ -90,7 +90,7 @@ class LoggedNetworkGains(
     jerk: Double = 0.0, // m/s
     key: String =
         (Throwable().stackTrace[1]?.fileName?.substringBeforeLast('.') + ""),
-    enableTune: Tunable = Tunable(),
+    enableTune: MotorGainTunability = MotorGainTunability(),
 ) {
     private val path = "/Tuning/$key/$name"
 
@@ -241,6 +241,7 @@ fun Slot0Configs.toLoggedNetworkGains(
     name: String,
     subsystem: String,
     motionMagicConfigs: MotionMagicConfigs = MotionMagicConfigs(),
+    motorGainTunability: MotorGainTunability = MotorGainTunability()
 ) =
     LoggedNetworkGains(
         name,
@@ -261,6 +262,7 @@ fun Gains.toNetworkLogged(
     name: String,
     subsystem: String,
     motionMagicConfigs: MotionMagicConfigs = MotionMagicConfigs(),
+    motorGainTunability: MotorGainTunability = MotorGainTunability()
 ) =
     LoggedNetworkGains(
         name,

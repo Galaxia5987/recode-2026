@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.*
 import frc.robot.lib.Gains
 import frc.robot.lib.GainsEnum
+import frc.robot.lib.MotorGainTunability
 import frc.robot.lib.extensions.*
 import frc.robot.lib.motors.TalonFXSim
 import frc.robot.lib.motors.TalonType
@@ -32,12 +33,14 @@ class MotorIOSim(
     private val gearRatio: Double,
     private val diameter: Distance,
     private val logConfig: MotorLogConfig,
-) : MotorIO {
+    private val logGainConfig: MotorGainTunability = MotorGainTunability(),
+    ) : MotorIO {
     private val gains =
         simGains.toNetworkLogged(
             name = "$motorName/SimGains",
             subsystem = subsystem,
             motionMagicConfigs = config.MotionMagic,
+            motorGainTunability = logGainConfig
         )
 
     override val inputs = LoggedMotorInputs()
