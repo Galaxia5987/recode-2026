@@ -20,8 +20,8 @@ import org.wpilib.units.measure.Distance
  * @param diameter The diameter of the wheel/spool if used in a linear system.
  */
 class MotorIOReal(
-    motorName: String,
-    subsystem: String,
+    private val motorName: String,
+    private val subsystem: String,
     private val port: Int,
     private val canBus: CANBus,
     override val config: TalonFXConfiguration,
@@ -72,15 +72,13 @@ class MotorIOReal(
         if (logConfig.controlRequest) {
             inputs.controlModeValue = motor.controlMode.value.value
         }
-        val pidChange = gains.hasPIDChanged()
-        val motionMagicChange = gains.hasMotionMagicChanged()
-        if (pidChange || motionMagicChange)
-            motor.configurator.apply(
-                config.apply {
-                    if (pidChange) Slot0 = gains.toSlotConfig()
-                    if (motionMagicChange)
-                        MotionMagic = gains.toMotionMagicConfig()
-                }
-            )
+
+        if (gains.hasPIDChanged()) {
+            motor.configurator.apply(gains.toSlotConfig())
+        }
+
+        if (gains.hasMotionMagicChanged()) {
+            motor.configurator.apply(gains.toMotionMagicConfig())
+        }
     }
 }

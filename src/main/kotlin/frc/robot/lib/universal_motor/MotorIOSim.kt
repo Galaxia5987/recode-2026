@@ -3,6 +3,7 @@ package frc.robot.lib.universal_motor
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.*
 import frc.robot.lib.Gains
+import frc.robot.lib.GainsEnum
 import frc.robot.lib.extensions.*
 import frc.robot.lib.motors.TalonFXSim
 import frc.robot.lib.motors.TalonType
@@ -110,24 +111,21 @@ class MotorIOSim(
             inputs.position = motor.position.rot
             inputs.distance = inputs.position.toDistance(diameter, gearRatio)
         }
-        val pidChange = gains.hasPIDChanged()
-        val motionMagicChange = gains.hasMotionMagicChanged()
-        if (pidChange || motionMagicChange) {
-            if (pidChange) {
-                controller.p = gains.kP
-                controller.i = gains.kI
-                controller.d = gains.kD
-                simGains.kV = gains.kV
-                motor.setController(controller)
-            }
-
-            profiledPIDController.p = gains.kP
-            profiledPIDController.i = gains.kI
-            profiledPIDController.d = gains.kD
+        if (gains.hasPIDChanged()) {
+            controller.p = gains[GainsEnum.KP]
+            controller.i = gains[GainsEnum.KI]
+            controller.d = gains[GainsEnum.KD]
+            simGains.kV = gains[GainsEnum.KV]
+            profiledPIDController.p = gains[GainsEnum.KP]
+            profiledPIDController.i = gains[GainsEnum.KI]
+            profiledPIDController.d = gains[GainsEnum.KD]
+            motor.setController(controller)
+        }
+        if (gains.hasMotionMagicChanged()) {
             profiledPIDController.constraints =
                 TrapezoidProfile.Constraints(
-                    gains.cruiseVelocity[rad_ps],
-                    gains.acceleration[rad_ps_ps],
+                    gains[GainsEnum.CRUISE_VELOCITY],
+                    gains[GainsEnum.ACCELERATION],
                 )
         }
     }
