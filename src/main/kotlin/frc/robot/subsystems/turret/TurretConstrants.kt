@@ -8,13 +8,17 @@ import com.ctre.phoenix6.signals.SensorDirectionValue
 import frc.robot.lib.Gains
 import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.deg
-import frc.robot.lib.extensions.rps
+import frc.robot.lib.extensions.get
+import frc.robot.lib.extensions.rot
 
 val PORT = 1
 val SIM_GAINS = Gains(kP = 0.5, kD = 0.075)
 val REAL_GAINS = Gains(kP = 0.5, kD = 0.075)
 const val RATIO = 1.0
 val ENCODER_ID = 0
+
+val forwardLimit = 360.deg // I made it a separate parameter for ease of use
+val reverseLimit = 0.0.rot
 
 val ENCODER_CONFIG =
     CANcoderConfiguration().apply {
@@ -35,6 +39,15 @@ val CONFIG =
         Slot0 =
             Slot0Configs().apply {
                 Slot0 = REAL_GAINS.toSlotConfig()
+            }
+        // This config forces the motor to not move beyond these limits
+        SoftwareLimitSwitch =
+            SoftwareLimitSwitchConfigs().apply {
+                ForwardSoftLimitEnable = true
+                ForwardSoftLimitThreshold =
+                    forwardLimit[rot] // The thresholds work in rotations.
+                ReverseSoftLimitEnable = true
+                ReverseSoftLimitThreshold = reverseLimit[rot]
             }
 
         Feedback =
