@@ -1,7 +1,6 @@
 package frc.robot.subsystems.drive
 
 import frc.robot.lib.LoggedNetworkGains
-import frc.robot.lib.GainsEnum
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import org.team5987.annotation.LogLevel
 import org.team5987.annotation.LoggedOutput
@@ -20,8 +19,7 @@ private val xGains = LoggedNetworkGains("X Gains", kP = 5.0, kD = 0.1)
 
 private val yGains = LoggedNetworkGains("Y Gains", kP = 5.0, kD = 0.1)
 
-private val thetaGains =
-    LoggedNetworkGains("Theta Gains", kP = 4.0, kD = 0.15)
+private val thetaGains = LoggedNetworkGains("Theta Gains", kP = 4.0, kD = 0.15)
 private val linearMaxVelocity =
     LoggedNetworkNumber("$TUNING_PATH/linearMaxVelocity", 40.0)
 private val linearMaxAcceleration =
@@ -45,27 +43,27 @@ private val rotationalLimits
 @LoggedOutput(LogLevel.DISABLED, "X controller", LOGGING_PREFIX)
 var xController =
     ProfiledPIDController(
-        xGains[GainsEnum.KP],
-        xGains[GainsEnum.KI],
-        xGains[GainsEnum.KD],
+        xGains.kP.value,
+        xGains.kI.value,
+        xGains.kD.value,
         linearLimits,
     )
 
 @LoggedOutput(LogLevel.DISABLED, "Y controller", LOGGING_PREFIX)
 var yController =
     ProfiledPIDController(
-        yGains[GainsEnum.KP],
-        yGains[GainsEnum.KI],
-        yGains[GainsEnum.KD],
+        yGains.kP.value,
+        yGains.kI.value,
+        yGains.kD.value,
         linearLimits,
     )
 
 @LoggedOutput(LogLevel.DISABLED, "Theta controller", LOGGING_PREFIX)
 var thetaController =
     ProfiledPIDController(
-            thetaGains[GainsEnum.KP],
-            thetaGains[GainsEnum.KI],
-            thetaGains[GainsEnum.KD],
+            thetaGains.kP.value,
+            thetaGains.kI.value,
+            thetaGains.kD.value,
             rotationalLimits,
         )
         .apply { enableContinuousInput(-Math.PI, Math.PI) }
@@ -83,11 +81,11 @@ fun updateProfiledPIDGains() {
             thetaController to Pair(thetaGains, rotationalLimits),
         )
         .forEach { (controller, pair) ->
-            pair.first.hasPIDChanged()
+            pair.first.updatePIDGains()
             controller.setPID(
-                pair.first[GainsEnum.KP],
-                pair.first[GainsEnum.KI],
-                pair.first[GainsEnum.KD],
+                pair.first.kP.value,
+                pair.first.kI.value,
+                pair.first.kD.value,
             )
             println("MAXVELOCITY ${pair.second.maxVelocity}")
             println("MAXACCEL ${pair.second.maxAcceleration}")

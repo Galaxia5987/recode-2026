@@ -6,7 +6,6 @@ import com.ctre.phoenix6.controls.ControlRequest
 import frc.robot.CURRENT_MODE
 import frc.robot.lib.Gains
 import frc.robot.lib.Mode
-import frc.robot.lib.MotorGainTunability
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.kg2m
 import frc.robot.lib.extensions.m
@@ -46,7 +45,6 @@ class UniversalTalonFX(
     private val linearSystemWheelDiameter: Distance = 0.m,
     private val absoluteEncoderOffset: Angle = 0.deg,
     private val logConfig: MotorLogConfig = MotorLogConfig(),
-    private val logGainConfig: MotorGainTunability = MotorGainTunability(),
 ) {
     init {
         if (CURRENT_MODE == Mode.SIM) {
@@ -66,7 +64,6 @@ class UniversalTalonFX(
                 linearSystemWheelDiameter,
                 absoluteEncoderOffset,
                 logConfig,
-                logGainConfig
             )
         else {
             MotorIOSim(
@@ -78,7 +75,6 @@ class UniversalTalonFX(
                 gearRatio,
                 linearSystemWheelDiameter,
                 logConfig,
-                logGainConfig
             )
         }
     val inputs: LoggedMotorInputs = motorIO.inputs

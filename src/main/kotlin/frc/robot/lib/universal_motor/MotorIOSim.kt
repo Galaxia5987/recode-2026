@@ -3,8 +3,6 @@ package frc.robot.lib.universal_motor
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.*
 import frc.robot.lib.Gains
-import frc.robot.lib.GainsEnum
-import frc.robot.lib.MotorGainTunability
 import frc.robot.lib.extensions.*
 import frc.robot.lib.motors.TalonFXSim
 import frc.robot.lib.motors.TalonType
@@ -33,14 +31,12 @@ class MotorIOSim(
     private val gearRatio: Double,
     private val diameter: Distance,
     private val logConfig: MotorLogConfig,
-    private val logGainConfig: MotorGainTunability = MotorGainTunability(),
-    ) : MotorIO {
+) : MotorIO {
     private val gains =
         simGains.toNetworkLogged(
             name = "$motorName/SimGains",
             subsystem = subsystem,
             motionMagicConfigs = config.MotionMagic,
-            motorGainTunability = logGainConfig
         )
 
     override val inputs = LoggedMotorInputs()
@@ -114,21 +110,21 @@ class MotorIOSim(
             inputs.position = motor.position.rot
             inputs.distance = inputs.position.toDistance(diameter, gearRatio)
         }
-        if (gains.hasPIDChanged()) {
-            controller.p = gains[GainsEnum.KP]
-            controller.i = gains[GainsEnum.KI]
-            controller.d = gains[GainsEnum.KD]
-            simGains.kV = gains[GainsEnum.KV]
-            profiledPIDController.p = gains[GainsEnum.KP]
-            profiledPIDController.i = gains[GainsEnum.KI]
-            profiledPIDController.d = gains[GainsEnum.KD]
+        if (gains.updatePIDGains()) {
+            controller.p = gains.kP.value
+            controller.i = gains.kI.value
+            controller.d = gains.kD.value
+            simGains.kV = gains.kV.value
+            profiledPIDController.p = gains.kP.value
+            profiledPIDController.i = gains.kI.value
+            profiledPIDController.d = gains.kD.value
             motor.setController(controller)
         }
-        if (gains.hasMotionMagicChanged()) {
+        if (gains.updateMotionMagicGains()) {
             profiledPIDController.constraints =
                 TrapezoidProfile.Constraints(
-                    gains[GainsEnum.CRUISE_VELOCITY],
-                    gains[GainsEnum.ACCELERATION],
+                    gains.cruiseVelocity.value,
+                    gains.acceleration.value,
                 )
         }
     }
