@@ -31,7 +31,7 @@ object Spindexer : Mechanism(), SpindexerVelocitiesCommandFactory {
 
     private fun periodic() {
         motor.periodic()
-        Logger.recordOutput("subsystem/$name/setpoint",setpoint)
-        Logger.recordOutput("subsystem/$name/atSetpoint",atSetpoint)
+        Logger.recordOutput("subsystem/Spindexer/setpoint",setpoint)
+        Logger.recordOutput("subsystem/Spindexer/atSetpoint",atSetpoint)
     }
 }
