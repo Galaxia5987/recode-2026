@@ -3,17 +3,10 @@ package frc.robot.lib.universal_motor
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.*
 import frc.robot.lib.Gains
-import frc.robot.lib.extensions.amps
-import frc.robot.lib.extensions.deg
-import frc.robot.lib.extensions.get
-import frc.robot.lib.extensions.kg2m
-import frc.robot.lib.extensions.m
-import frc.robot.lib.extensions.rot
-import frc.robot.lib.extensions.rps
-import frc.robot.lib.extensions.toDistance
-import frc.robot.lib.extensions.volts
+import frc.robot.lib.extensions.*
 import frc.robot.lib.motors.TalonFXSim
 import frc.robot.lib.motors.TalonType
+import frc.robot.lib.toNetworkLogged
 import org.wpilib.math.controller.PIDController
 import org.wpilib.math.controller.ProfiledPIDController
 import org.wpilib.math.trajectory.TrapezoidProfile
@@ -30,6 +23,8 @@ import org.wpilib.units.measure.MomentOfInertia
  * @param diameter The wheel/spool diameter for computing linear distance.
  */
 class MotorIOSim(
+    private val motorName: String,
+    private val subsystem: String,
     private val momentOfInertia: MomentOfInertia,
     override val config: TalonFXConfiguration,
     private val simGains: Gains,
@@ -37,6 +32,13 @@ class MotorIOSim(
     private val diameter: Distance,
     private val logConfig: MotorLogConfig,
 ) : MotorIO {
+    private val gains =
+        simGains.toNetworkLogged(
+            name = "$motorName/SimGains",
+            subsystem = subsystem,
+            motionMagicConfigs = config.MotionMagic,
+        )
+
     override val inputs = LoggedMotorInputs()
     private val profiledPIDController =
         ProfiledPIDController(
@@ -67,12 +69,15 @@ class MotorIOSim(
             is VelocityVoltage ->
                 controlRequest.FeedForward =
                     controlRequest.Velocity * simGains.kV
+
             is VelocityTorqueCurrentFOC ->
                 controlRequest.FeedForward =
                     controlRequest.Velocity * simGains.kV
+
             is PositionVoltage ->
                 controlRequest.FeedForward =
                     controlRequest.Position * simGains.kV
+
             is PositionTorqueCurrentFOC ->
                 controlRequest.FeedForward =
                     controlRequest.Position * simGains.kV
@@ -104,6 +109,23 @@ class MotorIOSim(
         if (logConfig.position) {
             inputs.position = motor.position.rot
             inputs.distance = inputs.position.toDistance(diameter, gearRatio)
+        }
+        if (gains.updatePIDGains()) {
+            controller.p = gains.kP.value
+            controller.i = gains.kI.value
+            controller.d = gains.kD.value
+            simGains.kV = gains.kV.value
+            profiledPIDController.p = gains.kP.value
+            profiledPIDController.i = gains.kI.value
+            profiledPIDController.d = gains.kD.value
+            motor.setController(controller)
+        }
+        if (gains.updateMotionMagicGains()) {
+            profiledPIDController.constraints =
+                TrapezoidProfile.Constraints(
+                    gains.cruiseVelocity.value,
+                    gains.acceleration.value,
+                )
         }
     }
 }

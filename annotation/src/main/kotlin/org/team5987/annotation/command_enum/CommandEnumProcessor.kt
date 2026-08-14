@@ -40,42 +40,51 @@ class CreateCommandProcessor(env: SymbolProcessorEnvironment) :
         fileName: String,
         enumName: String,
         entries: List<String>,
+        priorityPropertyName: String?,
     ): FileSpec {
         val enumClass = ClassName(pkg, enumName)
         val commandClass = ClassName("org.wpilib.command3", "Command")
-        val namedBuilderClass =
-            ClassName("org.wpilib.command3", "NeedsNameBuilderStage")
+        val unnamedCommandClass =
+            ClassName("frc.robot.lib.commands", "UnnamedCommand")
 
-        // generate all default entry functions
         val entryFunctions = entries.map { entry ->
             val camelEntry = entry.snakeToCamelCase()
-            FunSpec.builder(camelEntry)
-                .returns(commandClass)
-                .addStatement(
-                    "return setTarget(%T.%L).named(%S)",
+            val funBuilder = FunSpec.builder(camelEntry).returns(commandClass)
+
+            if (priorityPropertyName != null) {
+                funBuilder.addStatement(
+                    "return setTarget(%1T.%2L).withPriority(%1T.%2L.%4L.priority).named(%3S)",
                     enumClass,
                     entry,
                     "${pkg.substringAfterLast(".")}/$camelEntry",
+                    priorityPropertyName,
                 )
-                .build()
+            } else {
+                funBuilder.addStatement(
+                    "return setTarget(%1T.%2L).withPriority(%3T.DEFAULT_PRIORITY).named(%4S)",
+                    enumClass,
+                    entry,
+                    commandClass,
+                    "${pkg.substringAfterLast(".")}/$camelEntry",
+                )
+            }
+
+            funBuilder.build()
         }
 
-        // abstract setTarget function
         val setTargetFun =
             FunSpec.builder("setTarget")
                 .addParameter("value", enumClass)
-                .returns(namedBuilderClass)
+                .returns(unnamedCommandClass)
                 .addModifiers(KModifier.ABSTRACT)
                 .build()
 
-        // the interface
         val interfaceSpec =
             TypeSpec.interfaceBuilder(fileName)
                 .addFunctions(entryFunctions)
                 .addFunction(setTargetFun)
                 .build()
 
-        // final file
         return FileSpec.builder(pkg, fileName).addType(interfaceSpec).build()
     }
 
@@ -90,10 +99,29 @@ class CreateCommandProcessor(env: SymbolProcessorEnvironment) :
                 .map { it.simpleName.asString() }
                 .toList()
 
+        val priorityPropertyName: String? =
+            enumDecl.primaryConstructor
+                ?.parameters
+                ?.firstOrNull { param ->
+                    val paramType = param.type.resolve()
+                    paramType.declaration.simpleName.asString() == "Priority" &&
+                        paramType.declaration.packageName.asString() ==
+                            "org.team5987.annotation.command_enum" &&
+                        (param.isVal || param.isVar)
+                }
+                ?.name
+                ?.asString()
+
         val fileName = "${enumName}CommandFactory"
 
         val generated: FileSpec =
-            generateInterface(pkg, fileName, enumName, entries)
+            generateInterface(
+                pkg,
+                fileName,
+                enumName,
+                entries,
+                priorityPropertyName,
+            )
 
         generated.writeTo(code, Dependencies(false))
     }
