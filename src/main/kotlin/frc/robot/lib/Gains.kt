@@ -52,8 +52,8 @@ data class MotionMagicGains(
 
 fun MotionMagicConfigs.isEmpty() =
     this.MotionMagicCruiseVelocity == 0.0 &&
-            this.MotionMagicAcceleration == 0.0 &&
-            this.MotionMagicJerk == 0.0
+        this.MotionMagicAcceleration == 0.0 &&
+        this.MotionMagicJerk == 0.0
 
 class LoggedNetworkGains(
     name: String,
@@ -74,8 +74,8 @@ class LoggedNetworkGains(
 
     private val isMotionMagicEnabled =
         cruiseVelocity != rps.zero() ||
-                acceleration != rps_squared.zero() ||
-                jerk != 0.0
+            acceleration != rps_squared.zero() ||
+            jerk != 0.0
 
     private val pidGains = mutableListOf<Tunable>()
     private val motionMagicGains = mutableListOf<Tunable>()
@@ -177,7 +177,6 @@ class LoggedNetworkGains(
         motionMagicGains.forEach { if (it.update()) changed = true }
         return changed
     }
-
 }
 
 fun Slot0Configs.toLoggedNetworkGains(
