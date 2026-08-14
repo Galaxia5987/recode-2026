@@ -3,6 +3,7 @@ package frc.robot.subsystems.intake.roller
 import com.ctre.phoenix6.configs.MotorOutputConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.signals.InvertedValue
+import com.ctre.phoenix6.signals.NeutralModeValue
 import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.volts
@@ -16,6 +17,7 @@ val MOTOR_CONFIG =
     TalonFXConfiguration().apply {
         MotorOutput =
             MotorOutputConfigs().apply {
+                NeutralMode = NeutralModeValue.Coast
                 Inverted = InvertedValue.Clockwise_Positive
             }
         CurrentLimits =
