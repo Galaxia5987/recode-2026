@@ -35,19 +35,20 @@ object Roller : Mechanism() {
 
     private val voltageOut = VoltageOut(0.0)
 
-    private fun setVoltage(voltage : Voltage) : UnnamedCommand =
-        this{
-            mainMotor.setControl(voltageOut.withOutput(voltage))
-        }
+    private fun setVoltage(voltage: Voltage): UnnamedCommand = this {
+        mainMotor.setControl(voltageOut.withOutput(voltage))
+    }
 
-
-    private fun periodic(){
+    private fun periodic() {
         mainMotor.periodic()
         auxMotor.periodic()
     }
 
-    fun intake () : Command = setVoltage(CLOCKWISE).named("Subsystems/Roller/intake")
-    fun outtake () : Command = setVoltage(-CLOCKWISE).named("Subsystems/Roller/outtake")
-    fun stop () : Command = setVoltage(0.0.volts).named("Subsystems/Roller/stop")
+    fun intake(): Command =
+        setVoltage(CLOCKWISE).named("Subsystems/Roller/intake")
 
+    fun outtake(): Command =
+        setVoltage(-CLOCKWISE).named("Subsystems/Roller/outtake")
+
+    fun stop(): Command = setVoltage(0.0.volts).named("Subsystems/Roller/stop")
 }
