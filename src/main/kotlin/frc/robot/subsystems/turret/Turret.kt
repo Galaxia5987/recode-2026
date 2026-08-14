@@ -3,6 +3,7 @@ package frc.robot.subsystems.turret
 import com.ctre.phoenix6.CANBus.systemcore
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.CANcoder
+import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.universal_motor.UniversalTalonFX
@@ -26,13 +27,19 @@ object Turret : Mechanism() {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
     }
 
-    init {
-        absoluteEncoder.configurator.apply(ENCODER_CONFIG)
-    }
-
     fun setAngle(angle: Angle) = this {
         setpoint = angle
         motor.setControl(positionVoltage.withPosition(setpoint))
         waitUntil(atSetpoint)
     }
+
+    init {
+        absoluteEncoder.configurator.apply(ENCODER_CONFIG)
+        addPeriodic(::periodic)
+    }
+
+    fun periodic(){
+        motor.periodic()
+    }
+
 }
