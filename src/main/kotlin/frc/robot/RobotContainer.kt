@@ -46,8 +46,6 @@ object RobotContainer {
 
     private fun configureButtonBindings() {
         driverController.create().onTrue(DriveCommands.resetGyro())
-        driverController.square().onTrue(Spindexer.stop())
-        driverController.cross().onTrue(Spindexer.convey())
     }
 
     fun getAutonomousCommand(): Command = autoChooser.get()
