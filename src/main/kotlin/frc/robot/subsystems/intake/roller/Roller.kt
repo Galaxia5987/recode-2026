@@ -4,6 +4,7 @@ import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.signals.MotorAlignmentValue
 import frc.robot.lib.commands.UnnamedCommand
+import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.extensions.volts
 import frc.robot.lib.universal_motor.UniversalTalonFX
@@ -29,6 +30,7 @@ object Roller : Mechanism() {
         auxMotor.setControl(
             Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Aligned)
         )
+        addPeriodic(::periodic)
     }
 
     private val voltageOut = VoltageOut(0.0)
@@ -37,6 +39,12 @@ object Roller : Mechanism() {
         this{
             mainMotor.setControl(voltageOut.withOutput(voltage))
         }
+
+
+    private fun periodic(){
+        mainMotor.periodic()
+        auxMotor.periodic()
+    }
 
     fun intake () : Command = setVoltage(CLOCKWISE).named("Subsystems/Roller/intake")
     fun outtake () : Command = setVoltage(-CLOCKWISE).named("Subsystems/Roller/outtake")
