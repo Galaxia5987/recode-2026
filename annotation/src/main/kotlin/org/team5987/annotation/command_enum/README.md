@@ -44,3 +44,17 @@ object RobotContainer {
     ..
 }
 ```
+
+## Priorities
+
+Command Enums may also include a command priority for each enum entry, this is done like the following:
+```kotlin
+@CommandEnum
+enum class WristAngles(val angle: Angle, val priority: Priority) {
+    CLOSED(0.rot, Priority(Command.LOWEST_PRIORITY)),
+    OPEN(15.5.rot, Priority(Command.HIGHEST_PRIORITY)),
+    DEFAULT(2.4.rot, Priority(Command.DEFAULT_PRIORITY))
+}
+```
+
+> Note that the processor looks for the `Priority` type in the primary constructor, and thus the property can be called or placed as wished, as long as it's type is `Priority`
