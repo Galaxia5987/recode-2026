@@ -6,6 +6,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import frc.robot.lib.Gains
+import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.rps
 import org.team5987.annotation.command_enum.CommandEnum
 import org.team5987.annotation.command_enum.Priority
@@ -30,7 +31,7 @@ val SIM_GAINS =
 
 val MOTOR_CONFIG =
     TalonFXConfiguration().apply {
-        CurrentLimits = CurrentLimitsConfigs()
+        CurrentLimits = createCurrentLimits()
         Slot0 = GAINS.toSlotConfig()
         MotorOutput =
             MotorOutputConfigs().apply {
