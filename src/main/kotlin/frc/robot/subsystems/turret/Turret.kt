@@ -22,7 +22,9 @@ object Turret : Mechanism() {
 
     var setpoint: Angle = 0.deg
     val positionVoltage = PositionVoltage(0.0)
-    val atSetpoint = Trigger { motor.inputs.position.isNear(setpoint, TOLERANCE) }
+    val atSetpoint = Trigger {
+        motor.inputs.position.isNear(setpoint, TOLERANCE)
+    }
 
     init {
         absoluteEncoder.configurator.apply(ENCODER_CONFIG)
