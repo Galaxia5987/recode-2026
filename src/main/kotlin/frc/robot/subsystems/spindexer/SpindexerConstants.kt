@@ -8,7 +8,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue
 import frc.robot.lib.Gains
 import frc.robot.lib.extensions.rps
 import org.team5987.annotation.command_enum.CommandEnum
+import org.team5987.annotation.command_enum.Priority
+import org.wpilib.command3.Command
 import org.wpilib.units.measure.AngularVelocity
+
+const val PORT = 1
 
 val SETPOINT_TOLERANCE = 0.1.rps
 val GAINS =
@@ -36,7 +40,10 @@ val MOTOR_CONFIG =
     }
 
 @CommandEnum
-enum class SpindexerVelocities(val velocity: AngularVelocity) {
-    STOP(0.rps),
-    CONVEY(10.rps),
+enum class SpindexerVelocities(
+    val velocity: AngularVelocity,
+    val priority: Priority,
+) {
+    STOP(0.rps, Priority(Command.LOWEST_PRIORITY)),
+    CONVEY(10.rps, Priority(Command.HIGHEST_PRIORITY)),
 }
