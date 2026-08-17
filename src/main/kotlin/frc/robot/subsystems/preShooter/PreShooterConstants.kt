@@ -40,7 +40,7 @@ val LOG_CONFIG =
     )
 
 @CommandEnum
-enum class PreShooerVelocity(val velocity: AngularVelocity) {
+enum class PreShooterVelocity(val velocity: AngularVelocity) {
     STOP(0.rps),
     CONVEY(10.rps),
 }
