@@ -10,7 +10,7 @@ import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
 
-object PreShooter : Mechanism(), PreShooerVelocityCommandFactory {
+object PreShooter : Mechanism(), PreShooterVelocityCommandFactory {
     val motor =
         UniversalTalonFX(
             port = PORT,
@@ -30,7 +30,7 @@ object PreShooter : Mechanism(), PreShooerVelocityCommandFactory {
         addPeriodic(::periodic)
     }
 
-    override fun setTarget(value: PreShooerVelocity) = this {
+    override fun setTarget(value: PreShooterVelocity) = this {
         setpoint = value.velocity
         motor.setControl(velocityVoltage.withVelocity(value.velocity))
         atSetpoint.waitUntil()
