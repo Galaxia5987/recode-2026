@@ -19,8 +19,8 @@ object PreShooter : Mechanism(), PreShooerVelocityCommandFactory {
             logConfig = LOG_CONFIG,
             simGains = SIM_GAINS,
         )
-    var setpoint = 0.0.rps
-    var atSetpoint = Trigger {
+    private var setpoint = 0.0.rps
+    val atSetpoint = Trigger {
         motor.inputs.velocity.isNear(setpoint, SETPOINT_TOLERANCE)
     }
 
@@ -38,7 +38,7 @@ object PreShooter : Mechanism(), PreShooerVelocityCommandFactory {
 
     private fun periodic() {
         motor.periodic()
-        Logger.recordOutput("subsystem/$name/setpoint", setpoint)
-        Logger.recordOutput("subsystem/$name/atSetpoint", atSetpoint)
+        Logger.recordOutput("subsystem/PreShooter/setpoint", setpoint)
+        Logger.recordOutput("subsystem/PreShooter/atSetpoint", atSetpoint)
     }
 }

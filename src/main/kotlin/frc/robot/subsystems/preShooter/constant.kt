@@ -12,8 +12,8 @@ import org.team5987.annotation.command_enum.CommandEnum
 import org.wpilib.units.measure.AngularVelocity
 
 val SETPOINT_TOLERANCE = 0.1.rps
-val PORT = 1
-val GEAR_RATIO = 1.0
+const val PORT = 1
+const val GEAR_RATIO = 1.0
 val REAL_GAINS = Gains()
 val SIM_GAINS = Gains()
 
