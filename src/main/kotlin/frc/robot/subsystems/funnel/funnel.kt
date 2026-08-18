@@ -29,7 +29,7 @@ object Funnel : Mechanism() {
     }
 
     private fun periodic() {
-        Funnel.mainMotor.periodic()
+        mainMotor.periodic()
     }
 
     fun intake(): Command =
