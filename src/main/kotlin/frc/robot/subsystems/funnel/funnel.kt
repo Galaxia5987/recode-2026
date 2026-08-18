@@ -33,10 +33,10 @@ object Funnel : Mechanism() {
     }
 
     fun intake(): Command =
-        setVoltage(-CLOCKWISE).named("subsystems/funnel/intake")
+        setVoltage(-CLOCKWISE).named("Subsystems/Funnel/intake")
 
     fun outtake(): Command =
-        setVoltage(CLOCKWISE).named("subsystems/funnel/outtake")
+        setVoltage(CLOCKWISE).named("Subsystems/Funnel/outtake")
 
     fun stop(): Command = setVoltage(0.0.volts).named("subsystems/funnel/stop")
 }
