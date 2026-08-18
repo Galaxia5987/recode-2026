@@ -10,7 +10,7 @@ import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.units.measure.Voltage
 
-object funnel: Mechanism() {
+object Funnel : Mechanism() {
     private val mainMotor =
         UniversalTalonFX(
             port = MAIN_MOTOR_PORT,
@@ -29,17 +29,14 @@ object funnel: Mechanism() {
     }
 
     private fun periodic() {
-        funnel.mainMotor.periodic()
+        Funnel.mainMotor.periodic()
     }
 
     fun intake(): Command =
         setVoltage(-CLOCKWISE).named("subsystems/funnel/intake")
 
-
     fun outtake(): Command =
         setVoltage(CLOCKWISE).named("subsystems/funnel/outtake")
 
-    fun stop(): Command =
-        setVoltage(0.0.volts).named("subsystems/funnel/stop")
-
+    fun stop(): Command = setVoltage(0.0.volts).named("subsystems/funnel/stop")
 }

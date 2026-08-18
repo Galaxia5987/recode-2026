@@ -12,9 +12,9 @@ import frc.robot.lib.universal_motor.MotorLogConfig
 val MAIN_MOTOR_PORT = 4
 val CLOCKWISE = 12.0.volts
 val MOTOR_CONFIG =
-    TalonFXConfiguration().apply{
+    TalonFXConfiguration().apply {
         MotorOutput =
-            MotorOutputConfigs().apply{
+            MotorOutputConfigs().apply {
                 NeutralMode = NeutralModeValue.Coast
                 Inverted = InvertedValue.Clockwise_Positive
             }
@@ -33,5 +33,3 @@ val MOTOR_LOG_CONFIG =
         absoluteEncoder = false,
         voltage = true,
     )
-
-
