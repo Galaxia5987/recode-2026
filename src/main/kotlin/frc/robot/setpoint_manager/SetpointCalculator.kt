@@ -33,20 +33,19 @@ object SetpointCalculator {
                         )
                             .deg
 
-//        val constrainedStaticShooting = constraintTurretLimits(turretAngleToHub)
-//        if (
-//            abs(constrainedWithCompensation[deg] - constrainedStaticShooting[deg]) >
-//            180
-//        ) {
-//            return constrainedStaticShooting
-//        }
-//        return constrainedWithCompensation
+/*        val constrainedStaticShooting = constraintTurretLimits(turretAngleToHub)
+        if (
+            abs(constrainedWithCompensation[deg] - constrainedStaticShooting[deg]) >
+            180
+        ) {
+            return constrainedStaticShooting
+        }*/
 
         // Above is constraint logic from the 2026 robot. im unsure
         // if we should keep constraints here or move it out.
         //todo: figure this out ^^
 
-        return angleToGoal
+        return constrainedWithCompensation
     }
 
     fun calculateHoodSetpoint(
