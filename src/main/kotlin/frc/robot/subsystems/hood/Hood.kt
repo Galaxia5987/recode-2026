@@ -1,6 +1,8 @@
 package frc.robot.subsystems.hood
 
+import com.ctre.phoenix6.CANBus.systemcore
 import com.ctre.phoenix6.controls.PositionVoltage
+import com.ctre.phoenix6.hardware.CANcoder
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.convertTo360
@@ -16,9 +18,11 @@ import org.wpilib.math.util.Units
 import org.wpilib.units.measure.Angle
 
 class Hood : Mechanism() {
+    private val absoluteEncoder = CANcoder(ENCODER_ID, CANBUS)
     val hoodMotor =
         UniversalTalonFX(
             port = PORT,
+            canbus = CANBUS,
             config = CONFIG,
             gearRatio = GEAR_RATIO,
             simGains = SIM_GAINS,
@@ -27,6 +31,7 @@ class Hood : Mechanism() {
 
     init {
         addPeriodic(::periodic)
+        absoluteEncoder.configurator.apply(ENCODER_CONFIG)
     }
 
     private var positionRequest = PositionVoltage(0.deg)
