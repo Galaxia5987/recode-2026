@@ -42,7 +42,7 @@ object SetpointCalculator {
         }*/
 
         // Above is constraint logic from the 2026 robot. im unsure
-        // if we should keep constraints here or move it out.
+        // if we should keep constraints here or move it out
         //todo: figure this out ^^
 
         return constrainedWithCompensation

@@ -21,7 +21,7 @@ import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
 
 // here i just added temporary field constants, i imagine we will
-// introduce a fieldconstants.kt file later? lmk
+// introduce a fieldconstants.kt file later?
 // todo MOVE THIS
 
 private val HUB_TRANSLATION_BLUE = Translation2d(4620.41.mm, 4034.63.mm)
@@ -31,9 +31,10 @@ val HUB_TRANSLATION: Translation2d
 
 //
 
+// should we really keep this function here? maybe there's another place for it?
 fun ChassisVelocities.to2dVector(): Translation2d = Translation2d(this.vx, this.vy)
 
-object SetpointManager{
+object SetpointManager {
     private var currentGoal: Pose2d = HUB_TRANSLATION.toPose()
 
     val turretOrientedChassisSpeeds: Translation2d
@@ -79,8 +80,7 @@ object SetpointManager{
                 .rotateBy(Turret.position.toRotation2d())
 */
 
-            // The turret class has not been implemented yet, this is just
-            // a workaround.
+            // turret class has not been implemented yet, this is just a workaround
             // todo: replace with logic above once turret is implemented
             return drive.chassisSpeeds.to2dVector()
         }
