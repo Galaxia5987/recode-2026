@@ -8,8 +8,14 @@ import frc.robot.lib.extensions.flipIfNeeded
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.mm
+import frc.robot.lib.extensions.rad_ps
 import frc.robot.lib.extensions.rotationToPoint
 import frc.robot.lib.extensions.toPose
+import frc.robot.lib.extensions.toRotation2d
+import frc.robot.setpoint_manager.SetpointCalculator.calculateFlywheelSetpoint
+import frc.robot.setpoint_manager.SetpointCalculator.calculateHoodSetpoint
+import frc.robot.setpoint_manager.SetpointCalculator.calculateTurretSetpoint
+import frc.robot.setpoint_manager.SetpointManager.turretSetpoint
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.geometry.Translation2d
@@ -29,8 +35,24 @@ val HUB_TRANSLATION: Translation2d
 
 //
 
-object SetpointManager {
+fun ChassisVelocities.to2dVector(): Translation2d = Translation2d(this.vx, this.vy)
+
+object SetpointManager{
     var currentGoal: Pose2d = HUB_TRANSLATION.toPose()
+
+    val turretOrientedChassisSpeeds: Translation2d
+        get() {
+            val speeds = drive.chassisSpeeds
+            return speeds
+                .to2dVector()
+//                .plus(
+//                    getTurretTangentialVelocityFieldRelative(
+//                        drive.gyroOmega[rad_ps]
+//                    )
+//                )
+//                .rotateBy(Turret.position.toRotation2d())
+            // todo: patch above when turret implemented
+        }
 
     var turretTranslation: Translation2d = Translation2d(0.0, 0.0)
     var compensatedTurretTranslation: Translation2d = Translation2d(0.0, 0.0)
@@ -40,6 +62,24 @@ object SetpointManager {
 
     var turretDistanceFromGoal: Distance = Meters.zero()
     var compensatedTurretDistanceFromGoal: Distance = Meters.zero()
+
+    val turretSetpoint get() =
+        calculateTurretSetpoint(
+            turretOrientedChassisSpeeds,
+            turretRotationToGoal,
+            compensatedTurretDistanceFromGoal)
+
+    val hoodSetpoint get() =
+        calculateHoodSetpoint(
+            turretOrientedChassisSpeeds,
+            compensatedTurretDistanceFromGoal
+        )
+
+    val flywheelSetpoint get() =
+        calculateFlywheelSetpoint(
+            turretOrientedChassisSpeeds,
+            compensatedTurretDistanceFromGoal
+        )
 
     val alignedTurretVelocityVector: Translation2d
         get() {
@@ -59,29 +99,6 @@ object SetpointManager {
             return drive.chassisSpeeds.to2dVector()
         }
 
-    private fun ChassisVelocities.to2dVector(): Translation2d =
-        Translation2d(this.vx, this.vy)
-
-    fun getTurretSetpoint(): Angle {
-        // TODO
-        return 0.degrees
-    }
-
-    private fun getHoodSetpoint(): Angle {
-        val alignedTurretVelocityVector = alignedTurretVelocityVector
-        return (90.deg -
-                calculatePitch(
-                    compensatedTurretDistanceFromGoal[m],
-                    alignedTurretVelocityVector.x,
-                    alignedTurretVelocityVector.y
-                )
-                    .deg)
-    }
-
-    fun getFlywheelSetpoint(): Angle {
-        // TODO
-        return 0.degrees
-    }
 
     fun periodic() {
         val rotatedTurretOffset: Translation2d = drive.pose.translation
