@@ -37,12 +37,6 @@ deploy {
 
             artifacts {
                 wpilibJava(getArtifactTypeClass('WPILibJavaArtifact')) {
-                    jvmArgs.add("-XX:+UseSerialGC")
-                    jvmArgs.add("-XX:+AlwaysPreTouch")
-
-                    final MAX_JAVA_HEAP_SIZE_MB = 192
-                    jvmArgs.add("-Xmx" + MAX_JAVA_HEAP_SIZE_MB + "M")
-                    jvmArgs.add("-Xms" + MAX_JAVA_HEAP_SIZE_MB + "M")
                 }
 
                 wpilibStaticFileDeploy(getArtifactTypeClass('FileTreeArtifact')) {
