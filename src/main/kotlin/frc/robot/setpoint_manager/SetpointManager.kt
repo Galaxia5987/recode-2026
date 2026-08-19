@@ -2,6 +2,7 @@ package frc.robot.setpoint_manager
 
 import frc.robot.drive
 import frc.robot.lib.extensions.flipIfNeeded
+import frc.robot.lib.extensions.log
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.mm
 import frc.robot.lib.extensions.rotationToPoint
@@ -111,5 +112,12 @@ object SetpointManager{
             compensatedTurretTranslation
                 .getDistance(currentGoal.translation)
                 .m
+
+        mapOf(
+            "angleToGoal" to angleToGoal,
+            "turretDistanceFromGoal" to turretDistanceFromGoal,
+            "turretRotationToGoal" to turretRotationToGoal,
+            "compensatedTurretDistanceFromGoal" to compensatedTurretDistanceFromGoal
+        ).log("SetpointManager")
     }
 }
