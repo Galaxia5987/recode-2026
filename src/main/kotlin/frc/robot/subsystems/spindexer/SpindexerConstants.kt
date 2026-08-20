@@ -42,5 +42,5 @@ enum class SpindexerVelocities(
     val priority: Priority,
 ) {
     STOP(0.rps, Priority(Command.LOWEST_PRIORITY)),
-    CONVEY(8.rps, Priority(Command.HIGHEST_PRIORITY)),
+    CONVEY(30.rps, Priority(Command.HIGHEST_PRIORITY)),
 }
