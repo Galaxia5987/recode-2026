@@ -43,14 +43,14 @@ object RobotContainer {
                 { -driverController.leftX },
                 { -driverController.rightX },
             )
-        Hood.defaultCommand =
-            Hood.goToPosition()
+        //Hood.defaultCommand =
+            //Hood.setPosition(70.deg)
     }
 
     private fun configureButtonBindings() {
         driverController.create().onTrue(DriveCommands.resetGyro())
-        driverController.triangle().onTrue(Hood.setSetpoint(70.deg))
-        driverController.circle().onTrue(Hood.setSetpoint(0.deg))
+        driverController.triangle().onTrue(Hood.setPosition(70.deg))
+        driverController.circle().onTrue(Hood.setPosition(0.deg))
     }
 
     fun getAutonomousCommand(): Command = autoChooser.get()

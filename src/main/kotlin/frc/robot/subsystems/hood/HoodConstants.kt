@@ -16,9 +16,10 @@ val PORT = 0
 val CANBUS = systemcore(1)
 val CONFIG =
     TalonFXConfiguration().apply {
-        MotorOutputConfigs().apply {
-            NeutralMode = NeutralModeValue.Brake
-            Inverted = InvertedValue.Clockwise_Positive
+        MotorOutput =
+            MotorOutputConfigs().apply {
+                NeutralMode = NeutralModeValue.Brake
+                Inverted = InvertedValue.Clockwise_Positive
         }
         CurrentLimits =
             CurrentLimitsConfigs().apply {
@@ -35,7 +36,7 @@ val CONFIG =
     }
 val GEAR_RATIO = 1.0
 val SIM_GAINS = Gains(kP = 1.43, kD = 0.36)
-val ABSOLUTE_ENCODER_OFFSET = 0.deg
+val ABSOLUTE_ENCODER_OFFSET = 0.0
 
 val TOLERANCE = 0.1.deg
 
@@ -44,7 +45,7 @@ val ENCODER_CONFIG =
     CANcoderConfiguration().apply {
         MagnetSensor.SensorDirection =
             SensorDirectionValue.Clockwise_Positive
-        MagnetSensor.MagnetOffset = 0.0
+        MagnetSensor.MagnetOffset = ABSOLUTE_ENCODER_OFFSET
         MagnetSensor.AbsoluteSensorDiscontinuityPoint = 0.5
     }
 

@@ -100,4 +100,3 @@ val vision =
         *visionIOs,
     )
 
-val Hood = Hood()

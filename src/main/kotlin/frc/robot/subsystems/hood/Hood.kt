@@ -1,32 +1,28 @@
 package frc.robot.subsystems.hood
 
-import com.ctre.phoenix6.CANBus.systemcore
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.CANcoder
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
-import frc.robot.lib.convertTo360
 import frc.robot.lib.extensions.deg
-import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.log
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
-import org.wpilib.math.util.Units
 import org.wpilib.units.measure.Angle
 
-class Hood : Mechanism() {
+object Hood : Mechanism() {
     private val absoluteEncoder = CANcoder(ENCODER_ID, CANBUS)
-    val hoodMotor =
+    private val motor =
         UniversalTalonFX(
             port = PORT,
             canbus = CANBUS,
             config = CONFIG,
             gearRatio = GEAR_RATIO,
             simGains = SIM_GAINS,
-            absoluteEncoderOffset = ABSOLUTE_ENCODER_OFFSET,
+            absoluteEncoderOffset = ABSOLUTE_ENCODER_OFFSET.deg,
         )
 
     init {
@@ -35,33 +31,26 @@ class Hood : Mechanism() {
     }
 
     private var positionRequest = PositionVoltage(0.deg)
-    private var setPoint = 0.deg
+    private var setpoint = 0.deg
     val atSetpoint = Trigger {
-        hoodMotor.inputs.position.isNear(setPoint, TOLERANCE)
+        motor.inputs.position.isNear(setpoint, TOLERANCE)
     }
-    var positionDegrees = 0.deg
-
-    fun goToPosition(): Command =
+    fun setPosition(angle: Angle): Command =
         this {
-                hoodMotor.setControl(positionRequest.withPosition(setPoint))
+            setpoint = angle
+            motor.setControl(positionRequest.withPosition(setpoint))
             }
-            .named("subsystems/Hood/goToPosition")
-
-    fun setSetpoint(angle: Angle) : Command =
-        this{
-            setPoint = angle
-        }.named("subsystems/Hood/setSetpoint")
+            .named("subsystems/Hood/setPosition")
 
 
     fun periodic() {
-        hoodMotor.periodic()
+        motor.periodic()
         mapOf(
                 "atSetpoint" to atSetpoint,
-                "setpoint" to setPoint,
-                "setpointError" to setPoint - hoodMotor.inputs.position,
+                "setpoint" to setpoint,
+                "setpointError" to setpoint - motor.inputs.position,
             )
-            .log("Subsystems/hood")
-        Logger.recordOutput("Subsystems/Hood/degreePosition", Units.radiansToDegrees(hoodMotor.inputs.position.baseUnitMagnitude)
-        )
+            .log("Subsystems/Hood")
+        Logger.recordOutput("Subsystems/Hood/degreePosition", org.wpilib.math.util.Units.radiansToDegrees(motor.inputs.position.baseUnitMagnitude))
     }
 }
