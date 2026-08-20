@@ -49,7 +49,7 @@ object RobotContainer {
 
     private fun configureButtonBindings() {
         driverController.create().onTrue(DriveCommands.resetGyro())
-        driverController.circle().onTrue(command {
+        driverController.rightBumper().onTrue(command {
             +[Extender.open(), Roller.intake()]
         }.named("openIntake")).onFalse(
             command {

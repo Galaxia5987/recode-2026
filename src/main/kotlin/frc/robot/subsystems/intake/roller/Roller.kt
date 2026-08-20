@@ -31,7 +31,7 @@ object Roller : Mechanism() {
 
     init {
         auxMotor.setControl(
-            Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Aligned)
+            Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Opposed)
         )
         addPeriodic(::periodic)
     }
