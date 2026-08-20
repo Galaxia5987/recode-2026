@@ -1,10 +1,14 @@
 package frc.robot
 
 import frc.robot.lib.Mode
+import frc.robot.lib.commands.command
 import frc.robot.lib.commands.emptyCommand
+import frc.robot.lib.commands.unaryPlus
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.subsystems.drive.DriveCommands
+import frc.robot.subsystems.intake.extender.Extender
+import frc.robot.subsystems.intake.roller.Roller
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
@@ -45,6 +49,13 @@ object RobotContainer {
 
     private fun configureButtonBindings() {
         driverController.create().onTrue(DriveCommands.resetGyro())
+        driverController.circle().onTrue(command {
+            +[Extender.open(), Roller.intake()]
+        }.named("openIntake")).onFalse(
+            command {
+                +[Extender.close(), Roller.stop()]
+            }.named("closeIntake")
+        )
     }
 
     fun getAutonomousCommand(): Command = autoChooser.get()

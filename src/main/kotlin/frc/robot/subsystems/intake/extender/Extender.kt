@@ -8,6 +8,7 @@ import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.unaryPlus
 import frc.robot.lib.commands.waitUntil
+import frc.robot.lib.createDisableTriggerForCoast
 import frc.robot.lib.extensions.deg_ps
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.log
