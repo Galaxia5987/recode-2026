@@ -9,11 +9,12 @@ import frc.robot.lib.Gains
 import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.deg_ps
+import frc.robot.lib.extensions.rps
 import frc.robot.lib.universal_motor.MotorLogConfig
 
-const val MAIN_MOTOR_PORT = 2
-const val FIRST_AUX_MOTOR_PORT = 3
-const val SECOND_AUX_MOTOR_PORT = 4
+const val MAIN_MOTOR_PORT = 18
+const val FIRST_AUX_MOTOR_PORT = 17
+const val SECOND_AUX_MOTOR_PORT = 16
 
 const val GEAR_RATIO = 1.33
 val REAL_GAINS = Gains(kP = 0.3, kS = 0.3, kV = 0.115)
@@ -47,4 +48,4 @@ val MOTOR_LOG_CONFIG =
         voltage = true,
     )
 
-val TOLERANCE = 1.deg_ps
+val TOLERANCE = 3.rps
