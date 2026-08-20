@@ -8,11 +8,11 @@ import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.rps
+import kotlin.math.tanh
 import org.wpilib.math.geometry.Translation2d
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
-import kotlin.math.tanh
 
 interface SetpointCalculator {
     fun calculateTurretSetpoint(
@@ -23,12 +23,12 @@ interface SetpointCalculator {
 
     fun calculateHoodSetpoint(
         speeds: Translation2d,
-        distanceToGoal: Distance
+        distanceToGoal: Distance,
     ): Angle
 
     fun calculateFlywheelSetpoint(
         speeds: Translation2d,
-        distanceToGoal: Distance
+        distanceToGoal: Distance,
     ): AngularVelocity
 }
 
@@ -40,18 +40,18 @@ class GenericSetpointCalculator : SetpointCalculator {
         speeds: Translation2d,
         angleToGoal: Angle,
         distanceToGoal: Distance,
-        ): Angle {
+    ): Angle {
 
         val constrainedWithCompensation =
-                angleToGoal -
-                        calculateYaw(
-                            distanceToGoal[m],
-                            speeds.x,
-                            speeds.y
-                        )
-                            .deg
+            angleToGoal -
+                calculateYaw(
+                        distanceToGoal[m],
+                        speeds.x,
+                        speeds.y,
+                    )
+                    .deg
 
-/*        val constrainedStaticShooting = constraintTurretLimits(turretAngleToHub)
+        /*        val constrainedStaticShooting = constraintTurretLimits(turretAngleToHub)
         if (
             abs(constrainedWithCompensation[deg] - constrainedStaticShooting[deg]) >
             180
@@ -61,36 +61,36 @@ class GenericSetpointCalculator : SetpointCalculator {
 
         // Above is constraint logic from the 2026 robot. im unsure
         // if we should keep constraints here or move it out
-        //todo: figure this out ^^
+        // todo: figure this out ^^
 
         return constrainedWithCompensation
     }
 
     override fun calculateHoodSetpoint(
         speeds: Translation2d,
-        distanceToGoal: Distance
+        distanceToGoal: Distance,
     ): Angle {
         return (90.deg -
-                calculatePitch(
+            calculatePitch(
                     distanceToGoal[m],
                     speeds.x,
-                    speeds.y
+                    speeds.y,
                 )
-                    .deg)
+                .deg)
     }
 
     override fun calculateFlywheelSetpoint(
         speeds: Translation2d,
-        distanceToGoal: Distance
+        distanceToGoal: Distance,
     ): AngularVelocity {
-        return ((kStaticCalibration +
-                    (kMovingCalibration * tanh(speeds.x))) *
-                    calculateAngularVelocity(
-                        calculateVelocity(
-                            distanceToGoal[m],
-                            speeds.x,
-                            speeds.y
-                        )
-                    )).rps
+        return ((kStaticCalibration + (kMovingCalibration * tanh(speeds.x))) *
+                calculateAngularVelocity(
+                    calculateVelocity(
+                        distanceToGoal[m],
+                        speeds.x,
+                        speeds.y,
+                    )
+                ))
+            .rps
     }
 }

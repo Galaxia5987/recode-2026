@@ -29,7 +29,8 @@ val HUB_TRANSLATION: Translation2d
 //
 
 // should we really keep this function here? maybe there's another place for it?
-fun ChassisVelocities.to2dVector(): Translation2d = Translation2d(this.vx, this.vy)
+fun ChassisVelocities.to2dVector(): Translation2d =
+    Translation2d(this.vx, this.vy)
 
 object SetpointManager {
     private var currentGoal: Pose2d = HUB_TRANSLATION.toPose()
@@ -38,7 +39,8 @@ object SetpointManager {
         get() = calculateTurretVelocityVector
 
     private var turretTranslation: Translation2d = Translation2d(0.0, 0.0)
-    private var compensatedTurretTranslation: Translation2d = Translation2d(0.0, 0.0)
+    private var compensatedTurretTranslation: Translation2d =
+        Translation2d(0.0, 0.0)
 
     private var angleToGoal: Rotation2d = Rotation2d()
     private var turretRotationToGoal: Angle = Degrees.zero()
@@ -48,75 +50,72 @@ object SetpointManager {
 
     private val calculator: SetpointCalculator = GenericSetpointCalculator()
 
-    val turretSetpoint: Angle get() =
-        calculator.calculateTurretSetpoint(
-            turretOrientedChassisSpeeds,
-            turretRotationToGoal,
-            compensatedTurretDistanceFromGoal)
+    val turretSetpoint: Angle
+        get() =
+            calculator.calculateTurretSetpoint(
+                turretOrientedChassisSpeeds,
+                turretRotationToGoal,
+                compensatedTurretDistanceFromGoal,
+            )
 
-    val hoodSetpoint: Angle get() =
-        calculator.calculateHoodSetpoint(
-            turretOrientedChassisSpeeds,
-            compensatedTurretDistanceFromGoal
-        )
+    val hoodSetpoint: Angle
+        get() =
+            calculator.calculateHoodSetpoint(
+                turretOrientedChassisSpeeds,
+                compensatedTurretDistanceFromGoal,
+            )
 
-    val flywheelSetpoint: AngularVelocity get() =
-        calculator.calculateFlywheelSetpoint(
-            turretOrientedChassisSpeeds,
-            compensatedTurretDistanceFromGoal
-        )
+    val flywheelSetpoint: AngularVelocity
+        get() =
+            calculator.calculateFlywheelSetpoint(
+                turretOrientedChassisSpeeds,
+                compensatedTurretDistanceFromGoal,
+            )
 
     val calculateTurretVelocityVector: Translation2d
         get() {
-/*          val speeds = drive.chassisSpeeds
-            return speeds
-                .to2dVector()
-                .plus(
-                    getTurretTangentialVelocityFieldRelative(
-                        drive.gyroOmega[rad_ps]
-                    )
-                )
-                .rotateBy(Turret.position.toRotation2d())
-*/
+            /*          val speeds = drive.chassisSpeeds
+                        return speeds
+                            .to2dVector()
+                            .plus(
+                                getTurretTangentialVelocityFieldRelative(
+                                    drive.gyroOmega[rad_ps]
+                                )
+                            )
+                            .rotateBy(Turret.position.toRotation2d())
+            */
 
-            // turret class has not been implemented yet, this is just a workaround
+            // turret class has not been implemented yet, this is just a
+            // workaround
             // todo: replace with logic above once turret is implemented
             return drive.chassisSpeeds.to2dVector()
         }
-
 
     fun periodic() {
         val rotatedTurretOffset: Translation2d = drive.pose.translation
         // todo: switch to TURRET_TO_ROBOT.rotateBy(drive.pose.rotation)
 
-        turretTranslation =
-            drive.pose.translation.plus(rotatedTurretOffset)
+        turretTranslation = drive.pose.translation.plus(rotatedTurretOffset)
         compensatedTurretTranslation =
             drive.compensatedPose.translation.plus(rotatedTurretOffset)
 
-        angleToGoal =
-            turretTranslation.rotationToPoint(
-                currentGoal.translation
-            )
+        angleToGoal = turretTranslation.rotationToPoint(currentGoal.translation)
 
-        turretRotationToGoal =
-            (drive.pose.rotation - angleToGoal).measure
+        turretRotationToGoal = (drive.pose.rotation - angleToGoal).measure
 
         turretDistanceFromGoal =
-            turretTranslation
-                .getDistance(currentGoal.translation)
-                .m
+            turretTranslation.getDistance(currentGoal.translation).m
 
         compensatedTurretDistanceFromGoal =
-            compensatedTurretTranslation
-                .getDistance(currentGoal.translation)
-                .m
+            compensatedTurretTranslation.getDistance(currentGoal.translation).m
 
         mapOf(
-            "angleToGoal" to angleToGoal,
-            "turretDistanceFromGoal" to turretDistanceFromGoal,
-            "turretRotationToGoal" to turretRotationToGoal,
-            "compensatedTurretDistanceFromGoal" to compensatedTurretDistanceFromGoal
-        ).log("SetpointManager")
+                "angleToGoal" to angleToGoal,
+                "turretDistanceFromGoal" to turretDistanceFromGoal,
+                "turretRotationToGoal" to turretRotationToGoal,
+                "compensatedTurretDistanceFromGoal" to
+                    compensatedTurretDistanceFromGoal,
+            )
+            .log("SetpointManager")
     }
 }
