@@ -6,7 +6,6 @@ import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.extensions.volts
 import frc.robot.lib.universal_motor.UniversalTalonFX
-import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.units.measure.Voltage
 
@@ -19,10 +18,11 @@ object Funnel : Mechanism() {
         )
 
     init {
-        addPeriodic(::periodic)
+        addPeriodic(mainMotor::periodic)
     }
 
     private val voltageOut = VoltageOut(0.0)
+    private var voltageSetpoint = 0.volts
 
     private fun setVoltage(voltage: Voltage): UnnamedCommand = this {
         mainMotor.setControl(voltageOut.withOutput(voltage))
@@ -32,11 +32,8 @@ object Funnel : Mechanism() {
         mainMotor.periodic()
     }
 
-    fun intake(): Command =
-        setVoltage(-CLOCKWISE).named("Subsystems/Funnel/intake")
-
-    fun outtake(): Command =
-        setVoltage(CLOCKWISE).named("Subsystems/Funnel/outtake")
-
-    fun stop(): Command = setVoltage(0.0.volts).named("Subsystems/Funnel/stop")
+    fun setVoltageOut(value: FunnelVoltage) = this {
+        voltageSetpoint = value.voltage
+        setVoltage(voltageSetpoint)
+    }
 }
