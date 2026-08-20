@@ -7,9 +7,6 @@ import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.mm
 import frc.robot.lib.extensions.rotationToPoint
 import frc.robot.lib.extensions.toPose
-import frc.robot.setpoint_manager.SetpointCalculator.calculateFlywheelSetpoint
-import frc.robot.setpoint_manager.SetpointCalculator.calculateHoodSetpoint
-import frc.robot.setpoint_manager.SetpointCalculator.calculateTurretSetpoint
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.geometry.Translation2d
@@ -49,20 +46,22 @@ object SetpointManager {
     private var turretDistanceFromGoal: Distance = Meters.zero()
     private var compensatedTurretDistanceFromGoal: Distance = Meters.zero()
 
+    private val calculator: SetpointCalculator = GenericSetpointCalculator()
+
     val turretSetpoint: Angle get() =
-        calculateTurretSetpoint(
+        calculator.calculateTurretSetpoint(
             turretOrientedChassisSpeeds,
             turretRotationToGoal,
             compensatedTurretDistanceFromGoal)
 
     val hoodSetpoint: Angle get() =
-        calculateHoodSetpoint(
+        calculator.calculateHoodSetpoint(
             turretOrientedChassisSpeeds,
             compensatedTurretDistanceFromGoal
         )
 
     val flywheelSetpoint: AngularVelocity get() =
-        calculateFlywheelSetpoint(
+        calculator.calculateFlywheelSetpoint(
             turretOrientedChassisSpeeds,
             compensatedTurretDistanceFromGoal
         )

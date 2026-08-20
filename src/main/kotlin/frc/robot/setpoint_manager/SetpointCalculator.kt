@@ -14,11 +14,29 @@ import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
 import kotlin.math.tanh
 
-object SetpointCalculator {
+interface SetpointCalculator {
+    fun calculateTurretSetpoint(
+        speeds: Translation2d,
+        angleToGoal: Angle,
+        distanceToGoal: Distance,
+    ): Angle
+
+    fun calculateHoodSetpoint(
+        speeds: Translation2d,
+        distanceToGoal: Distance
+    ): Angle
+
+    fun calculateFlywheelSetpoint(
+        speeds: Translation2d,
+        distanceToGoal: Distance
+    ): AngularVelocity
+}
+
+class GenericSetpointCalculator : SetpointCalculator {
     private var kStaticCalibration = 0.97
     private var kMovingCalibration = 0.05
 
-    fun calculateTurretSetpoint(
+    override fun calculateTurretSetpoint(
         speeds: Translation2d,
         angleToGoal: Angle,
         distanceToGoal: Distance,
@@ -48,7 +66,7 @@ object SetpointCalculator {
         return constrainedWithCompensation
     }
 
-    fun calculateHoodSetpoint(
+    override fun calculateHoodSetpoint(
         speeds: Translation2d,
         distanceToGoal: Distance
     ): Angle {
@@ -61,7 +79,7 @@ object SetpointCalculator {
                     .deg)
     }
 
-    fun calculateFlywheelSetpoint(
+    override fun calculateFlywheelSetpoint(
         speeds: Translation2d,
         distanceToGoal: Distance
     ): AngularVelocity {
