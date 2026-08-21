@@ -44,7 +44,6 @@ object Flywheel : Mechanism() {
 
     var setpoint = 0.rps
     val atSetpoint = Trigger {
-        Logger.recordOutput("someValue", Timer.getTimestamp())
         mainMotor.inputs.velocity.isNear(setpoint, TOLERANCE)
     }
 
