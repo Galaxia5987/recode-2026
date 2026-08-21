@@ -10,7 +10,7 @@ class MechanismProcessorProvider : SymbolProcessorProvider {
     ): SymbolProcessor {
         return MechanismProcessor(
             codeGenerator = environment.codeGenerator,
-            logger = environment.logger
+            logger = environment.logger,
         )
     }
 }

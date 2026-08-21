@@ -17,11 +17,12 @@ import kotlin.reflect.KClass
 
 class MechanismProcessor(
     private val codeGenerator: CodeGenerator,
-    private val logger: KSPLogger
+    private val logger: KSPLogger,
 ) : SymbolProcessor {
 
     private val targetBaseClassName = "org.wpilib.command3.Mechanism"
-    // Store ClassName instead of KSClassDeclaration to avoid lifetime exceptions
+    // Store ClassName instead of KSClassDeclaration to avoid lifetime
+    // exceptions
     private val collectedClassNames = mutableSetOf<ClassName>()
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -40,7 +41,9 @@ class MechanismProcessor(
         return emptyList()
     }
 
-    private fun isTargetSubclass(classDeclaration: KSClassDeclaration): Boolean {
+    private fun isTargetSubclass(
+        classDeclaration: KSClassDeclaration
+    ): Boolean {
         return classDeclaration.getAllSuperTypes().any { type ->
             type.declaration.qualifiedName?.asString() == targetBaseClassName
         }
@@ -57,11 +60,14 @@ class MechanismProcessor(
         val fileName = "MechanismRegistry"
         val baseClassClassName = ClassName("org.wpilib.command3", "Mechanism")
 
-        val listType = List::class.asClassName().parameterizedBy(
-            KClass::class.asClassName().parameterizedBy(
-                WildcardTypeName.producerOf(baseClassClassName)
-            )
-        )
+        val listType =
+            List::class.asClassName()
+                .parameterizedBy(
+                    KClass::class.asClassName()
+                        .parameterizedBy(
+                            WildcardTypeName.producerOf(baseClassClassName)
+                        )
+                )
 
         val listBuilder = CodeBlock.builder()
         listBuilder.add("listOf(\n")
@@ -74,27 +80,32 @@ class MechanismProcessor(
         listBuilder.unindent()
         listBuilder.add(")")
 
-        val registryObject = TypeSpec.objectBuilder(fileName)
-            .addProperty(
-                PropertySpec.builder("allMechanisms", listType)
-                    .initializer(listBuilder.build())
-                    .build()
-            )
-            .build()
+        val registryObject =
+            TypeSpec.objectBuilder(fileName)
+                .addProperty(
+                    PropertySpec.builder("allMechanisms", listType)
+                        .initializer(listBuilder.build())
+                        .build()
+                )
+                .build()
 
-        val fileSpec = FileSpec.builder(packageName, fileName)
-            .addType(registryObject)
-            .build()
+        val fileSpec =
+            FileSpec.builder(packageName, fileName)
+                .addType(registryObject)
+                .build()
 
         // Aggregating dependencies without explicit sources
         val dependencies = Dependencies(aggregating = true)
 
-        codeGenerator.createNewFile(
-            dependencies = dependencies,
-            packageName = packageName,
-            fileName = fileName
-        ).writer().use { writer ->
-            fileSpec.writeTo(writer)
-        }
+        codeGenerator
+            .createNewFile(
+                dependencies = dependencies,
+                packageName = packageName,
+                fileName = fileName,
+            )
+            .writer()
+            .use { writer ->
+                fileSpec.writeTo(writer)
+            }
     }
 }
