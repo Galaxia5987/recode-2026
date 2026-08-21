@@ -3,8 +3,8 @@ package frc.robot
 import frc.robot.lib.Mode
 import frc.robot.lib.commands.command
 import frc.robot.lib.commands.emptyCommand
+import frc.robot.lib.commands.onChange
 import frc.robot.lib.commands.unaryPlus
-import frc.robot.lib.commands.waitUntil
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.extensions.rps
 import frc.robot.lib.unified_controller.PS5Gamepad
@@ -16,16 +16,24 @@ import frc.robot.subsystems.preShooter.PreShooter
 import frc.robot.subsystems.shooter.flywheel.Flywheel
 import frc.robot.subsystems.spindexer.Spindexer
 import org.ironmaple.simulation.SimulatedArena
-import org.littletonrobotics.junction.Logger
+import org.littletonrobotics.conduit.ConduitApi
+import org.littletonrobotics.junction.LoggedPowerDistribution
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
 import org.wpilib.command3.Trigger
+import org.wpilib.driverstation.Alert
 import org.wpilib.smartdashboard.SendableChooser
-import org.wpilib.system.Timer
 
 object RobotContainer {
     private val driverController = PS5Gamepad(0)
     private val autoChooser: LoggedDashboardChooser<Command>
+
+    private val batteryLowAlert = Alert("Battery is running low!", Alert.Level.MEDIUM).also {
+        val BATTERY_LOW_VOLTAGE = 12.3
+        val isBatteryLow = { ConduitApi.getInstance().pdpVoltage < BATTERY_LOW_VOLTAGE }
+        Trigger(isBatteryLow).onChange(command { it.set(isBatteryLow()) }.named("changeBatteryLowAlert"))
+    }
+
 
     init {
         drive // Ensure Drive is initialized
