@@ -11,6 +11,7 @@ import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.subsystems.drive.DriveCommands
 import frc.robot.subsystems.intake.extender.Extender
 import frc.robot.subsystems.intake.roller.Roller
+import frc.robot.subsystems.leds.Leds
 import frc.robot.subsystems.preShooter.PreShooter
 import frc.robot.subsystems.shooter.flywheel.Flywheel
 import frc.robot.subsystems.spindexer.Spindexer
@@ -49,6 +50,7 @@ object RobotContainer {
         Roller
         Spindexer
         PreShooter
+        Leds
     }
 
     private fun configureDefaultCommands() {
