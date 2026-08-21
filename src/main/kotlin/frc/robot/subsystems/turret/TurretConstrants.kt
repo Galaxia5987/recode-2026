@@ -17,8 +17,8 @@ val REAL_GAINS = Gains(kP = 0.5, kD = 0.075)
 const val RATIO = 1.0
 val ENCODER_ID = 0
 
-val forwardLimit = 360.deg // I made it a separate parameter for ease of use
-val reverseLimit = 0.0.rot
+val FORWARD_LIMIT = 360.deg // I made it a separate parameter for ease of use
+val REVERSE_LIMIT = 0.0.rot
 
 val ENCODER_CONFIG =
     CANcoderConfiguration().apply {
@@ -45,9 +45,9 @@ val CONFIG =
             SoftwareLimitSwitchConfigs().apply {
                 ForwardSoftLimitEnable = true
                 ForwardSoftLimitThreshold =
-                    forwardLimit[rot] // The thresholds work in rotations.
+                    FORWARD_LIMIT[rot] // The thresholds work in rotations.
                 ReverseSoftLimitEnable = true
-                ReverseSoftLimitThreshold = reverseLimit[rot]
+                ReverseSoftLimitThreshold = REVERSE_LIMIT[rot]
             }
 
         Feedback =
