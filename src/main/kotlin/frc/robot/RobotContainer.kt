@@ -7,6 +7,7 @@ import frc.robot.lib.commands.onChange
 import frc.robot.lib.commands.unaryPlus
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.extensions.rps
+import frc.robot.lib.extensions.sec
 import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.subsystems.drive.DriveCommands
 import frc.robot.subsystems.intake.extender.Extender
@@ -17,7 +18,6 @@ import frc.robot.subsystems.shooter.flywheel.Flywheel
 import frc.robot.subsystems.spindexer.Spindexer
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.conduit.ConduitApi
-import org.littletonrobotics.junction.LoggedPowerDistribution
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
 import org.wpilib.command3.Trigger
@@ -31,7 +31,7 @@ object RobotContainer {
     private val batteryLowAlert = Alert("Battery is running low!", Alert.Level.MEDIUM).also {
         val BATTERY_LOW_VOLTAGE = 12.3
         val isBatteryLow = { ConduitApi.getInstance().pdpVoltage < BATTERY_LOW_VOLTAGE }
-        Trigger(isBatteryLow).onChange(command { it.set(isBatteryLow()) }.named("changeBatteryLowAlert"))
+        Trigger(isBatteryLow).debounce(2.sec).onChange(command { it.set(isBatteryLow()) }.named("changeBatteryLowAlert"))
     }
 
 
