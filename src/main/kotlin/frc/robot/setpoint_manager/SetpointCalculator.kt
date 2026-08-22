@@ -48,7 +48,10 @@ enum class ShootingTarget(val pose: Pose2d) {
 
 // This function checks if compensating for speed would trigger a large turn of
 // the turret.
+
+const val OVERCOMPENSATION_THRESHOLD = 180
+
 fun Angle.accountForOvercompensation(angleToGoal: Angle): Angle {
-    if (abs(this[deg] - angleToGoal[deg]) > 180) return angleToGoal
+    if (abs(this[deg] - angleToGoal[deg]) > OVERCOMPENSATION_THRESHOLD) return angleToGoal
     return this
 }
