@@ -26,7 +26,9 @@ object SetpointManager {
         "SetpointManager/calibrationMode",
         false
     )
+    @LoggedOutput(path = "SetpointManager", level = LogLevel.COMP)
     var setpointCalculatorType = SetpointCalculatorType.SHOOTING
+    @LoggedOutput(path = "SetpointManager", level = LogLevel.COMP)
     var shootingTarget: ShootingTarget = ShootingTarget.HUB
         set(value) {
             field = value
