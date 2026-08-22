@@ -8,13 +8,7 @@ import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.unaryPlus
 import frc.robot.lib.commands.waitUntil
-import frc.robot.lib.createDisableTriggerForCoast
-import frc.robot.lib.extensions.deg_ps
-import frc.robot.lib.extensions.get
-import frc.robot.lib.extensions.log
-import frc.robot.lib.extensions.meters
-import frc.robot.lib.extensions.sec
-import frc.robot.lib.extensions.volts
+import frc.robot.lib.extensions.*
 import frc.robot.lib.universal_motor.LoggedMotorInputs
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command

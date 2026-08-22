@@ -4,18 +4,10 @@ import frc.robot.lib.Mode
 import frc.robot.lib.commands.command
 import frc.robot.lib.commands.emptyCommand
 import frc.robot.lib.commands.onChange
-import frc.robot.lib.commands.unaryPlus
 import frc.robot.lib.extensions.enableAutoLogOutputFor
-import frc.robot.lib.extensions.rps
 import frc.robot.lib.extensions.sec
 import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.subsystems.drive.DriveCommands
-import frc.robot.subsystems.intake.extender.Extender
-import frc.robot.subsystems.intake.roller.Roller
-import frc.robot.subsystems.leds.Leds
-import frc.robot.subsystems.preShooter.PreShooter
-import frc.robot.subsystems.shooter.flywheel.Flywheel
-import frc.robot.subsystems.spindexer.Spindexer
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.conduit.ConduitApi
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
@@ -53,12 +45,6 @@ object RobotContainer {
         }
 
         enableAutoLogOutputFor(this)
-        Flywheel
-        Extender
-        Roller
-        Spindexer
-        PreShooter
-        Leds
     }
 
     private fun configureDefaultCommands() {
@@ -72,28 +58,6 @@ object RobotContainer {
 
     private fun configureButtonBindings() {
         driverController.create().onTrue(DriveCommands.resetGyro())
-        driverController.rightBumper().onTrue(command {
-            +[Extender.open(), Roller.intake()]
-        }.named("openIntake")).onFalse(
-            command {
-                +[Extender.close(), Roller.stop()]
-            }.named("closeIntake")
-        )
-
-        val dontShoot = driverController.leftTrigger()
-        val shouldShoot = dontShoot.negate()
-        val shootVelocity = 35.rps
-
-        shouldShoot.onTrue(command {
-            +Flywheel.setVelocity(shootVelocity)
-            +[Spindexer.convey(), PreShooter.convey()]
-        }.named("Shoot")).onFalse(
-            command {
-                +Flywheel.setVelocity(0.rps)
-                +Spindexer.stop()
-                +PreShooter.stop()
-            }.named("StopShooting")
-        )
     }
 
     fun getAutonomousCommand(): Command = autoChooser.get()
