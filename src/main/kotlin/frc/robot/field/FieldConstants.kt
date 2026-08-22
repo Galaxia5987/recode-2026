@@ -21,8 +21,9 @@ val HUB_TRANSLATION: Translation2d by periodic {
 
 private val OUTPOST_FEED_TRANSLATION = Translation2d(2.607.m, 1.6.m)
 
-val OUTPOST_LOCATION: Translation2d
-    get() = OUTPOST_FEED_TRANSLATION.flipIfNeeded()
+val OUTPOST_LOCATION: Translation2d by periodic {
+    OUTPOST_FEED_TRANSLATION.flipIfNeeded()
+}
 
 private val DEPOT_TRANSLATION_BLUE =
     Translation2d(
@@ -30,8 +31,9 @@ private val DEPOT_TRANSLATION_BLUE =
         FlippingUtil.fieldSizeY.m - OUTPOST_FEED_TRANSLATION.measureY,
     )
 
-val DEPOT_TRANSLATION: Translation2d
-    get() = DEPOT_TRANSLATION_BLUE.flipIfNeeded()
+val DEPOT_TRANSLATION: Translation2d by periodic {
+    DEPOT_TRANSLATION_BLUE.flipIfNeeded()
+}
 
 private val ALLIANCE_ZONE_BLUE_RECTANGLE =
     Rectangle2d(
@@ -45,17 +47,20 @@ private val EXTENDED_ALLIANCE_ZONE_BLUE_RECTANGLE =
         Translation2d(EXTENDED_ALLIANCE_ZONE_WIDTH, Int.MAX_VALUE.m),
     )
 
-val ALLIANCE_ZONE: Rectangle2d
-    get() = ALLIANCE_ZONE_BLUE_RECTANGLE.flipIfNeeded()
+val ALLIANCE_ZONE: Rectangle2d by periodic {
+    ALLIANCE_ZONE_BLUE_RECTANGLE.flipIfNeeded()
+}
 
-val EXTENDED_ALLIANCE_ZONE: Rectangle2d
-    get() = EXTENDED_ALLIANCE_ZONE_BLUE_RECTANGLE.flipIfNeeded()
+val EXTENDED_ALLIANCE_ZONE: Rectangle2d by periodic {
+    EXTENDED_ALLIANCE_ZONE_BLUE_RECTANGLE.flipIfNeeded()
+}
 
 private val CLIMB_RECTANGLE_BLUE =
     Rectangle2d(Translation2d(0.0, 3.113), Translation2d(1.060, 4.363))
 
-val CLIMB_RECTANGLE: Rectangle2d
-    get() = CLIMB_RECTANGLE_BLUE.flipIfNeeded()
+val CLIMB_RECTANGLE: Rectangle2d by periodic {
+    CLIMB_RECTANGLE_BLUE.flipIfNeeded()
+}
 
 private val OUTPOST_CROSS_LINE_BLUE_RECTANGLE =
     Rectangle2d(
@@ -63,8 +68,9 @@ private val OUTPOST_CROSS_LINE_BLUE_RECTANGLE =
         Translation2d(FlippingUtil.fieldSizeX, FlippingUtil.fieldSizeY / 2),
     )
 
-val OUTPOST_CROSS_LINE_RECTANGLE: Rectangle2d
-    get() = OUTPOST_CROSS_LINE_BLUE_RECTANGLE.flipIfNeeded()
+val OUTPOST_CROSS_LINE_RECTANGLE: Rectangle2d by periodic {
+    OUTPOST_CROSS_LINE_BLUE_RECTANGLE.flipIfNeeded()
+}
 
 private val DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE_BLUE: Rectangle2d =
     Rectangle2d(Translation2d(7.852, 1.1), Translation2d(4.05, 0.2))
@@ -72,8 +78,10 @@ private val DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE_BLUE: Rectangle2d =
 private val OUTPOST_SIDE_DOUBLE_FEEDING_RECTANGLE_BLUE: Rectangle2d =
     DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE_BLUE.mirror()
 
-val DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE: Rectangle2d
-    get() = DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE_BLUE.flipIfNeeded()
+val DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE: Rectangle2d by periodic {
+    DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE_BLUE.flipIfNeeded()
+}
 
-val OUTPOST_SIDE_DOUBLE_FEEDING_RECTANGLE: Rectangle2d
-    get() = OUTPOST_SIDE_DOUBLE_FEEDING_RECTANGLE_BLUE.flipIfNeeded()
+val OUTPOST_SIDE_DOUBLE_FEEDING_RECTANGLE: Rectangle2d by periodic {
+    OUTPOST_SIDE_DOUBLE_FEEDING_RECTANGLE_BLUE.flipIfNeeded()
+}
