@@ -4,6 +4,7 @@ import frc.robot.lib.Mode
 import frc.robot.lib.commands.command
 import frc.robot.lib.commands.emptyCommand
 import frc.robot.lib.commands.onChange
+import frc.robot.lib.commands.initializeAllMechanisms
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.extensions.sec
 import frc.robot.lib.unified_controller.PS5Gamepad
@@ -45,6 +46,7 @@ object RobotContainer {
         }
 
         enableAutoLogOutputFor(this)
+        initializeAllMechanisms()
     }
 
     private fun configureDefaultCommands() {
