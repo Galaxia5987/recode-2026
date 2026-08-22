@@ -16,7 +16,7 @@ object CalibrationSetpointCalculator : SetpointCalculator {
     val calibrationVelocity =
         LoggedNetworkNumber(
             "/Tuning/Flywheel/calibrationFlywheelVelocity",
-            40.0
+            40.0,
         )
 
     override fun calculateTurretSetpoint(
@@ -32,12 +32,12 @@ object CalibrationSetpointCalculator : SetpointCalculator {
         distanceToGoal: Distance,
     ): Angle {
         return (90.deg -
-                calculatePitch(
+            calculatePitch(
                     distanceToGoal[m],
                     speeds.x,
                     speeds.y,
                 )
-                    .deg)
+                .deg)
     }
 
     override fun calculateFlywheelSetpoint(

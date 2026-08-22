@@ -27,7 +27,7 @@ val OUTPOST_LOCATION: Translation2d
 private val DEPOT_TRANSLATION_BLUE =
     Translation2d(
         OUTPOST_FEED_TRANSLATION.measureX,
-        FlippingUtil.fieldSizeY.m - OUTPOST_FEED_TRANSLATION.measureY
+        FlippingUtil.fieldSizeY.m - OUTPOST_FEED_TRANSLATION.measureY,
     )
 
 val DEPOT_TRANSLATION: Translation2d
@@ -36,13 +36,13 @@ val DEPOT_TRANSLATION: Translation2d
 private val ALLIANCE_ZONE_BLUE_RECTANGLE =
     Rectangle2d(
         Translation2d(0.m, Int.MIN_VALUE.m),
-        Translation2d(ALLIANCE_ZONE_WIDTH, Int.MAX_VALUE.m)
+        Translation2d(ALLIANCE_ZONE_WIDTH, Int.MAX_VALUE.m),
     )
 
 private val EXTENDED_ALLIANCE_ZONE_BLUE_RECTANGLE =
     Rectangle2d(
         Translation2d(0.m, Int.MIN_VALUE.m),
-        Translation2d(EXTENDED_ALLIANCE_ZONE_WIDTH, Int.MAX_VALUE.m)
+        Translation2d(EXTENDED_ALLIANCE_ZONE_WIDTH, Int.MAX_VALUE.m),
     )
 
 val ALLIANCE_ZONE: Rectangle2d
@@ -60,7 +60,7 @@ val CLIMB_RECTANGLE: Rectangle2d
 private val OUTPOST_CROSS_LINE_BLUE_RECTANGLE =
     Rectangle2d(
         Translation2d(0.m, Int.MIN_VALUE.m),
-        Translation2d(FlippingUtil.fieldSizeX, FlippingUtil.fieldSizeY / 2)
+        Translation2d(FlippingUtil.fieldSizeX, FlippingUtil.fieldSizeY / 2),
     )
 
 val OUTPOST_CROSS_LINE_RECTANGLE: Rectangle2d

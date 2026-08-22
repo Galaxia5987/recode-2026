@@ -1,24 +1,18 @@
 package frc.robot.setpoint_manager
 
 import frc.robot.drive
-import frc.robot.field.DEPOT_TRANSLATION
-import frc.robot.field.HUB_TRANSLATION
 import frc.robot.field.inClimbRectangle
 import frc.robot.field.inExtendedAllianceZone
 import frc.robot.field.isCloserToDepotSide
 import frc.robot.isAuto
 import frc.robot.lib.ToTranslation2d
 import frc.robot.lib.commands.command
-import frc.robot.lib.extensions.CacheManager
-import frc.robot.lib.extensions.log
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.not
 import frc.robot.lib.extensions.onTrue
 import frc.robot.lib.extensions.periodic
 import frc.robot.lib.extensions.rotationToPoint
-import frc.robot.lib.extensions.toPose
 import frc.robot.setpoint_manager.SetpointManager.currentGoal
-import frc.robot.setpoint_manager.calculators.ShootingSetpointCalculator
 import org.team5987.annotation.LogLevel
 import org.team5987.annotation.LoggedOutput
 import org.wpilib.math.geometry.Pose2d
@@ -74,16 +68,19 @@ val compensatedTurretDistanceFromGoal: Distance by periodic {
 
 object SetpointManager {
     val currentGoal: Pose2d by periodic { shootingTarget.pose }
-    val calculator: SetpointCalculator by periodic { setpointCalculatorType.calculator }
+    val calculator: SetpointCalculator by periodic {
+        setpointCalculatorType.calculator
+    }
     var setpointCalculatorType = SetpointCalculatorType.SHOOTING
     var shootingTarget: ShootingTarget = ShootingTarget.HUB
         set(value) {
             field = value
 
-            setpointCalculatorType = when (value) {
-                ShootingTarget.HUB -> SetpointCalculatorType.SHOOTING
-                else -> SetpointCalculatorType.FEEDING
-            }
+            setpointCalculatorType =
+                when (value) {
+                    ShootingTarget.HUB -> SetpointCalculatorType.SHOOTING
+                    else -> SetpointCalculatorType.FEEDING
+                }
         }
 
     val turretSetpoint: Angle by periodic {
@@ -113,8 +110,9 @@ object SetpointManager {
             .or(isAuto)
             .onTrue(
                 command {
-                    shootingTarget = ShootingTarget.HUB
-                }.named("SetpointManager/targetHub")
+                        shootingTarget = ShootingTarget.HUB
+                    }
+                    .named("SetpointManager/targetHub")
             )
 
     private val goalDepotTrigger =
@@ -124,8 +122,9 @@ object SetpointManager {
             .and(isAuto.negate())
             .onTrue(
                 command {
-                    shootingTarget = ShootingTarget.DEPOT
-                }.named("SetpointManager/targetDepot")
+                        shootingTarget = ShootingTarget.DEPOT
+                    }
+                    .named("SetpointManager/targetDepot")
             )
 
     private val goalOutpostTrigger =
@@ -136,7 +135,8 @@ object SetpointManager {
             .and(isAuto.negate())
             .onTrue(
                 command {
-                    shootingTarget = ShootingTarget.OUTPOST
-                }.named("SetpointManager/targetOutpost")
+                        shootingTarget = ShootingTarget.OUTPOST
+                    }
+                    .named("SetpointManager/targetOutpost")
             )
 }

@@ -10,11 +10,11 @@ import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.rps
 import frc.robot.setpoint_manager.SetpointCalculator
 import frc.robot.setpoint_manager.accountForOvercompensation
+import kotlin.math.tanh
 import org.wpilib.math.geometry.Translation2d
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
-import kotlin.math.tanh
 
 object ShootingSetpointCalculator : SetpointCalculator {
     private val kStaticCalibration = 0.97
@@ -28,12 +28,12 @@ object ShootingSetpointCalculator : SetpointCalculator {
 
         val shootingGoal =
             angleToGoal -
-                    calculateYaw(
+                calculateYaw(
                         distanceToGoal[m],
                         speeds.x,
                         speeds.y,
                     )
-                        .deg
+                    .deg
 
         // todo: constrain angleToGoal once turret class is implemented
         return shootingGoal.accountForOvercompensation(angleToGoal)

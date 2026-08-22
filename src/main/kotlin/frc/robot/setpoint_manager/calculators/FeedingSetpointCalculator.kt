@@ -25,12 +25,12 @@ object FeedingSetpointCalculator : SetpointCalculator {
     ): Angle {
         val compensatedFeedingGoal =
             angleToGoal -
-                    calculateFeedingYaw(
+                calculateFeedingYaw(
                         distanceToGoal[m],
                         speeds.x,
                         speeds.y,
                     )
-                        .deg
+                    .deg
 
         // todo: constrain angleToGoal once turret class is implemented
         return compensatedFeedingGoal.accountForOvercompensation(angleToGoal)
@@ -49,12 +49,12 @@ object FeedingSetpointCalculator : SetpointCalculator {
     ): AngularVelocity {
         val result =
             calculateAngularVelocity(
-                calculateFeedingVelocity(
-                    distanceToGoal[m],
-                    speeds.x,
-                    speeds.y,
+                    calculateFeedingVelocity(
+                        distanceToGoal[m],
+                        speeds.x,
+                        speeds.y,
+                    )
                 )
-            )
                 .rps
 
         return if (result > MAX_FEED_VELOCITY_RPS) {

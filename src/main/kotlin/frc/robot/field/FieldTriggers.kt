@@ -31,8 +31,8 @@ val isCloserToDepotSide: Trigger =
 
 val isInDoubleFeedingZone: Trigger =
     Trigger {
-        DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE.contains(drive.pose.translation)
-    }
+            DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE.contains(drive.pose.translation)
+        }
         .or {
             OUTPOST_SIDE_DOUBLE_FEEDING_RECTANGLE.contains(
                 drive.pose.translation
@@ -47,9 +47,9 @@ val ROTATION_TOLERANCE = 30.deg
 
 val isInDoubleFeedingRotation: Trigger =
     Trigger {
-        drive.pose.rotation.measure.isNear(
-            rotationForDoubleFeeding,
-            ROTATION_TOLERANCE
-        )
-    }
+            drive.pose.rotation.measure.isNear(
+                rotationForDoubleFeeding,
+                ROTATION_TOLERANCE,
+            )
+        }
         .logTrigger("$FIELD_LOGGING_PATH/isInDoubleFeedingRotation")
