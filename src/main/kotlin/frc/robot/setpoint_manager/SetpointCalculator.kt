@@ -44,8 +44,8 @@ fun Angle.accountForOvercompensation(angleToGoal: Angle): Angle {
 }
 
 class GenericSetpointCalculator : SetpointCalculator {
-    private var kStaticCalibration = 0.97
-    private var kMovingCalibration = 0.05
+    private val kStaticCalibration = 0.97
+    private val kMovingCalibration = 0.05
 
     override fun calculateTurretSetpoint(
         speeds: Translation2d,
@@ -70,13 +70,13 @@ class GenericSetpointCalculator : SetpointCalculator {
         speeds: Translation2d,
         distanceToGoal: Distance,
     ): Angle {
-        return (90.deg -
+        return (90 -
             calculatePitch(
                     distanceToGoal[m],
                     speeds.x,
                     speeds.y,
-                )
-                .deg)
+                ))
+                .deg
     }
 
     override fun calculateFlywheelSetpoint(

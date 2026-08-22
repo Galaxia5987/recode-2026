@@ -2,13 +2,13 @@ package frc.robot.setpoint_manager
 
 import frc.robot.drive
 import frc.robot.field.HUB_TRANSLATION
+import frc.robot.lib.ToTranslation2d
 import frc.robot.lib.extensions.CacheManager
 import frc.robot.lib.extensions.log
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.periodic
 import frc.robot.lib.extensions.rotationToPoint
 import frc.robot.lib.extensions.toPose
-import frc.robot.lib.to2dVector
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.geometry.Translation2d
@@ -17,13 +17,13 @@ import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
 
 object SetpointManager {
-    private var currentGoal: Pose2d = HUB_TRANSLATION.toPose()
+    private val currentGoal: Pose2d by periodic { HUB_TRANSLATION.toPose() }
     private val calculator: SetpointCalculator = GenericSetpointCalculator()
 
     val turretOrientedChassisSpeeds: Translation2d by periodic {
         // todo: replace with full tangential velocity logic once turret class
         // is implemented
-        drive.chassisSpeeds.to2dVector()
+        drive.chassisSpeeds.ToTranslation2d()
     }
 
     private val turretTranslation: Translation2d by periodic {
