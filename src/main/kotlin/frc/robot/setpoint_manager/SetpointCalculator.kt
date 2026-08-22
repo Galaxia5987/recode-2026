@@ -40,10 +40,18 @@ enum class SetpointCalculatorType(val calculator: SetpointCalculator) {
     CALIBRATION(CalibrationSetpointCalculator),
 }
 
-enum class ShootingTarget(val pose: Pose2d) {
-    HUB(HUB_TRANSLATION.toPose()),
-    DEPOT(DEPOT_TRANSLATION.toPose()),
-    OUTPOST(OUTPOST_LOCATION.toPose()),
+enum class ShootingTarget {
+    HUB,
+    DEPOT,
+    OUTPOST;
+
+    val pose: Pose2d
+        get() =
+            when (this) {
+                HUB -> HUB_TRANSLATION.toPose()
+                DEPOT -> DEPOT_TRANSLATION.toPose()
+                OUTPOST -> OUTPOST_LOCATION.toPose()
+            }
 }
 
 // This function checks if compensating for speed would trigger a large turn of
