@@ -4,7 +4,7 @@ import frc.robot.drive
 import frc.robot.lib.IS_RED
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.logTrigger
-import frc.robot.setpoint_manager.turretTranslation
+import frc.robot.subsystems.turret.turretTranslation
 import org.wpilib.command3.Trigger
 import org.wpilib.units.measure.Angle
 
