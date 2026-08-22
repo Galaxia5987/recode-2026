@@ -1,5 +1,6 @@
 package frc.robot
 
+import frc.robot.lib.BasicAlerts
 import frc.robot.lib.Mode
 import frc.robot.lib.commands.emptyCommand
 import frc.robot.lib.commands.initializeAllMechanisms
@@ -34,6 +35,7 @@ object RobotContainer {
 
         enableAutoLogOutputFor(this)
         initializeAllMechanisms()
+        BasicAlerts
     }
 
     private fun configureDefaultCommands() {

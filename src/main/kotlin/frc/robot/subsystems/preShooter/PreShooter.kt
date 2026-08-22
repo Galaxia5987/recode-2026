@@ -1,5 +1,6 @@
 package frc.robot.subsystems.preShooter
 
+import com.ctre.phoenix6.CANBus.systemcore
 import com.ctre.phoenix6.controls.VelocityVoltage
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
@@ -13,6 +14,7 @@ import org.wpilib.command3.Trigger
 object PreShooter : Mechanism(), PreShooterVelocityCommandFactory {
     val motor =
         UniversalTalonFX(
+            canbus = systemcore(0),
             port = PORT,
             gearRatio = GEAR_RATIO,
             config = CONFIG,
@@ -38,7 +40,7 @@ object PreShooter : Mechanism(), PreShooterVelocityCommandFactory {
 
     private fun periodic() {
         motor.periodic()
-        Logger.recordOutput("subsystem/PreShooter/setpoint", setpoint)
-        Logger.recordOutput("subsystem/PreShooter/atSetpoint", atSetpoint)
+        Logger.recordOutput("Subsystems/PreShooter/setpoint", setpoint)
+        Logger.recordOutput("Subsystems/PreShooter/atSetpoint", atSetpoint)
     }
 }
