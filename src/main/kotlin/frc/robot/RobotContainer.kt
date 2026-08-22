@@ -4,6 +4,7 @@ import frc.robot.lib.Mode
 import frc.robot.lib.commands.emptyCommand
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.unified_controller.PS5Gamepad
+import frc.robot.setpoint_manager.SetpointManager
 import frc.robot.subsystems.drive.DriveCommands
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
@@ -16,6 +17,8 @@ object RobotContainer {
 
     init {
         drive // Ensure Drive is initialized
+        SetpointManager
+
         autoChooser =
             LoggedDashboardChooser(
                 "Auto Choices",
