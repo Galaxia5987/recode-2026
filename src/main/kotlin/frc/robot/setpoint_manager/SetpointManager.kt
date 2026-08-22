@@ -1,10 +1,9 @@
 package frc.robot.setpoint_manager
 
 import frc.robot.drive
-import frc.robot.lib.extensions.flipIfNeeded
+import frc.robot.field.HUB_TRANSLATION
 import frc.robot.lib.extensions.log
 import frc.robot.lib.extensions.m
-import frc.robot.lib.extensions.mm
 import frc.robot.lib.extensions.rotationToPoint
 import frc.robot.lib.extensions.toPose
 import frc.robot.lib.to2dVector
@@ -16,17 +15,6 @@ import org.wpilib.units.Units.Meters
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
-
-// here i just added temporary field constants, i imagine we will
-// introduce a fieldconstants.kt file later?
-// todo MOVE THIS
-
-private val HUB_TRANSLATION_BLUE = Translation2d(4620.41.mm, 4034.63.mm)
-
-val HUB_TRANSLATION: Translation2d
-    get() = HUB_TRANSLATION_BLUE.flipIfNeeded()
-
-//
 
 object SetpointManager {
     private var currentGoal: Pose2d = HUB_TRANSLATION.toPose()
