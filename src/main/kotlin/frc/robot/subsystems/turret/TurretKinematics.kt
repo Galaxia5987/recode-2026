@@ -28,13 +28,13 @@ val turretTranslation: Translation2d by periodic {
 }
 
 @LoggedOutput(path = "TurretKinematics", level = LogLevel.COMP)
-private val compensatedTurretTranslation: Translation2d by periodic {
+val compensatedTurretTranslation: Translation2d by periodic {
     val rotatedTurretOffset: Translation2d = drive.pose.translation
     drive.compensatedPose.translation.plus(rotatedTurretOffset)
 }
 
 @LoggedOutput(path = "TurretKinematics", level = LogLevel.COMP)
-private val angleToGoal: Rotation2d by periodic {
+val angleToGoal: Rotation2d by periodic {
     turretTranslation.rotationToPoint(currentGoal.translation)
 }
 
