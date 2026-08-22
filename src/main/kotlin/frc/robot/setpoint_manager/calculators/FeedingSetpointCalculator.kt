@@ -15,7 +15,7 @@ import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
 
-class FeedingSetpointCalculator : SetpointCalculator {
+object FeedingSetpointCalculator : SetpointCalculator {
     private val MAX_FEED_VELOCITY_RPS = 42.rps
 
     override fun calculateTurretSetpoint(

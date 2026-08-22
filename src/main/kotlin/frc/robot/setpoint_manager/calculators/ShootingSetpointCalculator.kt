@@ -16,7 +16,7 @@ import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
 import kotlin.math.tanh
 
-class ShootingSetpointCalculator : SetpointCalculator {
+object ShootingSetpointCalculator : SetpointCalculator {
     private val kStaticCalibration = 0.97
     private val kMovingCalibration = 0.05
 

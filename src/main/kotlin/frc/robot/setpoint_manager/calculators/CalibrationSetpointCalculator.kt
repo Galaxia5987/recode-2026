@@ -6,13 +6,18 @@ import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.rps
 import frc.robot.setpoint_manager.SetpointCalculator
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import org.wpilib.math.geometry.Translation2d
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
 
-class CalibrationSetpointCalculator : SetpointCalculator {
-    val calibrationVelocity = 40.0.rps
+object CalibrationSetpointCalculator : SetpointCalculator {
+    val calibrationVelocity =
+        LoggedNetworkNumber(
+            "/Tuning/Flywheel/calibrationFlywheelVelocity",
+            40.0
+        )
 
     override fun calculateTurretSetpoint(
         speeds: Translation2d,
@@ -39,6 +44,6 @@ class CalibrationSetpointCalculator : SetpointCalculator {
         speeds: Translation2d,
         distanceToGoal: Distance,
     ): AngularVelocity {
-        return calibrationVelocity
+        return calibrationVelocity.get().rps
     }
 }
