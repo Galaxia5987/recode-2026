@@ -5,11 +5,10 @@ import frc.robot.field.inClimbRectangle
 import frc.robot.field.inExtendedAllianceZone
 import frc.robot.field.isCloserToDepotSide
 import frc.robot.isAuto
-import frc.robot.lib.ToTranslation2d
+import frc.robot.lib.toTranslation2d
 import frc.robot.lib.commands.command
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.not
-import frc.robot.lib.extensions.onTrue
 import frc.robot.lib.extensions.periodic
 import frc.robot.lib.extensions.rotationToPoint
 import frc.robot.setpoint_manager.SetpointManager.currentGoal
@@ -28,7 +27,7 @@ import org.wpilib.units.measure.Distance
 val turretOrientedChassisSpeeds: Translation2d by periodic {
     // todo: replace with full tangential velocity logic once turret class
     // is implemented
-    drive.chassisSpeeds.ToTranslation2d()
+    drive.chassisSpeeds.toTranslation2d()
 }
 
 @LoggedOutput(path = "SetpointManager", level = LogLevel.COMP)
@@ -75,6 +74,8 @@ object SetpointManager {
     var shootingTarget: ShootingTarget = ShootingTarget.HUB
         set(value) {
             field = value
+
+            if (setpointCalculatorType == SetpointCalculatorType.CALIBRATION) return
 
             setpointCalculatorType =
                 when (value) {
