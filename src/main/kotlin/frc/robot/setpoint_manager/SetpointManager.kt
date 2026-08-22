@@ -11,6 +11,8 @@ import frc.robot.subsystems.turret.compensatedTurretDistanceFromGoal
 import frc.robot.subsystems.turret.turretOrientedChassisSpeeds
 import frc.robot.subsystems.turret.turretRotationToGoal
 import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean
+import org.team5987.annotation.LogLevel
+import org.team5987.annotation.LoggedOutput
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
@@ -37,6 +39,7 @@ object SetpointManager {
                 }
         }
 
+    @LoggedOutput(path = "SetpointManager", level = LogLevel.COMP)
     val turretSetpoint: Angle by periodic {
         calculator.calculateTurretSetpoint(
             turretOrientedChassisSpeeds,
@@ -45,6 +48,7 @@ object SetpointManager {
         )
     }
 
+    @LoggedOutput(path = "SetpointManager", level = LogLevel.COMP)
     val hoodSetpoint: Angle by periodic {
         calculator.calculateHoodSetpoint(
             turretOrientedChassisSpeeds,
@@ -52,6 +56,7 @@ object SetpointManager {
         )
     }
 
+    @LoggedOutput(path = "SetpointManager", level = LogLevel.COMP)
     val flywheelSetpoint: AngularVelocity by periodic {
         calculator.calculateFlywheelSetpoint(
             turretOrientedChassisSpeeds,
