@@ -71,12 +71,12 @@ class GenericSetpointCalculator : SetpointCalculator {
         distanceToGoal: Distance,
     ): Angle {
         return (90 -
-            calculatePitch(
+                calculatePitch(
                     distanceToGoal[m],
                     speeds.x,
                     speeds.y,
                 ))
-                .deg
+            .deg
     }
 
     override fun calculateFlywheelSetpoint(
