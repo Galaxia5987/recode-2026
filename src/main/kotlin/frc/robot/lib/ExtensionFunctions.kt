@@ -211,5 +211,5 @@ fun Pose2d.estimateAt(
                 0.5 * seconds * seconds * fieldOrientedAcceleration.vx,
         )
 
-fun ChassisVelocities.ToTranslation2d(): Translation2d =
+fun ChassisVelocities.toTranslation2d(): Translation2d =
     Translation2d(this.vx, this.vy)
