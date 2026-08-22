@@ -7,10 +7,10 @@ import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.mm
 import frc.robot.lib.extensions.rotationToPoint
 import frc.robot.lib.extensions.toPose
+import frc.robot.lib.to2dVector
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.geometry.Translation2d
-import org.wpilib.math.kinematics.ChassisVelocities
 import org.wpilib.units.Units.Degrees
 import org.wpilib.units.Units.Meters
 import org.wpilib.units.measure.Angle
@@ -27,10 +27,6 @@ val HUB_TRANSLATION: Translation2d
     get() = HUB_TRANSLATION_BLUE.flipIfNeeded()
 
 //
-
-// should we really keep this function here? maybe there's another place for it?
-fun ChassisVelocities.to2dVector(): Translation2d =
-    Translation2d(this.vx, this.vy)
 
 object SetpointManager {
     private var currentGoal: Pose2d = HUB_TRANSLATION.toPose()
