@@ -52,9 +52,8 @@ class GenericSetpointCalculator : SetpointCalculator {
                     )
                     .deg
 
-        val staticShootingGoal = angleToGoal
-        if (abs(compensatedShootingGoal[deg] - staticShootingGoal[deg]) > 180)
-            return staticShootingGoal
+        if (abs(compensatedShootingGoal[deg] - angleToGoal[deg]) > 180)
+            return angleToGoal
         return compensatedShootingGoal
     }
 
