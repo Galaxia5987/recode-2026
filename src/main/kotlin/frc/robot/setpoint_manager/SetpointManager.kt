@@ -66,8 +66,8 @@ val compensatedTurretDistanceFromGoal: Distance by periodic {
 // TODO: MOVE ALL OF THE DEFINTIONS ABOVE TO THE TURRET SUBSYSTEM
 
 object SetpointManager {
-    val currentGoal: Pose2d by periodic { shootingTarget.pose }
-    val calculator: SetpointCalculator by periodic {
+    private val currentGoal: Pose2d by periodic { shootingTarget.pose }
+    private val calculator: SetpointCalculator by periodic {
         setpointCalculatorType.calculator
     }
     var setpointCalculatorType = SetpointCalculatorType.SHOOTING
