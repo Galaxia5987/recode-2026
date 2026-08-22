@@ -12,8 +12,6 @@ import frc.robot.lib.to2dVector
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.geometry.Translation2d
-import org.wpilib.units.Units.Degrees
-import org.wpilib.units.Units.Meters
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
@@ -23,7 +21,8 @@ object SetpointManager {
     private val calculator: SetpointCalculator = GenericSetpointCalculator()
 
     val turretOrientedChassisSpeeds: Translation2d by periodic {
-        // todo: replace with full tangential velocity logic once turret class is implemented
+        // todo: replace with full tangential velocity logic once turret class
+        // is implemented
         drive.chassisSpeeds.to2dVector()
     }
 
@@ -80,10 +79,12 @@ object SetpointManager {
         CacheManager.invalidateAll()
 
         mapOf(
-            "angleToGoal" to angleToGoal,
-            "turretDistanceFromGoal" to turretDistanceFromGoal,
-            "turretRotationToGoal" to turretRotationToGoal,
-            "compensatedTurretDistanceFromGoal" to compensatedTurretDistanceFromGoal,
-        ).log("SetpointManager")
+                "angleToGoal" to angleToGoal,
+                "turretDistanceFromGoal" to turretDistanceFromGoal,
+                "turretRotationToGoal" to turretRotationToGoal,
+                "compensatedTurretDistanceFromGoal" to
+                    compensatedTurretDistanceFromGoal,
+            )
+            .log("SetpointManager")
     }
 }

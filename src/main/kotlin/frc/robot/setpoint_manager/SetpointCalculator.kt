@@ -11,12 +11,12 @@ import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.rps
+import kotlin.math.abs
 import kotlin.math.tanh
 import org.wpilib.math.geometry.Translation2d
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
-import kotlin.math.abs
 
 interface SetpointCalculator {
     fun calculateTurretSetpoint(
@@ -36,10 +36,10 @@ interface SetpointCalculator {
     ): AngularVelocity
 }
 
-// This function checks if compensating for speed would trigger a large turn of the turret.
+// This function checks if compensating for speed would trigger a large turn of
+// the turret.
 fun Angle.accountForOvercompensation(angleToGoal: Angle): Angle {
-    if (abs(this[deg] - angleToGoal[deg]) > 180)
-        return angleToGoal
+    if (abs(this[deg] - angleToGoal[deg]) > 180) return angleToGoal
     return this
 }
 
@@ -104,13 +104,13 @@ class FeedingSetpointCalculator : SetpointCalculator {
         distanceToGoal: Distance,
     ): Angle {
         val compensatedFeedingGoal =
-                angleToGoal -
-                        calculateFeedingYaw(
-                            distanceToGoal[m],
-                            speeds.x,
-                            speeds.y,
-                        )
-                            .deg
+            angleToGoal -
+                calculateFeedingYaw(
+                        distanceToGoal[m],
+                        speeds.x,
+                        speeds.y,
+                    )
+                    .deg
 
         // todo: constrain angleToGoal once turret class is implemented
         return compensatedFeedingGoal.accountForOvercompensation(angleToGoal)
@@ -129,12 +129,13 @@ class FeedingSetpointCalculator : SetpointCalculator {
     ): AngularVelocity {
         val result =
             calculateAngularVelocity(
-                calculateFeedingVelocity(
-                    distanceToGoal[m],
-                    speeds.x,
-                    speeds.y,
+                    calculateFeedingVelocity(
+                        distanceToGoal[m],
+                        speeds.x,
+                        speeds.y,
+                    )
                 )
-            ).rps
+                .rps
 
         return if (result > MAX_FEED_VELOCITY_RPS) {
             MAX_FEED_VELOCITY_RPS
@@ -160,12 +161,12 @@ class CalibrationSetpointCalculator : SetpointCalculator {
         distanceToGoal: Distance,
     ): Angle {
         return (90.deg -
-                calculatePitch(
+            calculatePitch(
                     distanceToGoal[m],
                     speeds.x,
                     speeds.y,
                 )
-                    .deg)
+                .deg)
     }
 
     override fun calculateFlywheelSetpoint(
