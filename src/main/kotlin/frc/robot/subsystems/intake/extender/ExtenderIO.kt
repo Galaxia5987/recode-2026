@@ -1,6 +1,5 @@
 package frc.robot.subsystems.intake.extender
 
-import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.CANBus.systemcore
 import com.ctre.phoenix6.controls.ControlRequest
 import frc.robot.lib.createDisableTriggerForCoast
@@ -36,6 +35,7 @@ open class ExtenderIOReal : ExtenderIO {
                     controlRequest = true,
                 ),
         )
+
     init {
         createDisableTriggerForCoast(motor)
     }

@@ -15,9 +15,7 @@ import org.wpilib.units.measure.AngularVelocity
 const val PORT = 12
 
 val SETPOINT_TOLERANCE = 0.1.rps
-val GAINS =
-    Gains(kP = 0.3, kS = 0.3, kV = 0.115)
-
+val GAINS = Gains(kP = 0.3, kS = 0.3, kV = 0.115)
 
 val SIM_GAINS =
     Gains(

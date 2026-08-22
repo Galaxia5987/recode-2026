@@ -1,6 +1,5 @@
 package frc.robot.subsystems.intake.extender
 
-import com.ctre.phoenix6.configs.FeedbackConfigs
 import com.ctre.phoenix6.configs.MotorOutputConfigs
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
@@ -34,7 +33,6 @@ val CLOSING_TIMEOUT = 3.sec
 val CLOSING_MIN_VELOCITY: AngularVelocity = (-300).deg_ps
 
 val FORWARD_LIMIT = 12.15.rot
-
 
 val CONFIG =
     TalonFXConfiguration().apply {

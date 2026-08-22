@@ -12,7 +12,6 @@ import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
-import org.wpilib.system.Timer
 import org.wpilib.units.measure.AngularVelocity
 
 object Flywheel : Mechanism() {
@@ -73,6 +72,9 @@ object Flywheel : Mechanism() {
 
         Logger.recordOutput("Subsystems/Flywheel/atSetpoint", atSetpoint)
         Logger.recordOutput("Subsystems/Flywheel/setpoint", setpoint)
-        Logger.recordOutput("Subsystems/Flywheel/setpointError", setpoint - mainMotor.inputs.velocity)
+        Logger.recordOutput(
+            "Subsystems/Flywheel/setpointError",
+            setpoint - mainMotor.inputs.velocity,
+        )
     }
 }

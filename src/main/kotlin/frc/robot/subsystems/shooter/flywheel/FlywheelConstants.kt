@@ -8,7 +8,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue
 import frc.robot.lib.Gains
 import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.amps
-import frc.robot.lib.extensions.deg_ps
 import frc.robot.lib.extensions.rps
 import frc.robot.lib.universal_motor.MotorLogConfig
 

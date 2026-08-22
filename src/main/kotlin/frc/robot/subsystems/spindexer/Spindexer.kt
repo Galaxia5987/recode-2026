@@ -15,7 +15,9 @@ object Spindexer : Mechanism(), SpindexerVelocitiesCommandFactory {
     private val motor =
         UniversalTalonFX(
             canbus = systemcore(0),
-            port = PORT, config = MOTOR_CONFIG, simGains = SIM_GAINS
+            port = PORT,
+            config = MOTOR_CONFIG,
+            simGains = SIM_GAINS,
         )
     private val velocityRequest = VelocityVoltage(0.0)
 
