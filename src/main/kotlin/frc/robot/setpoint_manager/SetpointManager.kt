@@ -10,6 +10,7 @@ import frc.robot.lib.extensions.periodic
 import frc.robot.subsystems.turret.compensatedTurretDistanceFromGoal
 import frc.robot.subsystems.turret.turretOrientedChassisSpeeds
 import frc.robot.subsystems.turret.turretRotationToGoal
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
@@ -19,16 +20,19 @@ object SetpointManager {
     val calculator: SetpointCalculator by periodic {
         setpointCalculatorType.calculator
     }
+    var calibrationMode = LoggedNetworkBoolean(
+        "SetpointManager/calibrationMode",
+        false
+    )
     var setpointCalculatorType = SetpointCalculatorType.SHOOTING
     var shootingTarget: ShootingTarget = ShootingTarget.HUB
         set(value) {
             field = value
 
-            if (setpointCalculatorType == SetpointCalculatorType.CALIBRATION) return
-
             setpointCalculatorType =
-                when (value) {
-                    ShootingTarget.HUB -> SetpointCalculatorType.SHOOTING
+                when {
+                    calibrationMode.get() -> SetpointCalculatorType.CALIBRATION
+                    shootingTarget == ShootingTarget.HUB -> SetpointCalculatorType.SHOOTING
                     else -> SetpointCalculatorType.FEEDING
                 }
         }
