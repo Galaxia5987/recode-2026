@@ -1,18 +1,11 @@
 package frc.robot.setpoint_manager
 
-import frc.robot.FeedingShotCalculator.calculateFeedingPitch
-import frc.robot.FeedingShotCalculator.calculateFeedingVelocity
-import frc.robot.FeedingShotCalculator.calculateFeedingYaw
-import frc.robot.ShotCalculator.calculateAngularVelocity
-import frc.robot.ShotCalculator.calculatePitch
-import frc.robot.ShotCalculator.calculateVelocity
-import frc.robot.ShotCalculator.calculateYaw
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.get
-import frc.robot.lib.extensions.m
-import frc.robot.lib.extensions.rps
+import frc.robot.setpoint_manager.calculators.CalibrationSetpointCalculator
+import frc.robot.setpoint_manager.calculators.FeedingSetpointCalculator
+import frc.robot.setpoint_manager.calculators.ShootingSetpointCalculator
 import kotlin.math.abs
-import kotlin.math.tanh
 import org.wpilib.math.geometry.Translation2d
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
@@ -34,6 +27,12 @@ interface SetpointCalculator {
         speeds: Translation2d,
         distanceToGoal: Distance,
     ): AngularVelocity
+}
+
+enum class SetpointCalculatorType(val calculator: SetpointCalculator) {
+    SHOOTING(ShootingSetpointCalculator),
+    FEEDING(FeedingSetpointCalculator),
+    CALIBRATION(CalibrationSetpointCalculator)
 }
 
 // This function checks if compensating for speed would trigger a large turn of
