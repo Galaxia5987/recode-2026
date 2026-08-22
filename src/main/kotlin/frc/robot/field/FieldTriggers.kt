@@ -13,6 +13,7 @@ const val FIELD_LOGGING_PATH = "Field"
 val inClimbRectangle = Trigger {
     CLIMB_RECTANGLE.contains(turretTranslation)
 }
+    .logTrigger("$FIELD_LOGGING_PATH/inClimbRectangle")
 
 val inAllianceZone =
     Trigger { ALLIANCE_ZONE.contains(turretTranslation) }
