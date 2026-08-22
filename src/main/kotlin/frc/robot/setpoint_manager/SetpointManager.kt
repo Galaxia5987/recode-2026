@@ -22,10 +22,11 @@ object SetpointManager {
     val calculator: SetpointCalculator by periodic {
         setpointCalculatorType.calculator
     }
-    var calibrationMode = LoggedNetworkBoolean(
-        "SetpointManager/calibrationMode",
-        false
-    )
+    var calibrationMode =
+        LoggedNetworkBoolean(
+            "SetpointManager/calibrationMode",
+            false,
+        )
     @LoggedOutput(path = "SetpointManager", level = LogLevel.COMP)
     var setpointCalculatorType = SetpointCalculatorType.SHOOTING
     @LoggedOutput(path = "SetpointManager", level = LogLevel.COMP)
@@ -36,7 +37,8 @@ object SetpointManager {
             setpointCalculatorType =
                 when {
                     calibrationMode.get() -> SetpointCalculatorType.CALIBRATION
-                    shootingTarget == ShootingTarget.HUB -> SetpointCalculatorType.SHOOTING
+                    shootingTarget == ShootingTarget.HUB ->
+                        SetpointCalculatorType.SHOOTING
                     else -> SetpointCalculatorType.FEEDING
                 }
         }

@@ -60,6 +60,7 @@ enum class ShootingTarget {
 const val OVERCOMPENSATION_THRESHOLD = 180
 
 fun Angle.accountForOvercompensation(angleToGoal: Angle): Angle {
-    if (abs(this[deg] - angleToGoal[deg]) > OVERCOMPENSATION_THRESHOLD) return angleToGoal
+    if (abs(this[deg] - angleToGoal[deg]) > OVERCOMPENSATION_THRESHOLD)
+        return angleToGoal
     return this
 }
