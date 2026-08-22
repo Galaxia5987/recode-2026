@@ -13,6 +13,7 @@ import org.wpilib.math.geometry.Translation2d
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
+import kotlin.math.abs
 
 interface SetpointCalculator {
     fun calculateTurretSetpoint(
@@ -42,7 +43,7 @@ class GenericSetpointCalculator : SetpointCalculator {
         distanceToGoal: Distance,
     ): Angle {
 
-        val constrainedWithCompensation =
+        val compensatedShootingGoal =
             angleToGoal -
                 calculateYaw(
                         distanceToGoal[m],
@@ -51,19 +52,10 @@ class GenericSetpointCalculator : SetpointCalculator {
                     )
                     .deg
 
-        /*        val constrainedStaticShooting = constraintTurretLimits(turretAngleToHub)
-        if (
-            abs(constrainedWithCompensation[deg] - constrainedStaticShooting[deg]) >
-            180
-        ) {
-            return constrainedStaticShooting
-        }*/
-
-        // Above is constraint logic from the 2026 robot. im unsure
-        // if we should keep constraints here or move it out
-        // todo: figure this out ^^
-
-        return constrainedWithCompensation
+        val staticShootingGoal = angleToGoal
+        if (abs(compensatedShootingGoal[deg] - staticShootingGoal[deg]) > 180)
+            return staticShootingGoal
+        return compensatedShootingGoal
     }
 
     override fun calculateHoodSetpoint(
