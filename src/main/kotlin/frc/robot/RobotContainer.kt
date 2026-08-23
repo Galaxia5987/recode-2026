@@ -1,11 +1,15 @@
 package frc.robot
 
+import frc.robot.lib.BasicAlerts
 import frc.robot.lib.Mode
 import frc.robot.lib.commands.emptyCommand
+import frc.robot.lib.commands.initializeAllMechanisms
+import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.setpoint_manager.SetpointManager
 import frc.robot.subsystems.drive.DriveCommands
+import frc.robot.subsystems.turret.Turret
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
@@ -35,6 +39,8 @@ object RobotContainer {
         }
 
         enableAutoLogOutputFor(this)
+        initializeAllMechanisms()
+        BasicAlerts
     }
 
     private fun configureDefaultCommands() {
@@ -44,6 +50,8 @@ object RobotContainer {
                 { -driverController.leftX },
                 { -driverController.rightX },
             )
+
+        Turret.defaultCommand = Turret.setAngle(0.deg)
     }
 
     private fun configureButtonBindings() {

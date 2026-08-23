@@ -1,5 +1,6 @@
 package frc.robot.lib.commands
 
+import frc.robot.lib.MechanismRegistry
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Scheduler
@@ -18,5 +19,11 @@ fun Mechanism.addPeriodic(function: Runnable) {
                 Microseconds,
             )
         Logger.recordOutput(timeLogPath, totalTime)
+    }
+}
+
+fun initializeAllMechanisms() {
+    MechanismRegistry.allMechanisms.forEach {
+        it.objectInstance
     }
 }

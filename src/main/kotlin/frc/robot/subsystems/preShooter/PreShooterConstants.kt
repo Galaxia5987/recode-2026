@@ -12,9 +12,9 @@ import org.team5987.annotation.command_enum.CommandEnum
 import org.wpilib.units.measure.AngularVelocity
 
 val SETPOINT_TOLERANCE = 0.1.rps
-const val PORT = 1
+const val PORT = 13
 const val GEAR_RATIO = 1.0
-val REAL_GAINS = Gains()
+val REAL_GAINS = Gains(kP = 0.3, kV = 0.15)
 val SIM_GAINS = Gains()
 
 val CONFIG =
@@ -42,5 +42,5 @@ val LOG_CONFIG =
 @CommandEnum
 enum class PreShooterVelocity(val velocity: AngularVelocity) {
     STOP(0.rps),
-    CONVEY(10.rps),
+    CONVEY(30.rps),
 }

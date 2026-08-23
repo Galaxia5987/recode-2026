@@ -1,14 +1,14 @@
 package frc.robot.subsystems.shooter.flywheel
 
+import com.ctre.phoenix6.CANBus.systemcore
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.signals.MotorAlignmentValue
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
-import frc.robot.lib.commands.waitUntil
-import frc.robot.lib.extensions.deg_ps
-import frc.robot.lib.extensions.log
+import frc.robot.lib.extensions.rps
 import frc.robot.lib.universal_motor.UniversalTalonFX
+import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
@@ -17,6 +17,7 @@ import org.wpilib.units.measure.AngularVelocity
 object Flywheel : Mechanism() {
     val mainMotor =
         UniversalTalonFX(
+            canbus = systemcore(0),
             port = MAIN_MOTOR_PORT,
             config = MOTOR_CONFIG,
             gearRatio = GEAR_RATIO,
@@ -25,6 +26,7 @@ object Flywheel : Mechanism() {
 
     val auxMotor1 =
         UniversalTalonFX(
+            canbus = systemcore(0),
             port = FIRST_AUX_MOTOR_PORT,
             config = MOTOR_CONFIG,
             gearRatio = GEAR_RATIO,
@@ -32,13 +34,14 @@ object Flywheel : Mechanism() {
         )
     val auxMotor2 =
         UniversalTalonFX(
+            canbus = systemcore(0),
             port = SECOND_AUX_MOTOR_PORT,
             config = MOTOR_CONFIG,
             gearRatio = GEAR_RATIO,
             logConfig = MOTOR_LOG_CONFIG,
         )
 
-    var setpoint = 0.deg_ps
+    var setpoint = 0.rps
     val atSetpoint = Trigger {
         mainMotor.inputs.velocity.isNear(setpoint, TOLERANCE)
     }
@@ -48,7 +51,7 @@ object Flywheel : Mechanism() {
     init {
         addPeriodic(::periodic)
         auxMotor1.setControl(
-            Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Aligned)
+            Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Opposed)
         )
         auxMotor2.setControl(
             Follower(MAIN_MOTOR_PORT, MotorAlignmentValue.Aligned)
@@ -59,8 +62,6 @@ object Flywheel : Mechanism() {
         this {
                 setpoint = velocity
                 mainMotor.setControl(velocityVoltage.withVelocity(velocity))
-
-                atSetpoint.waitUntil()
             }
             .named("Subsystems/Flywheel/setVelocity")
 
@@ -69,11 +70,11 @@ object Flywheel : Mechanism() {
         auxMotor1.periodic()
         auxMotor2.periodic()
 
-        mapOf(
-                "atSetpoint" to atSetpoint,
-                "setpoint" to setpoint,
-                "setpointError" to setpoint - mainMotor.inputs.velocity,
-            )
-            .log("Subsystems/Flywheel")
+        Logger.recordOutput("Subsystems/Flywheel/atSetpoint", atSetpoint)
+        Logger.recordOutput("Subsystems/Flywheel/setpoint", setpoint)
+        Logger.recordOutput(
+            "Subsystems/Flywheel/setpointError",
+            setpoint - mainMotor.inputs.velocity,
+        )
     }
 }

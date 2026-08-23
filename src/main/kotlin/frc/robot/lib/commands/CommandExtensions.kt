@@ -44,3 +44,8 @@ fun Trigger.waitUntil() {
         coroutine.yield()
     } while (!this.asBoolean)
 }
+
+fun Trigger.onChange(command: Command) {
+    onFalse(command)
+    onTrue(command)
+}
