@@ -26,6 +26,7 @@ object Turret : Mechanism() {
         )
 
     var setpoint: Angle = 0.deg
+      private set
     val positionVoltage = PositionVoltage(0.0)
     val atSetpoint = Trigger {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
