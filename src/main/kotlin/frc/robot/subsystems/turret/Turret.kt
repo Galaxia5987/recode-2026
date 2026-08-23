@@ -7,6 +7,7 @@ import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.waitUntil
 import frc.robot.lib.extensions.deg
+import frc.robot.lib.extensions.periodic
 import frc.robot.lib.extensions.rot
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
@@ -32,6 +33,8 @@ object Turret : Mechanism() {
     val atSetpoint = Trigger {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
     }
+
+    val motorPosition: Angle by periodic { motor.inputs.position }
 
     fun setAngle(angle: Angle): Command =
         this {
