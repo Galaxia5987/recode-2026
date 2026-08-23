@@ -1,9 +1,12 @@
 package frc.robot.subsystems.turret
 
 import frc.robot.drive
+import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.periodic
+import frc.robot.lib.extensions.rad_ps
 import frc.robot.lib.extensions.rotationToPoint
+import frc.robot.lib.extensions.toRotation2d
 import frc.robot.lib.toTranslation2d
 import frc.robot.setpoint_manager.SetpointManager.currentGoal
 import org.team5987.annotation.LogLevel
@@ -15,16 +18,18 @@ import org.wpilib.units.measure.Distance
 
 @LoggedOutput(path = "TurretKinematics", level = LogLevel.COMP)
 val turretOrientedChassisSpeeds: Translation2d by periodic {
-    // todo: replace with full tangential velocity logic once turret class
-    // is implemented
     drive.chassisSpeeds.toTranslation2d()
+        .plus(
+            getTurretTangentialVelocityFieldRelative(
+                drive.gyroOmega[rad_ps]
+            )
+        )
+        .rotateBy(Turret.motorPosition.toRotation2d())
 }
 
 @LoggedOutput(path = "TurretKinematics", level = LogLevel.COMP)
 val turretTranslation: Translation2d by periodic {
-    val rotatedTurretOffset: Translation2d = drive.pose.translation
-    // todo: switch to TURRET_TO_ROBOT.rotateBy(drive.pose.rotation)
-    drive.pose.translation.plus(rotatedTurretOffset)
+    TURRET_TO_ROBOT.rotateBy(drive.pose.rotation)
 }
 
 @LoggedOutput(path = "TurretKinematics", level = LogLevel.COMP)
