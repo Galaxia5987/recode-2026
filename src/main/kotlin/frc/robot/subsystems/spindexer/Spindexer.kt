@@ -1,5 +1,6 @@
 package frc.robot.subsystems.spindexer
 
+import com.ctre.phoenix6.CANBus.systemcore
 import com.ctre.phoenix6.controls.VelocityVoltage
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
@@ -12,7 +13,12 @@ import org.wpilib.command3.Trigger
 
 object Spindexer : Mechanism(), SpindexerVelocitiesCommandFactory {
     private val motor =
-        UniversalTalonFX(PORT, config = MOTOR_CONFIG, simGains = SIM_GAINS)
+        UniversalTalonFX(
+            canbus = systemcore(0),
+            port = PORT,
+            config = MOTOR_CONFIG,
+            simGains = SIM_GAINS,
+        )
     private val velocityRequest = VelocityVoltage(0.0)
 
     private var setpoint = 0.rps
@@ -33,7 +39,7 @@ object Spindexer : Mechanism(), SpindexerVelocitiesCommandFactory {
 
     private fun periodic() {
         motor.periodic()
-        Logger.recordOutput("subsystem/Spindexer/setpoint", setpoint)
-        Logger.recordOutput("subsystem/Spindexer/atSetpoint", atSetpoint)
+        Logger.recordOutput("Subsystems/Spindexer/setpoint", setpoint)
+        Logger.recordOutput("Subsystems/Spindexer/atSetpoint", atSetpoint)
     }
 }

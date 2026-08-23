@@ -12,15 +12,10 @@ import org.team5987.annotation.command_enum.Priority
 import org.wpilib.command3.Command
 import org.wpilib.units.measure.AngularVelocity
 
-const val PORT = 1
+const val PORT = 12
 
 val SETPOINT_TOLERANCE = 0.1.rps
-val GAINS =
-    Gains(
-        kP = 0.0,
-        kD = 0.0,
-        kV = 0.0,
-    )
+val GAINS = Gains(kP = 0.3, kS = 0.3, kV = 0.115)
 
 val SIM_GAINS =
     Gains(
@@ -34,7 +29,7 @@ val MOTOR_CONFIG =
         Slot0 = GAINS.toSlotConfig()
         MotorOutput =
             MotorOutputConfigs().apply {
-                Inverted = InvertedValue.Clockwise_Positive
+                Inverted = InvertedValue.CounterClockwise_Positive
                 NeutralMode = NeutralModeValue.Brake
             }
     }
@@ -45,5 +40,5 @@ enum class SpindexerVelocities(
     val priority: Priority,
 ) {
     STOP(0.rps, Priority(Command.LOWEST_PRIORITY)),
-    CONVEY(10.rps, Priority(Command.HIGHEST_PRIORITY)),
+    CONVEY(30.rps, Priority(Command.HIGHEST_PRIORITY)),
 }

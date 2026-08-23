@@ -9,9 +9,9 @@ import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.volts
 import frc.robot.lib.universal_motor.MotorLogConfig
 
-val MAIN_MOTOR_PORT = 1
-val AUX_MOTOR_PORT = 2
-val CLOCKWISE = 12.0.volts
+val MAIN_MOTOR_PORT = 10
+val AUX_MOTOR_PORT = 30
+val CLOCKWISE = 6.0.volts
 
 val MOTOR_CONFIG =
     TalonFXConfiguration().apply {
@@ -22,8 +22,8 @@ val MOTOR_CONFIG =
             }
         CurrentLimits =
             createCurrentLimits(
-                supplyCurrentLimit = 35.amps,
-                supplyCurrentPeakDifference = 6.amps,
+                supplyCurrentLimit = 25.amps,
+                supplyCurrentPeakDifference = 5.amps,
             )
     }
 
