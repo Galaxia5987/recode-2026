@@ -48,8 +48,7 @@ object RobotContainer {
                 { -driverController.rightX },
             )
 
-        Turret.defaultCommand =
-            Turret.setAngle(0.deg,)
+        Turret.defaultCommand = Turret.setAngle(0.deg)
     }
 
     private fun configureButtonBindings() {
