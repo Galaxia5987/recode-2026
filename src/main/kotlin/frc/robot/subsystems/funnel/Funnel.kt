@@ -27,11 +27,6 @@ object Funnel : Mechanism() {
     private fun setVoltage(voltage: Voltage): UnnamedCommand = this {
         mainMotor.setControl(voltageOut.withOutput(voltage))
     }
-
-    private fun periodic() {
-        mainMotor.periodic()
-    }
-
     fun setVoltageOut(value: FunnelVoltage) = this {
         voltageSetpoint = value.voltage
         setVoltage(voltageSetpoint)
