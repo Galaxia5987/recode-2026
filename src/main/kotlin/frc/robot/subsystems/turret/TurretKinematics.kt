@@ -18,12 +18,9 @@ import org.wpilib.units.measure.Distance
 
 @LoggedOutput(path = "TurretKinematics", level = LogLevel.COMP)
 val turretOrientedChassisSpeeds: Translation2d by periodic {
-    drive.chassisSpeeds.toTranslation2d()
-        .plus(
-            getTurretTangentialVelocityFieldRelative(
-                drive.gyroOmega[rad_ps]
-            )
-        )
+    drive.chassisSpeeds
+        .toTranslation2d()
+        .plus(getTurretTangentialVelocityFieldRelative(drive.gyroOmega[rad_ps]))
         .rotateBy(Turret.motorPosition.toRotation2d())
 }
 

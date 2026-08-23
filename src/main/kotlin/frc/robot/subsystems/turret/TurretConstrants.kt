@@ -12,12 +12,10 @@ import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.meters
 import frc.robot.lib.extensions.mm
 import frc.robot.lib.extensions.rad
-import frc.robot.lib.extensions.rad_ps
 import frc.robot.lib.extensions.rot
-import frc.robot.lib.extensions.rps
-import org.wpilib.math.geometry.Translation2d
 import kotlin.math.cos
 import kotlin.math.sin
+import org.wpilib.math.geometry.Translation2d
 
 val PORT = 1
 val SIM_GAINS = Gains(kP = 0.5, kD = 0.075)
@@ -72,7 +70,8 @@ val TURRET_VELOCITY_ANGLE = 60.4426997.deg
 fun getTurretTangentialVelocityFieldRelative(
     omegaRadiansPerSecond: Double
 ): Translation2d {
-    val magnitude = omegaRadiansPerSecond * TURRET_RADIUS_TO_CENTER_ROBOT[meters]
+    val magnitude =
+        omegaRadiansPerSecond * TURRET_RADIUS_TO_CENTER_ROBOT[meters]
     return Translation2d(
         -cos(TURRET_VELOCITY_ANGLE[rad]) * magnitude,
         -sin(TURRET_VELOCITY_ANGLE[rad]) * magnitude,

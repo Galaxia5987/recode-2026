@@ -33,7 +33,9 @@ object FeedingSetpointCalculator : SetpointCalculator {
                     )
                     .deg
 
-        return compensatedFeedingGoal.accountForOvercompensation(constraintTurretLimit(angleToGoal))
+        return compensatedFeedingGoal.accountForOvercompensation(
+            constraintTurretLimit(angleToGoal)
+        )
     }
 
     override fun calculateHoodSetpoint(

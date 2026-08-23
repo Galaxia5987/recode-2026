@@ -36,7 +36,9 @@ object ShootingSetpointCalculator : SetpointCalculator {
                     )
                     .deg
 
-        return shootingGoal.accountForOvercompensation(constraintTurretLimit(angleToGoal))
+        return shootingGoal.accountForOvercompensation(
+            constraintTurretLimit(angleToGoal)
+        )
     }
 
     override fun calculateHoodSetpoint(
