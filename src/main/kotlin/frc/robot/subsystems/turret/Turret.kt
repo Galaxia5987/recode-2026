@@ -62,7 +62,7 @@ object Turret : Mechanism() {
 
     fun periodic() {
         motor.periodic()
-        Logger.recordOutput("Subsystem/Turret/setpoint", setpoint)
-        Logger.recordOutput("Subsystem/Turret/atSetpoint", atSetpoint)
+        Logger.recordOutput("Subsystems/Turret/setpoint", setpoint)
+        Logger.recordOutput("Subsystems/Turret/atSetpoint", atSetpoint)
     }
 }
