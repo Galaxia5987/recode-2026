@@ -36,10 +36,7 @@ val CONFIG =
                 Inverted = InvertedValue.Clockwise_Positive
             }
         CurrentLimits = createCurrentLimits()
-        Slot0 =
-            Slot0Configs().apply {
-                Slot0 = REAL_GAINS.toSlotConfig()
-            }
+        Slot0 = REAL_GAINS.toSlotConfig()
         // This config forces the motor to not move beyond these limits
         SoftwareLimitSwitch =
             SoftwareLimitSwitchConfigs().apply {
