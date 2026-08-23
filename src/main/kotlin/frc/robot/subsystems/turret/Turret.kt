@@ -31,21 +31,24 @@ object Turret : Mechanism() {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
     }
 
-    fun setAngle(angle: Angle): Command = this {
-        setpoint = constraintTurretLimit(angle)
-        motor.setControl(positionVoltage.withPosition(setpoint))
-        atSetpoint.waitUntil()
-    }
-        .named("Subsystems/Turret/setAngle")
+    fun setAngle(angle: Angle): Command =
+        this {
+                setpoint = constraintTurretLimit(angle)
+                motor.setControl(positionVoltage.withPosition(setpoint))
+                atSetpoint.waitUntil()
+            }
+            .named("Subsystems/Turret/setAngle")
 
-    fun setAngle(angleSupplier: () -> Angle): Command = this {
-        while(true){
-            setpoint = constraintTurretLimit(angleSupplier())
-            motor.setControl(positionVoltage.withPosition(setpoint))
-            yield()
-        }
-    }
-        .named("Subsystems/Turret/setAngleWithSupplier")
+    fun setAngle(angleSupplier: () -> Angle): Command =
+        this {
+                while (true) {
+                    setpoint = constraintTurretLimit(angleSupplier())
+                    motor.setControl(positionVoltage.withPosition(setpoint))
+                    yield()
+                }
+            }
+            .named("Subsystems/Turret/setAngleWithSupplier")
+
     fun constraintTurretLimit(angle: Angle): Angle {
         if (angle < REVERSE_LIMIT) return 1.rot + angle
         return angle
@@ -56,10 +59,9 @@ object Turret : Mechanism() {
         addPeriodic(::periodic)
     }
 
-    fun periodic(){
+    fun periodic() {
         motor.periodic()
         Logger.recordOutput("Subsystem/Turret/setpoint", setpoint)
-        Logger.recordOutput("Subsystem/Turret/atSetpoint",atSetpoint)
+        Logger.recordOutput("Subsystem/Turret/atSetpoint", atSetpoint)
     }
-
 }
