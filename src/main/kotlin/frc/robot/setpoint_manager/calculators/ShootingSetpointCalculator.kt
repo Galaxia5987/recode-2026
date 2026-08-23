@@ -10,6 +10,7 @@ import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.rps
 import frc.robot.setpoint_manager.SetpointCalculator
 import frc.robot.setpoint_manager.accountForOvercompensation
+import frc.robot.subsystems.turret.Turret.constraintTurretLimit
 import kotlin.math.tanh
 import org.wpilib.math.geometry.Translation2d
 import org.wpilib.units.measure.Angle
@@ -35,8 +36,7 @@ object ShootingSetpointCalculator : SetpointCalculator {
                     )
                     .deg
 
-        // todo: constrain angleToGoal once turret class is implemented
-        return shootingGoal.accountForOvercompensation(angleToGoal)
+        return shootingGoal.accountForOvercompensation(constraintTurretLimit(angleToGoal))
     }
 
     override fun calculateHoodSetpoint(
