@@ -9,7 +9,13 @@ import frc.robot.lib.Gains
 import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.get
+import frc.robot.lib.extensions.meters
+import frc.robot.lib.extensions.mm
+import frc.robot.lib.extensions.rad
 import frc.robot.lib.extensions.rot
+import kotlin.math.cos
+import kotlin.math.sin
+import org.wpilib.math.geometry.Translation2d
 
 val PORT = 1
 val SIM_GAINS = Gains(kP = 0.5, kD = 0.075)
@@ -56,3 +62,18 @@ val CONFIG =
     }
 
 val TOLERANCE = 1.deg
+
+val TURRET_TO_ROBOT = Translation2d((-117.5).mm, 207.5.mm)
+val TURRET_RADIUS_TO_CENTER_ROBOT = 0.23868132.meters
+val TURRET_VELOCITY_ANGLE = 60.4426997.deg
+
+fun getTurretTangentialVelocityFieldRelative(
+    omegaRadiansPerSecond: Double
+): Translation2d {
+    val magnitude =
+        omegaRadiansPerSecond * TURRET_RADIUS_TO_CENTER_ROBOT[meters]
+    return Translation2d(
+        -cos(TURRET_VELOCITY_ANGLE[rad]) * magnitude,
+        -sin(TURRET_VELOCITY_ANGLE[rad]) * magnitude,
+    )
+}

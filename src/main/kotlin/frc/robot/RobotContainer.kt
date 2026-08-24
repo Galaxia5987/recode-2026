@@ -7,6 +7,7 @@ import frc.robot.lib.commands.initializeAllMechanisms
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.unified_controller.PS5Gamepad
+import frc.robot.setpoint_manager.SetpointManager
 import frc.robot.subsystems.drive.DriveCommands
 import frc.robot.subsystems.hood.Hood
 import frc.robot.subsystems.turret.Turret
@@ -39,6 +40,7 @@ object RobotContainer {
         enableAutoLogOutputFor(this)
         initializeAllMechanisms()
         BasicAlerts
+        SetpointManager
     }
 
     private fun configureDefaultCommands() {
