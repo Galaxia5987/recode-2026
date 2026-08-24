@@ -3,11 +3,8 @@ package frc.robot.lib
 import com.ctre.phoenix6.configs.MotionMagicConfigs
 import com.ctre.phoenix6.configs.Slot0Configs
 import frc.robot.lib.extensions.get
-import frc.robot.lib.extensions.rad_ps
-import frc.robot.lib.extensions.rad_ps_ps
 import frc.robot.lib.extensions.rps
 import frc.robot.lib.extensions.rps_squared
-import kotlin.apply
 import org.littletonrobotics.junction.networktables.LoggedNetworkNumber
 import org.wpilib.units.measure.AngularAcceleration
 import org.wpilib.units.measure.AngularVelocity
@@ -53,6 +50,11 @@ data class MotionMagicGains(
         }
 }
 
+fun MotionMagicConfigs.isEmpty() =
+    this.MotionMagicCruiseVelocity == 0.0 &&
+        this.MotionMagicAcceleration == 0.0 &&
+        this.MotionMagicJerk == 0.0
+
 class LoggedNetworkGains(
     name: String,
     kP: Double = 0.0,
@@ -69,55 +71,150 @@ class LoggedNetworkGains(
         (Throwable().stackTrace[1]?.fileName?.substringBeforeLast('.') + ""),
 ) {
     private val path = "/Tuning/$key/$name"
-    val kP: LoggedNetworkNumber = LoggedNetworkNumber("$path/kP", kP)
-    val kI: LoggedNetworkNumber = LoggedNetworkNumber("$path/kI", kI)
-    val kD: LoggedNetworkNumber = LoggedNetworkNumber("$path/kD", kD)
-    val kS: LoggedNetworkNumber = LoggedNetworkNumber("$path/kS", kS)
-    val kV: LoggedNetworkNumber = LoggedNetworkNumber("$path/kV", kV)
-    val kA: LoggedNetworkNumber = LoggedNetworkNumber("$path/kA", kA)
-    val kG: LoggedNetworkNumber = LoggedNetworkNumber("$path/kG", kG)
-    var jerk: LoggedNetworkNumber? = null
-    var cruiseVelocity: LoggedNetworkNumber? = null
-    var acceleration: LoggedNetworkNumber? = null
 
-    init {
-        if (
-            jerk != 0.0 ||
-                cruiseVelocity[rad_ps] != 0.0 ||
-                acceleration[rad_ps_ps] != 0.0
-        ) {
-            this@LoggedNetworkGains.jerk =
-                LoggedNetworkNumber("$path/jerk", jerk)
-            this@LoggedNetworkGains.cruiseVelocity =
-                LoggedNetworkNumber(
-                    "$path/cruiseVelocity",
-                    cruiseVelocity[rad_ps],
-                )
-            this@LoggedNetworkGains.acceleration =
-                LoggedNetworkNumber(
-                    "$path/acceleration",
-                    acceleration[rad_ps_ps],
-                )
+    private val isMotionMagicEnabled =
+        cruiseVelocity != rps.zero() ||
+            acceleration != rps_squared.zero() ||
+            jerk != 0.0
+
+    private val pidGains = mutableListOf<Tunable>()
+    private val motionMagicGains = mutableListOf<Tunable>()
+
+    val kP = Tunable("PID/kP", kP, GainType.PID)
+    val kI = Tunable("PID/kI", kI, GainType.PID)
+    val kD = Tunable("PID/kD", kD, GainType.PID)
+    val kS = Tunable("FeedForward/kS", kS, GainType.PID)
+    val kV = Tunable("FeedForward/kV", kV, GainType.PID)
+    val kA = Tunable("FeedForward/kA", kA, GainType.PID)
+    val kG = Tunable("FeedForward/kG", kG, GainType.PID)
+
+    val cruiseVelocity =
+        Tunable(
+            "MotionMagic/cruiseVelocity",
+            cruiseVelocity[rps],
+            GainType.MOTION_MAGIC,
+            isMotionMagicEnabled,
+        )
+    val acceleration =
+        Tunable(
+            "MotionMagic/acceleration",
+            acceleration[rps_squared],
+            GainType.MOTION_MAGIC,
+            isMotionMagicEnabled,
+        )
+    val jerk =
+        Tunable(
+            "MotionMagic/jerk",
+            jerk,
+            GainType.MOTION_MAGIC,
+            isMotionMagicEnabled,
+        )
+
+    enum class GainType {
+        PID,
+        MOTION_MAGIC,
+    }
+
+    inner class Tunable(
+        subPath: String,
+        initialValue: Double,
+        gainType: GainType,
+        isActive: Boolean = true,
+    ) {
+
+        init {
+            when (gainType) {
+                GainType.PID -> pidGains += this
+                GainType.MOTION_MAGIC -> motionMagicGains += this
+            }
+        }
+
+        private val logger =
+            if (isActive) LoggedNetworkNumber("$path/$subPath", initialValue)
+            else null
+        var value: Double = initialValue
+            private set
+
+        fun update(): Boolean {
+            val networkVal = logger?.get()
+            if (networkVal != null && networkVal != value) {
+                value = networkVal
+                return true
+            }
+            return false
         }
     }
 
     fun toSlotConfig() =
         Slot0Configs().apply {
-            kP = this@LoggedNetworkGains.kP.get()
-            kI = this@LoggedNetworkGains.kI.get()
-            kD = this@LoggedNetworkGains.kD.get()
-            kA = this@LoggedNetworkGains.kA.get()
-            kS = this@LoggedNetworkGains.kS.get()
-            kV = this@LoggedNetworkGains.kV.get()
-            kG = this@LoggedNetworkGains.kG.get()
+            kP = this@LoggedNetworkGains.kP.value
+            kI = this@LoggedNetworkGains.kI.value
+            kD = this@LoggedNetworkGains.kD.value
+            kA = this@LoggedNetworkGains.kA.value
+            kS = this@LoggedNetworkGains.kS.value
+            kV = this@LoggedNetworkGains.kV.value
+            kG = this@LoggedNetworkGains.kG.value
         }
 
     fun toMotionMagicConfig() =
         MotionMagicConfigs().apply {
             MotionMagicCruiseVelocity =
-                this@LoggedNetworkGains.cruiseVelocity?.get() ?: 0.0
-            MotionMagicAcceleration =
-                this@LoggedNetworkGains.acceleration?.get() ?: 0.0
-            MotionMagicJerk = this@LoggedNetworkGains.jerk?.get() ?: 0.0
+                this@LoggedNetworkGains.cruiseVelocity.value
+            MotionMagicAcceleration = this@LoggedNetworkGains.acceleration.value
+            MotionMagicJerk = this@LoggedNetworkGains.jerk.value
         }
+
+    /** @return Whether the PID gains changed value */
+    fun updatePIDGains(): Boolean {
+        var changed = false
+        pidGains.forEach { if (it.update()) changed = true }
+        return changed
+    }
+
+    /** @return Whether the Motion Magic gains changed value */
+    fun updateMotionMagicGains(): Boolean {
+        var changed = false
+        motionMagicGains.forEach { if (it.update()) changed = true }
+        return changed
+    }
 }
+
+fun Slot0Configs.toLoggedNetworkGains(
+    name: String,
+    subsystem: String,
+    motionMagicConfigs: MotionMagicConfigs = MotionMagicConfigs(),
+) =
+    LoggedNetworkGains(
+        name,
+        kP = kP,
+        kI = kI,
+        kD = kD,
+        kV = kV,
+        kA = kA,
+        kG = kG,
+        kS = kS,
+        cruiseVelocity = motionMagicConfigs.MotionMagicCruiseVelocity.rps,
+        acceleration = motionMagicConfigs.MotionMagicAcceleration.rps_squared,
+        jerk = motionMagicConfigs.MotionMagicJerk,
+        key = subsystem,
+    )
+
+fun Gains.toNetworkLogged(
+    name: String,
+    subsystem: String,
+    motionMagicConfigs: MotionMagicConfigs = MotionMagicConfigs(),
+) =
+    LoggedNetworkGains(
+        name,
+        kP = kP,
+        kI = kI,
+        kD = kD,
+        kV = kV,
+        kA = kA,
+        kG = kG,
+        kS = kS,
+        key = subsystem,
+        cruiseVelocity = motionMagicConfigs.MotionMagicCruiseVelocity.rps,
+        acceleration = motionMagicConfigs.MotionMagicAcceleration.rps_squared,
+        jerk = motionMagicConfigs.MotionMagicJerk,
+    )

@@ -1,43 +1,34 @@
-package frc.robot.subsystems.shooter.flywheel
+package frc.robot.subsystems.preShooter
 
-import com.ctre.phoenix6.configs.FeedbackConfigs
 import com.ctre.phoenix6.configs.MotorOutputConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
 import frc.robot.lib.Gains
 import frc.robot.lib.createCurrentLimits
-import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.rps
 import frc.robot.lib.universal_motor.MotorLogConfig
+import org.team5987.annotation.command_enum.CommandEnum
+import org.wpilib.units.measure.AngularVelocity
 
-const val MAIN_MOTOR_PORT = 18
-const val FIRST_AUX_MOTOR_PORT = 17
-const val SECOND_AUX_MOTOR_PORT = 16
+val SETPOINT_TOLERANCE = 0.1.rps
+const val PORT = 13
+const val GEAR_RATIO = 1.0
+val REAL_GAINS = Gains(kP = 0.3, kV = 0.15)
+val SIM_GAINS = Gains()
 
-const val GEAR_RATIO = 1.33
-val REAL_GAINS = Gains(kP = 0.3, kS = 0.3, kV = 0.115)
-val SIM_GAINS = Gains(kP = 1.0, kV = 0.12)
-
-val MOTOR_CONFIG =
+val CONFIG =
     TalonFXConfiguration().apply {
         MotorOutput =
             MotorOutputConfigs().apply {
-                NeutralMode = NeutralModeValue.Coast
+                NeutralMode = NeutralModeValue.Brake
                 Inverted = InvertedValue.Clockwise_Positive
             }
-        Feedback =
-            FeedbackConfigs().apply { SensorToMechanismRatio = GEAR_RATIO }
+        CurrentLimits = createCurrentLimits()
         Slot0 = REAL_GAINS.toSlotConfig()
-
-        CurrentLimits =
-            createCurrentLimits(
-                supplyCurrentLimit = 30.amps,
-                supplyCurrentPeakDifference = 5.amps,
-            )
     }
 
-val MOTOR_LOG_CONFIG =
+val LOG_CONFIG =
     MotorLogConfig(
         position = false,
         statorCurrent = false,
@@ -45,6 +36,11 @@ val MOTOR_LOG_CONFIG =
         velocity = true,
         absoluteEncoder = false,
         voltage = true,
+        controlRequest = false,
     )
 
-val TOLERANCE = 3.rps
+@CommandEnum
+enum class PreShooterVelocity(val velocity: AngularVelocity) {
+    STOP(0.rps),
+    CONVEY(30.rps),
+}

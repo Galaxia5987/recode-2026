@@ -19,7 +19,7 @@ private val xGains = LoggedNetworkGains("X Gains", kP = 5.0, kD = 0.1)
 
 private val yGains = LoggedNetworkGains("Y Gains", kP = 5.0, kD = 0.1)
 
-private val thetaGains = LoggedNetworkGains("Theta Gains", 4.0, kD = 0.15)
+private val thetaGains = LoggedNetworkGains("Theta Gains", kP = 4.0, kD = 0.15)
 private val linearMaxVelocity =
     LoggedNetworkNumber("$TUNING_PATH/linearMaxVelocity", 40.0)
 private val linearMaxAcceleration =
@@ -43,27 +43,27 @@ private val rotationalLimits
 @LoggedOutput(LogLevel.DISABLED, "X controller", LOGGING_PREFIX)
 var xController =
     ProfiledPIDController(
-        xGains.kP.get(),
-        xGains.kI.get(),
-        xGains.kD.get(),
+        xGains.kP.value,
+        xGains.kI.value,
+        xGains.kD.value,
         linearLimits,
     )
 
 @LoggedOutput(LogLevel.DISABLED, "Y controller", LOGGING_PREFIX)
 var yController =
     ProfiledPIDController(
-        yGains.kP.get(),
-        yGains.kI.get(),
-        yGains.kD.get(),
+        yGains.kP.value,
+        yGains.kI.value,
+        yGains.kD.value,
         linearLimits,
     )
 
 @LoggedOutput(LogLevel.DISABLED, "Theta controller", LOGGING_PREFIX)
 var thetaController =
     ProfiledPIDController(
-            thetaGains.kP.get(),
-            thetaGains.kI.get(),
-            thetaGains.kD.get(),
+            thetaGains.kP.value,
+            thetaGains.kI.value,
+            thetaGains.kD.value,
             rotationalLimits,
         )
         .apply { enableContinuousInput(-Math.PI, Math.PI) }
@@ -81,10 +81,11 @@ fun updateProfiledPIDGains() {
             thetaController to Pair(thetaGains, rotationalLimits),
         )
         .forEach { (controller, pair) ->
+            pair.first.updatePIDGains()
             controller.setPID(
-                pair.first.kP.get(),
-                pair.first.kI.get(),
-                pair.first.kD.get(),
+                pair.first.kP.value,
+                pair.first.kI.value,
+                pair.first.kD.value,
             )
             println("MAXVELOCITY ${pair.second.maxVelocity}")
             println("MAXACCEL ${pair.second.maxAcceleration}")

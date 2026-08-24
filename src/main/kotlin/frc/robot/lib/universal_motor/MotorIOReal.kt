@@ -5,6 +5,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.controls.ControlRequest
 import com.ctre.phoenix6.hardware.TalonFX
 import frc.robot.lib.extensions.toDistance
+import frc.robot.lib.toLoggedNetworkGains
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.Distance
 
@@ -19,6 +20,8 @@ import org.wpilib.units.measure.Distance
  * @param diameter The diameter of the wheel/spool if used in a linear system.
  */
 class MotorIOReal(
+    private val motorName: String,
+    private val subsystem: String,
     private val port: Int,
     private val canBus: CANBus,
     override val config: TalonFXConfiguration,
@@ -29,6 +32,13 @@ class MotorIOReal(
 ) : MotorIO {
     override val inputs = LoggedMotorInputs()
     private val motor = TalonFX(port, canBus)
+
+    private val gains =
+        config.Slot0.toLoggedNetworkGains(
+            name = "$motorName/RealGains",
+            subsystem = subsystem,
+            motionMagicConfigs = config.MotionMagic,
+        )
 
     init {
         motor.configurator.apply(config)
@@ -61,6 +71,14 @@ class MotorIOReal(
         }
         if (logConfig.controlRequest) {
             inputs.controlModeValue = motor.controlMode.value.value
+        }
+
+        if (gains.updatePIDGains()) {
+            motor.configurator.apply(gains.toSlotConfig())
+        }
+
+        if (gains.updateMotionMagicGains()) {
+            motor.configurator.apply(gains.toMotionMagicConfig())
         }
     }
 }

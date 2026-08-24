@@ -55,6 +55,8 @@ class UniversalTalonFX(
     private val motorIO: MotorIO =
         if (CURRENT_MODE == Mode.REAL)
             MotorIOReal(
+                motorName,
+                subsystem,
                 port,
                 canbus,
                 config,
@@ -65,6 +67,8 @@ class UniversalTalonFX(
             )
         else {
             MotorIOSim(
+                motorName,
+                subsystem,
                 momentOfInertia,
                 config,
                 simGains,
@@ -95,9 +99,5 @@ class UniversalTalonFX(
 
     fun applyConfiguration(config: TalonFXConfiguration) {
         motorIO.applyConfiguration(config)
-    }
-
-    fun po() {
-        TODO("Not yet implemented")
     }
 }

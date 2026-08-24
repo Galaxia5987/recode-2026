@@ -1,23 +1,17 @@
-package frc.robot.subsystems.shooter.flywheel
+package frc.robot.subsystems.intake.roller
 
-import com.ctre.phoenix6.configs.FeedbackConfigs
 import com.ctre.phoenix6.configs.MotorOutputConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
 import com.ctre.phoenix6.signals.InvertedValue
 import com.ctre.phoenix6.signals.NeutralModeValue
-import frc.robot.lib.Gains
 import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.amps
-import frc.robot.lib.extensions.rps
+import frc.robot.lib.extensions.volts
 import frc.robot.lib.universal_motor.MotorLogConfig
 
-const val MAIN_MOTOR_PORT = 18
-const val FIRST_AUX_MOTOR_PORT = 17
-const val SECOND_AUX_MOTOR_PORT = 16
-
-const val GEAR_RATIO = 1.33
-val REAL_GAINS = Gains(kP = 0.3, kS = 0.3, kV = 0.115)
-val SIM_GAINS = Gains(kP = 1.0, kV = 0.12)
+val MAIN_MOTOR_PORT = 10
+val AUX_MOTOR_PORT = 30
+val CLOCKWISE = 6.0.volts
 
 val MOTOR_CONFIG =
     TalonFXConfiguration().apply {
@@ -26,13 +20,9 @@ val MOTOR_CONFIG =
                 NeutralMode = NeutralModeValue.Coast
                 Inverted = InvertedValue.Clockwise_Positive
             }
-        Feedback =
-            FeedbackConfigs().apply { SensorToMechanismRatio = GEAR_RATIO }
-        Slot0 = REAL_GAINS.toSlotConfig()
-
         CurrentLimits =
             createCurrentLimits(
-                supplyCurrentLimit = 30.amps,
+                supplyCurrentLimit = 25.amps,
                 supplyCurrentPeakDifference = 5.amps,
             )
     }
@@ -46,5 +36,3 @@ val MOTOR_LOG_CONFIG =
         absoluteEncoder = false,
         voltage = true,
     )
-
-val TOLERANCE = 3.rps
