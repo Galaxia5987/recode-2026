@@ -8,6 +8,7 @@ import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.enableAutoLogOutputFor
 import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.subsystems.drive.DriveCommands
+import frc.robot.subsystems.hood.Hood
 import frc.robot.subsystems.turret.Turret
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
@@ -53,6 +54,8 @@ object RobotContainer {
 
     private fun configureButtonBindings() {
         driverController.create().onTrue(DriveCommands.resetGyro())
+        driverController.triangle().onTrue(Hood.setPosition(70.deg))
+        driverController.circle().onTrue(Hood.setPosition(0.deg))
     }
 
     fun getAutonomousCommand(): Command = autoChooser.get()
