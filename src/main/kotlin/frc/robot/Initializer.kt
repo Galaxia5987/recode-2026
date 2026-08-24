@@ -10,7 +10,6 @@ import frc.robot.subsystems.drive.TunerConstants
 import frc.robot.subsystems.drive.gyroIOs.GyroIO
 import frc.robot.subsystems.drive.gyroIOs.GyroIOPigeon2
 import frc.robot.subsystems.drive.gyroIOs.GyroIOSim
-import frc.robot.subsystems.hood.Hood
 import frc.robot.subsystems.vision.*
 import org.ironmaple.simulation.SimulatedArena
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation
@@ -99,4 +98,3 @@ val vision =
         drive::resetOdometry,
         *visionIOs,
     )
-

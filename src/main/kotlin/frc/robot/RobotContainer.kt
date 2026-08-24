@@ -43,8 +43,6 @@ object RobotContainer {
                 { -driverController.leftX },
                 { -driverController.rightX },
             )
-        //Hood.defaultCommand =
-            //Hood.setPosition(70.deg)
     }
 
     private fun configureButtonBindings() {
