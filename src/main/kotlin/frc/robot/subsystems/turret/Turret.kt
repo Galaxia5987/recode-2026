@@ -34,7 +34,8 @@ object Turret : Mechanism() {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
     }
 
-    val motorPosition: Angle by periodic { motor.inputs.position }
+    val motorPosition: Angle
+        get() = motor.inputs.position
 
     fun setAngle(angle: Angle): Command =
         this {
