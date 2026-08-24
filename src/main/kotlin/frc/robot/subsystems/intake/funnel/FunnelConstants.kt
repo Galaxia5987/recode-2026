@@ -1,4 +1,4 @@
-package frc.robot.subsystems.funnel
+package frc.robot.subsystems.intake.funnel
 
 import com.ctre.phoenix6.configs.MotorOutputConfigs
 import com.ctre.phoenix6.configs.TalonFXConfiguration
@@ -11,8 +11,8 @@ import frc.robot.lib.universal_motor.MotorLogConfig
 import org.team5987.annotation.command_enum.CommandEnum
 import org.wpilib.units.measure.Voltage
 
-val MAIN_MOTOR_PORT = 4
-val CLOCKWISE = 12.volts
+const val MAIN_MOTOR_PORT = 4
+val SPIN_VOLTAGE = 6.volts
 val MOTOR_CONFIG =
     TalonFXConfiguration().apply {
         MotorOutput =
@@ -22,7 +22,7 @@ val MOTOR_CONFIG =
             }
         CurrentLimits =
             createCurrentLimits(
-                supplyCurrentLimit = 35.amps,
+                supplyCurrentLimit = 25.amps,
                 supplyCurrentPeakDifference = 6.amps,
             )
     }
@@ -37,8 +37,8 @@ val MOTOR_LOG_CONFIG =
     )
 
 @CommandEnum
-enum class FunnelVoltage(val voltage: Voltage) {
-    INTAKE(-CLOCKWISE),
-    OUTTAKE(CLOCKWISE),
+enum class FunnelState(val voltage: Voltage) {
+    INTAKE(-SPIN_VOLTAGE),
+    OUTTAKE(SPIN_VOLTAGE),
     STOP(0.volts),
 }

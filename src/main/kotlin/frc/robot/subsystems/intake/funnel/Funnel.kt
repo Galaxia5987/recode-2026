@@ -1,15 +1,13 @@
-package frc.robot.subsystems.funnel
+package frc.robot.subsystems.intake.funnel
 
 import com.ctre.phoenix6.controls.VoltageOut
 import frc.robot.lib.commands.UnnamedCommand
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
-import frc.robot.lib.extensions.volts
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.wpilib.command3.Mechanism
-import org.wpilib.units.measure.Voltage
 
-object Funnel : Mechanism() {
+object Funnel : Mechanism(), FunnelStateCommandFactory {
     private val mainMotor =
         UniversalTalonFX(
             port = MAIN_MOTOR_PORT,
@@ -22,13 +20,8 @@ object Funnel : Mechanism() {
     }
 
     private val voltageOut = VoltageOut(0.0)
-    private var voltageSetpoint = 0.volts
 
-    private fun setVoltage(voltage: Voltage): UnnamedCommand = this {
-        mainMotor.setControl(voltageOut.withOutput(voltage))
-    }
-    fun setVoltageOut(value: FunnelVoltage) = this {
-        voltageSetpoint = value.voltage
-        setVoltage(voltageSetpoint)
+    override fun setTarget(value: FunnelState): UnnamedCommand = this {
+        mainMotor.setControl(voltageOut.withOutput(value.voltage))
     }
 }
