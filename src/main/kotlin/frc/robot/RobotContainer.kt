@@ -21,8 +21,6 @@ object RobotContainer {
 
     init {
         drive // Ensure Drive is initialized
-        SetpointManager
-
         autoChooser =
             LoggedDashboardChooser(
                 "Auto Choices",
@@ -41,6 +39,7 @@ object RobotContainer {
         enableAutoLogOutputFor(this)
         initializeAllMechanisms()
         BasicAlerts
+        SetpointManager
     }
 
     private fun configureDefaultCommands() {
