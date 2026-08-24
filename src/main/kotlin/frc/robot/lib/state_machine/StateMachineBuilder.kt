@@ -15,8 +15,9 @@ class StateMachineBuilder<E : Enum<E>>(val name: String, val log: Boolean = true
     operator fun E.invoke(command: Command): E {
         val state = stateMachine.addState(command)
         if(log) {
+            val logPath = "States/${this::class.simpleName}/state"
             state.onEnter {
-                Logger.recordOutput("States/$name/state", name)
+                Logger.recordOutput(logPath, name)
             }
         }
         stateMap[this] = state
