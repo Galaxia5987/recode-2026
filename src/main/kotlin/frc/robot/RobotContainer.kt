@@ -1,5 +1,7 @@
 package frc.robot
 
+import frc.robot.RobotContainer.Buttons.intakeButton
+import frc.robot.RobotContainer.Buttons.outtakeButton
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.Mode
 import frc.robot.lib.commands.emptyCommand
@@ -14,11 +16,19 @@ import frc.robot.subsystems.turret.Turret
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
+import org.wpilib.command3.Trigger
 import org.wpilib.smartdashboard.SendableChooser
+
+
 
 object RobotContainer {
     private val driverController = PS5Gamepad(0)
     private val autoChooser: LoggedDashboardChooser<Command>
+
+    object Buttons {
+        var intakeButton = Trigger { false }
+        var outtakeButton = Trigger {false}
+    }
 
     init {
         drive // Ensure Drive is initialized
@@ -58,6 +68,8 @@ object RobotContainer {
         driverController.create().onTrue(DriveCommands.resetGyro())
         driverController.triangle().onTrue(Hood.setPosition(70.deg))
         driverController.circle().onTrue(Hood.setPosition(0.deg))
+        intakeButton = driverController.rightTrigger()
+        outtakeButton = driverController.leftTrigger()
     }
 
     fun getAutonomousCommand(): Command = autoChooser.get()
