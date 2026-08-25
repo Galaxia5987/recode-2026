@@ -70,7 +70,7 @@ enum class IntakeState {
                         ) switchTo
                     IDLE
 
-                TODO("isShooting is currently a mock variable, add it from shooter state machine after implement.")
+                //TODO("isShooting is currently a mock variable, add it from shooter state machine after implement.")
             }
     }
 }
