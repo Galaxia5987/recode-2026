@@ -16,9 +16,12 @@ class StateMachineBuilder<E : Enum<E>>(
     private val stateMap = mutableMapOf<E, StateMachine.State>()
 
     operator fun E.invoke(command: Command): E {
+        require(!stateMap.containsKey(this))
+
         val state = stateMachine.addState(command)
         if (log) {
-            val logPath = "States/${this::class.simpleName}/state"
+            val logPath =
+                "States/${this@StateMachineBuilder::class.simpleName}/state"
             state.onEnter {
                 Logger.recordOutput(logPath, name)
             }
