@@ -19,15 +19,13 @@ import org.wpilib.command3.Command
 import org.wpilib.command3.Trigger
 import org.wpilib.smartdashboard.SendableChooser
 
-
-
 object RobotContainer {
     private val driverController = PS5Gamepad(0)
     private val autoChooser: LoggedDashboardChooser<Command>
 
     object Buttons {
         var intakeButton = Trigger { false }
-        var outtakeButton = Trigger {false}
+        var outtakeButton = Trigger { false }
     }
 
     init {
