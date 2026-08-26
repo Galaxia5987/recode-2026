@@ -4,7 +4,6 @@ import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Command.noRequirements
 import org.wpilib.command3.Coroutine
-import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Scheduler
 import org.wpilib.command3.StateMachine
 import org.wpilib.command3.Trigger
