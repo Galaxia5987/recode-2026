@@ -21,6 +21,10 @@ repositories {
 
 def javaVersion = JavaVersion.VERSION_25
 
+ksp {
+    arg("graphRootDir", project.rootDir.absolutePath + "/graphs")
+}
+
 java {
     sourceCompatibility = javaVersion
     targetCompatibility = javaVersion

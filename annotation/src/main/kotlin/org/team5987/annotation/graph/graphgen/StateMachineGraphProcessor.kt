@@ -12,11 +12,12 @@ import org.jetbrains.kotlin.com.intellij.openapi.util.Disposer
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.psi.*
+import java.io.File
 import java.io.OutputStream
 
 class StateMachineGraphProcessor(
-    private val codeGenerator: CodeGenerator,
-    private val logger: KSPLogger
+    private val logger: KSPLogger,
+    private val projectDir: String
 ) : SymbolProcessor {
 
     private val project by lazy {
@@ -164,12 +165,7 @@ class StateMachineGraphProcessor(
         transitions: List<Transition>,
         containingFile: KSFile
     ) {
-        val file: OutputStream = codeGenerator.createNewFile(
-            dependencies = Dependencies(false, containingFile),
-            packageName = "",
-            fileName = fileName,
-            extensionName = "md"
-        )
+        val outputFile = File(projectDir, "$fileName.md")
 
         val sb = StringBuilder()
         sb.appendLine("```mermaid")
@@ -185,8 +181,8 @@ class StateMachineGraphProcessor(
 
         sb.appendLine("```")
 
-        file.write(sb.toString().toByteArray())
-        file.close()
+        outputFile.writeText(sb.toString())
+        logger.info("Generated State Machine Graph at: ${outputFile.absolutePath}")
     }
 
     data class Transition(val from: String, val to: String, val condition: String)
