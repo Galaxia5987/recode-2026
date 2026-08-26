@@ -9,14 +9,17 @@ class StateMachineGraphProcessorProvider : SymbolProcessorProvider {
     override fun create(
         environment: SymbolProcessorEnvironment
     ): SymbolProcessor {
-        val projectDir = environment.options["graphRootDir"]
-            ?: throw IllegalArgumentException("Missing graphRootDir KSP argument")
+        val projectDir =
+            environment.options["graphRootDir"]
+                ?: throw IllegalArgumentException(
+                    "Missing graphRootDir KSP argument"
+                )
 
         File(projectDir).mkdirs()
 
         return StateMachineGraphProcessor(
             environment.logger,
-            projectDir
+            projectDir,
         )
     }
 }
