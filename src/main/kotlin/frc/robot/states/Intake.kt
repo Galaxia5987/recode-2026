@@ -22,7 +22,7 @@ enum class IntakeState {
     OUTTAKING;
 
     companion object {
-        @GenerateStateMachineGraph
+        @GenerateStateMachineGraph("IntakeStateMachine")
         val stateMachine =
             buildStateMachine<IntakeState>("Intake State Machine") {
                 IDLE {
