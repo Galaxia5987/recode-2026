@@ -4,6 +4,7 @@ import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Command.noRequirements
 import org.wpilib.command3.Coroutine
+import org.wpilib.command3.Scheduler
 import org.wpilib.command3.StateMachine
 import org.wpilib.command3.Trigger
 
@@ -118,4 +119,8 @@ inline fun <reified E : Enum<E>> buildStateMachine(
     init: StateMachineBuilder<E>.() -> Unit,
 ): StateMachine {
     return StateMachineBuilder<E>(name).apply(init).stateMachine
+}
+
+fun StateMachine.register() {
+    Scheduler.getDefault().schedule(this)
 }
