@@ -7,7 +7,6 @@ import org.wpilib.command3.Coroutine
 import org.wpilib.command3.Scheduler
 import org.wpilib.command3.StateMachine
 import org.wpilib.command3.Trigger
-import javax.xml.validation.Schema
 
 class StateMachineBuilder<E : Enum<E>>(
     val name: String,

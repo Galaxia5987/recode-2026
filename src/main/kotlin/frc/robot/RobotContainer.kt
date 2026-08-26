@@ -18,7 +18,6 @@ import frc.robot.subsystems.turret.Turret
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
-import org.wpilib.command3.Scheduler
 import org.wpilib.command3.Trigger
 import org.wpilib.smartdashboard.SendableChooser
 
@@ -71,8 +70,8 @@ object RobotContainer {
         driverController.create().onTrue(DriveCommands.resetGyro())
         driverController.triangle().onTrue(Hood.setPosition(70.deg))
         driverController.circle().onTrue(Hood.setPosition(0.deg))
-        intakeButton = driverController.rightTrigger()
-        outtakeButton = driverController.leftTrigger()
+        intakeButton = driverController.rightBumper()
+        outtakeButton = driverController.leftBumper()
     }
 
     fun getAutonomousCommand(): Command = autoChooser.get()
