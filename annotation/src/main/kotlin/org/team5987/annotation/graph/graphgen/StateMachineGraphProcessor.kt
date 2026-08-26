@@ -1,8 +1,8 @@
 @file:OptIn(CompilerConfiguration.Internals::class, K1Deprecation::class)
 package org.team5987.annotation.graph.graphgen
-
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
+import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import org.jetbrains.kotlin.K1Deprecation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -19,7 +19,6 @@ class StateMachineGraphProcessor(
     private val logger: KSPLogger
 ) : SymbolProcessor {
 
-    // Initialize headless environment for PSI parsing
     private val project by lazy {
         val configuration = CompilerConfiguration().apply {
             put(CommonConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
@@ -32,29 +31,37 @@ class StateMachineGraphProcessor(
     }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val symbols = resolver.getSymbolsWithAnnotation("GenerateStateMachineGraph")
+        val symbols = resolver.getSymbolsWithAnnotation("org.team5987.annotation.graph.graphgen.GenerateStateMachineGraph")
 
         symbols.filterIsInstance<KSPropertyDeclaration>().forEach { property ->
-            generateGraphForProperty(property)
+            try {
+                generateGraphForProperty(property)
+            } catch (e: Exception) {
+                logger.error("Failed to generate state machine graph: ${e.message}", property)
+            }
         }
 
         return emptyList()
     }
 
     private fun generateGraphForProperty(property: KSPropertyDeclaration) {
-        val annotation = property.annotations.first {
+        val annotation = property.annotations.firstOrNull {
             it.shortName.asString() == "GenerateStateMachineGraph"
-        }
-        val fileName = annotation.arguments.first().value as String
+        } ?: return
 
-        val containingFile = property.containingFile ?: return
+        val fileNameArg = annotation.arguments.firstOrNull { it.name?.asString() == "outputFileName" }
+        val fileName = (fileNameArg?.value as? String) ?: "StateMachineGraph"
+
+        val containingFile = property.containingFile ?: run {
+            logger.error("Could not locate containing file for property", property)
+            return
+        }
+
         val sourceText = java.io.File(containingFile.filePath).readText()
 
-        // Create the PSI tree from the source file text
         val psiFactory = KtPsiFactory(project)
         val ktFile = psiFactory.createFile(sourceText)
 
-        // Find the specific property in the PSI tree
         val propertyName = property.simpleName.asString()
         val psiProperty = ktFile.findDescendantOfType<KtProperty> { it.name == propertyName }
 
@@ -63,7 +70,6 @@ class StateMachineGraphProcessor(
             var initialState: String? = null
 
             psiProperty.accept(object : KtTreeVisitorVoid() {
-                // Parse transitions like: A on B switchTo C
                 override fun visitBinaryExpression(expression: KtBinaryExpression) {
                     super.visitBinaryExpression(expression)
 
@@ -73,25 +79,26 @@ class StateMachineGraphProcessor(
                     }
                 }
 
-                // Parse standard function calls like: (A on B).switchTo(C)
                 override fun visitDotQualifiedExpression(expression: KtDotQualifiedExpression) {
                     super.visitDotQualifiedExpression(expression)
 
                     val selector = expression.selectorExpression
+                    if (selector is KtCallExpression) {
+                        val callee = selector.calleeExpression?.text
 
-                    if (selector is KtCallExpression && selector.calleeExpression?.text == "switchTo") {
-                        val targetStateText = selector.valueArguments.firstOrNull()?.text ?: return
-                        parseSwitchToSource(expression.receiverExpression, targetStateText, transitions)
-                    }
-                    // Parse initial state: IDLE { ... }.initial()
-                    else if (selector?.text == "initial()") {
-                        val receiver = expression.receiverExpression
-                        initialState = extractStateNameFromReceiver(receiver)
+                        if (callee == "switchTo") {
+                            val targetStateText = selector.valueArguments.firstOrNull()?.text ?: return
+                            parseSwitchToSource(expression.receiverExpression, targetStateText, transitions)
+                        } else if (callee == "initial") {
+                            initialState = extractStateNameFromReceiver(expression.receiverExpression)
+                        }
                     }
                 }
             })
 
-            writeMermaidGraph(fileName, initialState, transitions)
+            writeMermaidGraph(fileName, initialState, transitions, containingFile)
+        } else {
+            logger.warn("Could not find PSI property for $propertyName")
         }
     }
 
@@ -138,23 +145,27 @@ class StateMachineGraphProcessor(
 
     private fun extractStateNameFromReceiver(receiver: KtExpression): String? {
         return when (receiver) {
-            // Handles IDLE { ... }
             is KtCallExpression -> receiver.calleeExpression?.text
-            // Handles simple IDLE
             is KtNameReferenceExpression -> receiver.text
             else -> null
         }
     }
 
     private fun String.cleanConditionText(): String {
-        return this.replace(Regex("\\s+"), " ")
-            .replace("\n", "")
+        return this
+            .replace(Regex("\\s+"), " ")
+            .replace(" .", ".")
             .trim()
     }
 
-    private fun writeMermaidGraph(fileName: String, initialState: String?, transitions: List<Transition>) {
+    private fun writeMermaidGraph(
+        fileName: String,
+        initialState: String?,
+        transitions: List<Transition>,
+        containingFile: KSFile
+    ) {
         val file: OutputStream = codeGenerator.createNewFile(
-            dependencies = Dependencies.ALL_FILES,
+            dependencies = Dependencies(false, containingFile),
             packageName = "",
             fileName = fileName,
             extensionName = "md"
@@ -181,7 +192,6 @@ class StateMachineGraphProcessor(
     data class Transition(val from: String, val to: String, val condition: String)
 }
 
-// Utility extension for traversing AST to find specific node types
 private inline fun <reified T : KtElement> KtElement.findDescendantOfType(crossinline predicate: (T) -> Boolean): T? {
     var result: T? = null
     this.accept(object : KtTreeVisitorVoid() {
