@@ -181,6 +181,8 @@ class StateMachineGraphProcessor(
                             Transition(sourceState, targetState, finalCondition)
                         )
                     }
+                } else {
+                    logger.warn("Unhandled binary operation in switch statement: $op")
                 }
             }
             is KtDotQualifiedExpression -> {
@@ -195,7 +197,12 @@ class StateMachineGraphProcessor(
                                 )
                             )
                         }
+                } else {
+                    logger.warn("Unhandled dot qualified expression selector: ${sourceExpression.selectorExpression?.text}")
                 }
+            }
+            else -> {
+                logger.warn("Unhandled source expression type: ${sourceExpression?.javaClass?.simpleName}")
             }
         }
     }
@@ -203,14 +210,19 @@ class StateMachineGraphProcessor(
     private fun extractSources(expression: KtExpression?): List<String> {
         return when (expression) {
             is KtCallExpression -> {
-                when (expression.calleeExpression?.text) {
-                    "anyOf" -> expression.valueArguments.map { it.text }
-                    "allOf" -> listOf("[*]")
-                    else -> emptyList()
+                when (val calleeText = expression.calleeExpression?.text) {
+                    "anyOf", "allOf" -> expression.valueArguments.map { it.text }
+                    else -> {
+                        logger.warn("Unhandled call expression callee in state sources: $calleeText")
+                        emptyList()
+                    }
                 }
             }
             is KtNameReferenceExpression -> listOf(expression.text)
-            else -> emptyList()
+            else -> {
+                logger.warn("Unhandled expression type in state sources: ${expression?.javaClass?.simpleName}")
+                emptyList()
+            }
         }
     }
 
