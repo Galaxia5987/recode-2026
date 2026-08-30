@@ -238,6 +238,30 @@ class StateMachineGraphProcessor(
         return this.replace(Regex("\\s+"), " ").replace(" .", ".").trim()
     }
 
+    private fun stripCommentsAndNewlines(rawText: String): String {
+        return rawText
+            .replace(Regex("//.*"), "")
+            .replace(Regex("/\\*[\\s\\S]*?\\*/"), "")
+            .replace("\n", " ")
+            .trim()
+    }
+
+    private fun sanitizeNodeId(rawText: String): String {
+        val cleanText = stripCommentsAndNewlines(rawText)
+        return cleanText.replace(Regex("[{}:\"\\s]|-->"), "_")
+    }
+
+    private fun sanitizeLabel(rawText: String): String {
+        val cleanText = stripCommentsAndNewlines(rawText)
+
+        return cleanText
+            .replace(":", "∶")
+            .replace("-->", "⟶")
+            .replace("{", "(")
+            .replace("}", ")")
+            .replace("\"", "\\\"")
+    }
+
     private fun writeMermaidGraph(
         fileName: String,
         initialState: String?,
@@ -254,10 +278,16 @@ class StateMachineGraphProcessor(
             sb.appendLine("    [*] --> $initialState")
         }
 
-        transitions.forEach { transition ->
-            sb.appendLine(
-                "    ${transition.from} --> ${transition.to} :${transition.condition}"
-            )
+        transitions.distinct().forEach { transition ->
+            val safeFrom = sanitizeNodeId(transition.from)
+            val safeTo = sanitizeNodeId(transition.to)
+
+            if (transition.condition.isBlank()) {
+                sb.appendLine("    $safeFrom --> $safeTo")
+            } else {
+                val safeCondition = sanitizeLabel(transition.condition)
+                sb.appendLine("    $safeFrom --> $safeTo : $safeCondition")
+            }
         }
 
         sb.appendLine("```")
