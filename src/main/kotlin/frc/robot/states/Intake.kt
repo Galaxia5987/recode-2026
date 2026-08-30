@@ -10,6 +10,7 @@ import frc.robot.lib.state_machine.buildStateMachine
 import frc.robot.subsystems.intake.extender.Extender
 import frc.robot.subsystems.intake.funnel.Funnel
 import frc.robot.subsystems.intake.roller.Roller
+import frc.robot.subsystems.spindexer.Spindexer
 import org.wpilib.command3.Trigger
 
 val isShooting = Trigger { true }
@@ -24,20 +25,20 @@ enum class IntakeState {
         val stateMachine =
             buildStateMachine<IntakeState>("Intake State Machine") {
                 IDLE {
-                        +[Roller.stop(), Funnel.stop(), Extender.close()]
+                        +[Roller.stop(), Funnel.stop(), Extender.close(), Spindexer.stop()]
                     }
                     .initial()
 
                 PUMPING {
-                    +[Roller.intake(), Funnel.intake(), Extender.pump()]
+                    +[Roller.intake(), Funnel.intake(), Extender.pump(), Spindexer.convey()]
                 }
 
                 INTAKING {
-                    +[Roller.intake(), Funnel.intake(), Extender.open()]
+                    +[Roller.intake(), Funnel.intake(), Extender.open(), Spindexer.convey()]
                 }
 
                 OUTTAKING {
-                    +[Roller.outtake(), Funnel.outtake(), Extender.open()]
+                    +[Roller.outtake(), Funnel.outtake(), Extender.open(), Spindexer.stop()]
                 }
 
                 IDLE on isShooting switchTo PUMPING
