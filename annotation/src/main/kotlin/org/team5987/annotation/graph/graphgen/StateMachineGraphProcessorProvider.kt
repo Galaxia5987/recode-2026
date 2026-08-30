@@ -17,7 +17,9 @@ class StateMachineGraphProcessorProvider : SymbolProcessorProvider {
 
         val targetDir = File(projectDir)
         if (!targetDir.exists() && !targetDir.mkdirs()) {
-            error("Failed to create state machine graph output directory: $projectDir")
+            error(
+                "Failed to create state machine graph output directory: $projectDir"
+            )
         }
 
         return StateMachineGraphProcessor(

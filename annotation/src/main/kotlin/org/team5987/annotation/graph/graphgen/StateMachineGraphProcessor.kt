@@ -31,10 +31,10 @@ class StateMachineGraphProcessor(
                 )
             }
         KotlinCoreEnvironment.createForProduction(
-            disposable,
-            configuration,
-            EnvironmentConfigFiles.JVM_CONFIG_FILES,
-        )
+                disposable,
+                configuration,
+                EnvironmentConfigFiles.JVM_CONFIG_FILES,
+            )
             .project
     }
 
@@ -68,7 +68,11 @@ class StateMachineGraphProcessor(
             annotation.arguments.firstOrNull {
                 it.name?.asString() == "outputFileName"
             }
-        val fileName = (fileNameArg?.value as? String) ?: error("State Machine Graph annotation doesn't provide an `outputFileName`")
+        val fileName =
+            (fileNameArg?.value as? String)
+                ?: error(
+                    "State Machine Graph annotation doesn't provide an `outputFileName`"
+                )
 
         val containingFile =
             property.containingFile
@@ -181,7 +185,9 @@ class StateMachineGraphProcessor(
                         )
                     }
                 } else {
-                    logger.warn("Unhandled binary operation in switch statement: $op")
+                    logger.warn(
+                        "Unhandled binary operation in switch statement: $op"
+                    )
                 }
             }
             is KtDotQualifiedExpression -> {
@@ -197,11 +203,15 @@ class StateMachineGraphProcessor(
                             )
                         }
                 } else {
-                    logger.warn("Unhandled dot qualified expression selector: ${sourceExpression.selectorExpression?.text}")
+                    logger.warn(
+                        "Unhandled dot qualified expression selector: ${sourceExpression.selectorExpression?.text}"
+                    )
                 }
             }
             else -> {
-                logger.warn("Unhandled source expression type: ${sourceExpression?.javaClass?.simpleName}")
+                logger.warn(
+                    "Unhandled source expression type: ${sourceExpression?.javaClass?.simpleName}"
+                )
             }
         }
     }
@@ -210,16 +220,21 @@ class StateMachineGraphProcessor(
         return when (expression) {
             is KtCallExpression -> {
                 when (val calleeText = expression.calleeExpression?.text) {
-                    "anyOf", "allOf" -> expression.valueArguments.map { it.text }
+                    "anyOf",
+                    "allOf" -> expression.valueArguments.map { it.text }
                     else -> {
-                        logger.warn("Unhandled call expression callee in state sources: $calleeText")
+                        logger.warn(
+                            "Unhandled call expression callee in state sources: $calleeText"
+                        )
                         emptyList()
                     }
                 }
             }
             is KtNameReferenceExpression -> listOf(expression.text)
             else -> {
-                logger.warn("Unhandled expression type in state sources: ${expression?.javaClass?.simpleName}")
+                logger.warn(
+                    "Unhandled expression type in state sources: ${expression?.javaClass?.simpleName}"
+                )
                 emptyList()
             }
         }
@@ -289,19 +304,18 @@ class StateMachineGraphProcessor(
 
         sb.appendLine("```")
 
-        val fileStream = codeGenerator.createNewFileByPath(
-            dependencies = Dependencies(aggregating = true, containingFile),
-            path = fileName,
-            extensionName = "md"
-        )
+        val fileStream =
+            codeGenerator.createNewFileByPath(
+                dependencies = Dependencies(aggregating = true, containingFile),
+                path = fileName,
+                extensionName = "md",
+            )
 
         fileStream.use {
             it.write(sb.toString().toByteArray())
         }
 
-        logger.info(
-            "Generated State Machine Graph: $fileName.md"
-        )
+        logger.info("Generated State Machine Graph: $fileName.md")
     }
 
     data class Transition(
