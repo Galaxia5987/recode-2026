@@ -21,6 +21,8 @@ class StateMachineGraphProcessor(
     private val projectDir: String,
 ) : SymbolProcessor {
 
+    private val disposable = Disposer.newDisposable()
+
     private val project by lazy {
         val configuration =
             CompilerConfiguration().apply {
@@ -30,7 +32,7 @@ class StateMachineGraphProcessor(
                 )
             }
         KotlinCoreEnvironment.createForProduction(
-                Disposer.newDisposable(),
+                disposable,
                 configuration,
                 EnvironmentConfigFiles.JVM_CONFIG_FILES,
             )
@@ -148,6 +150,14 @@ class StateMachineGraphProcessor(
         } else {
             logger.warn("Could not find PSI property for $propertyName")
         }
+    }
+
+    override fun finish() {
+        disposable.dispose()
+    }
+
+    override fun onError() {
+        disposable.dispose()
     }
 
     private fun parseSwitchToSource(
