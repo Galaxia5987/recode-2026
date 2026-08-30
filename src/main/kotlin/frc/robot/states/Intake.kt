@@ -25,20 +25,40 @@ enum class IntakeState {
         val stateMachine =
             buildStateMachine<IntakeState>("Intake State Machine") {
                 IDLE {
-                        +[Roller.stop(), Funnel.stop(), Extender.close(), Spindexer.stop()]
+                        +[
+                            Roller.stop(),
+                            Funnel.stop(),
+                            Extender.close(),
+                            Spindexer.stop(),
+                        ]
                     }
                     .initial()
 
                 PUMPING {
-                    +[Roller.intake(), Funnel.intake(), Extender.pump(), Spindexer.convey()]
+                    +[
+                        Roller.intake(),
+                        Funnel.intake(),
+                        Extender.pump(),
+                        Spindexer.convey(),
+                    ]
                 }
 
                 INTAKING {
-                    +[Roller.intake(), Funnel.intake(), Extender.open(), Spindexer.convey()]
+                    +[
+                        Roller.intake(),
+                        Funnel.intake(),
+                        Extender.open(),
+                        Spindexer.convey(),
+                    ]
                 }
 
                 OUTTAKING {
-                    +[Roller.outtake(), Funnel.outtake(), Extender.open(), Spindexer.stop()]
+                    +[
+                        Roller.outtake(),
+                        Funnel.outtake(),
+                        Extender.open(),
+                        Spindexer.stop(),
+                    ]
                 }
 
                 IDLE on isShooting switchTo PUMPING
@@ -62,13 +82,9 @@ enum class IntakeState {
                         .and(!inExtendedAllianceZone) switchTo
                     OUTTAKING
                 OUTTAKING on
-                    outtakeButton
-                        .negate()
-                        .or(
-                            isInDoubleFeedingZone
-                                .negate()
-                                .and(!inExtendedAllianceZone)
-                        ) switchTo
+                    !outtakeButton
+                        .or(isInDoubleFeedingZone.or(inExtendedAllianceZone))
+                        .negate() switchTo
                     IDLE
 
                 // TODO("isShooting is currently a mock variable)
