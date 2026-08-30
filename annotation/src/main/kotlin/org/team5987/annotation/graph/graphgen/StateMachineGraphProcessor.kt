@@ -69,7 +69,7 @@ class StateMachineGraphProcessor(
             annotation.arguments.firstOrNull {
                 it.name?.asString() == "outputFileName"
             }
-        val fileName = (fileNameArg?.value as? String) ?: "StateMachineGraph"
+        val fileName = (fileNameArg?.value as? String) ?: error("State Machine Graph annotation doesn't provide an `outputFileName`")
 
         val containingFile =
             property.containingFile
