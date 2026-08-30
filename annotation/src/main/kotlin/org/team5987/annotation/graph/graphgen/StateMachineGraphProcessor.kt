@@ -6,7 +6,6 @@ import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
-import java.io.File
 import org.jetbrains.kotlin.K1Deprecation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.cli.jvm.compiler.EnvironmentConfigFiles
@@ -18,7 +17,7 @@ import org.jetbrains.kotlin.psi.*
 
 class StateMachineGraphProcessor(
     private val logger: KSPLogger,
-    private val projectDir: String,
+    private val codeGenerator: CodeGenerator,
 ) : SymbolProcessor {
 
     private val disposable = Disposer.newDisposable()
@@ -32,10 +31,10 @@ class StateMachineGraphProcessor(
                 )
             }
         KotlinCoreEnvironment.createForProduction(
-                disposable,
-                configuration,
-                EnvironmentConfigFiles.JVM_CONFIG_FILES,
-            )
+            disposable,
+            configuration,
+            EnvironmentConfigFiles.JVM_CONFIG_FILES,
+        )
             .project
     }
 
@@ -268,8 +267,6 @@ class StateMachineGraphProcessor(
         transitions: List<Transition>,
         containingFile: KSFile,
     ) {
-        val outputFile = File(projectDir, "$fileName.md")
-
         val sb = StringBuilder()
         sb.appendLine("```mermaid")
         sb.appendLine("stateDiagram-v2")
@@ -292,9 +289,18 @@ class StateMachineGraphProcessor(
 
         sb.appendLine("```")
 
-        outputFile.writeText(sb.toString())
+        val fileStream = codeGenerator.createNewFileByPath(
+            dependencies = Dependencies(aggregating = true, containingFile),
+            path = fileName,
+            extensionName = "md"
+        )
+
+        fileStream.use {
+            it.write(sb.toString().toByteArray())
+        }
+
         logger.info(
-            "Generated State Machine Graph at: ${outputFile.absolutePath}"
+            "Generated State Machine Graph: $fileName.md"
         )
     }
 

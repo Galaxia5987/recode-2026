@@ -163,6 +163,24 @@ tasks.named("shadowJar").configure {
     dependsOn("createVersionFile")
 }
 
+tasks.register('syncStateMachineGraphs', Copy) {
+    dependsOn tasks.matching { it.name.startsWith("ksp") }
+
+    from layout.buildDirectory.dir("generated/ksp")
+    include "**/*.md"
+
+    eachFile { FileCopyDetails fcd ->
+        fcd.path = fcd.name
+    }
+    includeEmptyDirs = false
+
+    into layout.projectDirectory.dir("graphs")
+}
+
+tasks.matching { it.name.startsWith("ksp") && it.name.toLowerCase().endsWith("kotlin") }.configureEach { kspTask ->
+    kspTask.finalizedBy 'syncStateMachineGraphs'
+}
+
 gversion {
     srcDir       = "src/main/kotlin/"
     classPackage = "frc.robot"

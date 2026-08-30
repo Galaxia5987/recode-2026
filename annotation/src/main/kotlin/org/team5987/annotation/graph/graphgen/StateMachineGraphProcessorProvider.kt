@@ -15,11 +15,14 @@ class StateMachineGraphProcessorProvider : SymbolProcessorProvider {
                     "Missing graphRootDir KSP argument"
                 )
 
-        File(projectDir).mkdirs()
+        val targetDir = File(projectDir)
+        if (!targetDir.exists() && !targetDir.mkdirs()) {
+            error("Failed to create state machine graph output directory: $projectDir")
+        }
 
         return StateMachineGraphProcessor(
             environment.logger,
-            projectDir,
+            environment.codeGenerator,
         )
     }
 }
