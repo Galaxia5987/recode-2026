@@ -66,8 +66,8 @@ def main():
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
 
-        mermaid_code = '\n'.join(content.split("\n")[1:-1])
-        chunk = f"### `{file_path}`\n[Interactive Link]({gen_pako_link(mermaid_code)})\n{content}\n\n"
+        mermaid_code = content.replace("```mermaid", "").replace("```", "")
+        chunk = f"### `{file_path}`\n**Interactive Links:**\n* [Dagre Layout]({gen_pako_link(mermaid_code)})\n* [ELK Layout]({gen_pako_link("---\nconfig:\n  layout: elk\n---" + mermaid_code)})\n{content}\n\n"
 
         # Measure byte size to match GitHub's limits
         if len(comment_body.encode('utf-8')) + len(chunk.encode('utf-8')) > max_size:
