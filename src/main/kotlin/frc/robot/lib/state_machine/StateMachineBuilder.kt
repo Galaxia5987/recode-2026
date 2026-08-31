@@ -58,7 +58,7 @@ class StateMachineBuilder<E : Enum<E>>(
     )
 
     inner class MultiTransitionCondition(
-        val sources: Array<out E>,
+        val sources: List<E>,
         val condition: Trigger,
     )
 
@@ -85,17 +85,13 @@ class StateMachineBuilder<E : Enum<E>>(
         }
     }
 
-    fun anyOf(vararg states: E): Array<out E> = states
+    inline fun <reified E : Enum<E>> allOf(): List<E> = enumValues<E>().toList()
 
-    inline fun <reified E : Enum<E>> allOf(): Array<out E> =
-        enumValues<E>() as Array<out E>
-
-    infix fun Array<out E>.on(trigger: Trigger): MultiTransitionCondition =
+    infix fun List<E>.on(trigger: Trigger): MultiTransitionCondition =
         MultiTransitionCondition(this, trigger)
 
-    infix fun Array<out E>.on(
-        condition: () -> Boolean
-    ): MultiTransitionCondition = on(Trigger(condition))
+    infix fun List<E>.on(condition: () -> Boolean): MultiTransitionCondition =
+        on(Trigger(condition))
 
     infix fun MultiTransitionCondition.switchTo(target: E) {
         val sourceStates = this.sources.map { getState(it) }.toTypedArray()
