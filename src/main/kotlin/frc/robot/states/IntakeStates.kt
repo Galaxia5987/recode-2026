@@ -11,6 +11,7 @@ import frc.robot.subsystems.intake.extender.Extender
 import frc.robot.subsystems.intake.funnel.Funnel
 import frc.robot.subsystems.intake.roller.Roller
 import frc.robot.subsystems.spindexer.Spindexer
+import org.team5987.annotation.graph.graphgen.GenerateStateMachineGraph
 import org.wpilib.command3.Trigger
 
 // TODO: Update when shooting state machine is merged
@@ -23,6 +24,7 @@ enum class IntakeState {
     OUTTAKING;
 
     companion object {
+        @GenerateStateMachineGraph("IntakeStates")
         val stateMachine =
             buildStateMachine<IntakeState>("Intake State Machine") {
                 IDLE {
