@@ -13,6 +13,8 @@ import frc.robot.subsystems.intake.roller.Roller
 import frc.robot.subsystems.spindexer.Spindexer
 import org.wpilib.command3.Trigger
 
+
+// TODO: Update when shooting state machine is merged
 val isShooting = Trigger { true }
 
 enum class IntakeState {
@@ -62,32 +64,32 @@ enum class IntakeState {
                 }
 
                 IDLE on isShooting switchTo PUMPING
-                IDLE on intakeButton switchTo INTAKING
-                IDLE on
-                    outtakeButton
-                        .and(!inExtendedAllianceZone)
-                        .and(isInDoubleFeedingZone) switchTo
-                    OUTTAKING
-                PUMPING on !isShooting switchTo IDLE
-                PUMPING on intakeButton switchTo INTAKING
-                PUMPING on
-                    outtakeButton
-                        .and(isInDoubleFeedingZone)
-                        .and(!inExtendedAllianceZone) switchTo
-                    OUTTAKING
-                INTAKING on !intakeButton switchTo IDLE
-                INTAKING on
-                    outtakeButton
-                        .and(isInDoubleFeedingZone)
-                        .and(!inExtendedAllianceZone) switchTo
-                    OUTTAKING
-                OUTTAKING on
-                    !outtakeButton
-                        .or(isInDoubleFeedingZone.or(inExtendedAllianceZone))
-                        .negate() switchTo
-                    IDLE
 
-                // TODO("isShooting is currently a mock variable)
+                IDLE on intakeButton switchTo INTAKING
+
+                IDLE on
+                        (outtakeButton and !inExtendedAllianceZone
+                        and isInDoubleFeedingZone) switchTo OUTTAKING
+
+                PUMPING on !isShooting switchTo IDLE
+
+                PUMPING on intakeButton switchTo INTAKING
+
+                PUMPING on
+                        (outtakeButton
+                        and isInDoubleFeedingZone
+                        and !inExtendedAllianceZone) switchTo OUTTAKING
+
+                INTAKING on !intakeButton switchTo IDLE
+
+                INTAKING on (outtakeButton
+                        and isInDoubleFeedingZone and
+                        !inExtendedAllianceZone) switchTo OUTTAKING
+
+                OUTTAKING on
+                        (!outtakeButton
+                        or !isInDoubleFeedingZone or inExtendedAllianceZone) switchTo IDLE
+
             }
     }
 }
