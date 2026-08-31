@@ -19,42 +19,8 @@ jobs:
         id: build-comment
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          MAX_SIZE=64000
-          TEMP_FILE="comment.txt"
-
-          echo "## Updated State Machine Graphs" > "$TEMP_FILE"
-          echo "Generated from the latest commit." >> "$TEMP_FILE"
-          echo "" >> "$TEMP_FILE"
-
-          # Fetch files changed in the PR and filter for markdown files in the graphs directory
-          CHANGED_FILES=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json files --jq '.files[].path' | grep '^graphs/.*\.md$' || true)
-
-          for file in $CHANGED_FILES; do
-            if [ -f "$file" ]; then
-              # Store the single file's output in a chunk to measure its size before appending
-              {
-                echo "### \`$file\`"
-                cat "$file"
-                echo ""
-              } > chunk.txt
-          
-              CURRENT_SIZE=$(wc -c < "$TEMP_FILE")
-              CHUNK_SIZE=$(wc -c < chunk.txt)
-          
-              if [ $((CURRENT_SIZE + CHUNK_SIZE)) -gt $MAX_SIZE ]; then
-                echo "> Note: Comment truncated due to GitHub size limits. Some graphs are omitted." >> "$TEMP_FILE"
-                break
-              fi
-          
-              cat chunk.txt >> "$TEMP_FILE"
-            fi
-          done
-
-          delimiter="$(openssl rand -hex 8)"
-          echo "comment_body<<$delimiter" >> "$GITHUB_OUTPUT"
-          cat "$TEMP_FILE" >> "$GITHUB_OUTPUT"
-          echo "$delimiter" >> "$GITHUB_OUTPUT"
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python .github/graphgen/graphgen.py
 
       - name: Create or Update PR Comment
         uses: marocchino/sticky-pull-request-comment@v2
