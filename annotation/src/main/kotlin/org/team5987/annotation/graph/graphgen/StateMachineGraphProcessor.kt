@@ -31,10 +31,10 @@ class StateMachineGraphProcessor(
                 )
             }
         KotlinCoreEnvironment.createForProduction(
-            disposable,
-            configuration,
-            EnvironmentConfigFiles.JVM_CONFIG_FILES,
-        )
+                disposable,
+                configuration,
+                EnvironmentConfigFiles.JVM_CONFIG_FILES,
+            )
             .project
     }
 
@@ -178,7 +178,8 @@ class StateMachineGraphProcessor(
                         if (op == "completeAnd") "Complete & $condition"
                         else condition
 
-                    extractSources(sourceExpression.left).forEach { sourceState ->
+                    extractSources(sourceExpression.left).forEach { sourceState
+                        ->
                         transitions.add(
                             Transition(sourceState, targetState, finalCondition)
                         )
@@ -222,7 +223,12 @@ class StateMachineGraphProcessor(
             }
             is KtCallExpression -> {
                 when (val calleeText = expression.calleeExpression?.text) {
-                    "listOf", "setOf", "arrayOf" -> expression.valueArguments.mapNotNull { it.getArgumentExpression()?.text }
+                    "listOf",
+                    "setOf",
+                    "arrayOf" ->
+                        expression.valueArguments.mapNotNull {
+                            it.getArgumentExpression()?.text
+                        }
                     else -> {
                         logger.warn(
                             "Unhandled call expression callee in state sources: $calleeText"
