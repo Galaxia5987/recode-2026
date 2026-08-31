@@ -67,6 +67,8 @@ enum class IntakeState {
 
                 IDLE on intakeButton switchTo INTAKING
 
+                INTAKING on !intakeButton switchTo IDLE
+
                 IDLE on
                         (outtakeButton and !inExtendedAllianceZone
                         and isInDoubleFeedingZone) switchTo OUTTAKING
@@ -75,16 +77,11 @@ enum class IntakeState {
 
                 PUMPING on intakeButton switchTo INTAKING
 
-                PUMPING on
+
+                [PUMPING, INTAKING] on
                         (outtakeButton
                         and isInDoubleFeedingZone
                         and !inExtendedAllianceZone) switchTo OUTTAKING
-
-                INTAKING on !intakeButton switchTo IDLE
-
-                INTAKING on (outtakeButton
-                        and isInDoubleFeedingZone and
-                        !inExtendedAllianceZone) switchTo OUTTAKING
 
                 OUTTAKING on
                         (!outtakeButton
