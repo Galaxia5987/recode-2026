@@ -31,10 +31,10 @@ class StateMachineGraphProcessor(
                 )
             }
         KotlinCoreEnvironment.createForProduction(
-                disposable,
-                configuration,
-                EnvironmentConfigFiles.JVM_CONFIG_FILES,
-            )
+            disposable,
+            configuration,
+            EnvironmentConfigFiles.JVM_CONFIG_FILES,
+        )
             .project
     }
 
@@ -178,8 +178,7 @@ class StateMachineGraphProcessor(
                         if (op == "completeAnd") "Complete & $condition"
                         else condition
 
-                    extractSources(sourceExpression.left).forEach { sourceState
-                        ->
+                    extractSources(sourceExpression.left).forEach { sourceState ->
                         transitions.add(
                             Transition(sourceState, targetState, finalCondition)
                         )
@@ -218,10 +217,12 @@ class StateMachineGraphProcessor(
 
     private fun extractSources(expression: KtExpression?): List<String> {
         return when (expression) {
+            is KtCollectionLiteralExpression -> {
+                expression.getInnerExpressions().map { it.text }
+            }
             is KtCallExpression -> {
                 when (val calleeText = expression.calleeExpression?.text) {
-                    "anyOf",
-                    "allOf" -> expression.valueArguments.map { it.text }
+                    "listOf", "setOf", "arrayOf" -> expression.valueArguments.mapNotNull { it.getArgumentExpression()?.text }
                     else -> {
                         logger.warn(
                             "Unhandled call expression callee in state sources: $calleeText"
@@ -295,10 +296,10 @@ class StateMachineGraphProcessor(
             val safeTo = sanitizeNodeId(transition.to)
 
             if (transition.condition.isBlank()) {
-                sb.appendLine("    $safeFrom --> $safeTo")
+                sb.appendLine("    $safeFrom -->$safeTo")
             } else {
                 val safeCondition = sanitizeLabel(transition.condition)
-                sb.appendLine("    $safeFrom --> $safeTo : $safeCondition")
+                sb.appendLine("    $safeFrom --> $safeTo :$safeCondition")
             }
         }
 
