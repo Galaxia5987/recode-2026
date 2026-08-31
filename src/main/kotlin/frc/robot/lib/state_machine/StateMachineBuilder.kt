@@ -115,3 +115,9 @@ inline fun <reified E : Enum<E>> buildStateMachine(
 ): StateMachine {
     return StateMachineBuilder<E>(name).apply(init).stateMachine
 }
+
+context(builder: StateMachineBuilder<T>)
+infix fun <T : Enum<T>> Trigger.and(other: Trigger): Trigger = this.and(other)
+
+context(builder: StateMachineBuilder<T>)
+infix fun <T : Enum<T>> Trigger.or(other: Trigger): Trigger = this.and(other)
