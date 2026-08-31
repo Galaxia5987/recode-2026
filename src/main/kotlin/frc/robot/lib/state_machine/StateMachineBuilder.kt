@@ -1,9 +1,11 @@
 package frc.robot.lib.state_machine
 
+import java.util.function.BooleanSupplier
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Command.noRequirements
 import org.wpilib.command3.Coroutine
+import org.wpilib.command3.Scheduler
 import org.wpilib.command3.StateMachine
 import org.wpilib.command3.Trigger
 
@@ -107,6 +109,10 @@ class StateMachineBuilder<E : Enum<E>>(
     infix fun CompleteTransitionWrapper.switchTo(target: E) {
         getState(this.source).switchTo(getState(target)).whenComplete()
     }
+
+    infix fun Trigger.and(other: BooleanSupplier): Trigger = this.and(other)
+
+    infix fun Trigger.or(other: BooleanSupplier): Trigger = this.and(other)
 }
 
 inline fun <reified E : Enum<E>> buildStateMachine(
@@ -116,8 +122,6 @@ inline fun <reified E : Enum<E>> buildStateMachine(
     return StateMachineBuilder<E>(name).apply(init).stateMachine
 }
 
-context(builder: StateMachineBuilder<T>)
-infix fun <T : Enum<T>> Trigger.and(other: Trigger): Trigger = this.and(other)
-
-context(builder: StateMachineBuilder<T>)
-infix fun <T : Enum<T>> Trigger.or(other: Trigger): Trigger = this.and(other)
+fun StateMachine.register() {
+    Scheduler.getDefault().schedule(this)
+}
