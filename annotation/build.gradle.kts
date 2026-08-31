@@ -8,6 +8,7 @@ dependencies {
     implementation("com.squareup:kotlinpoet:1.14.2")
     implementation("com.squareup:kotlinpoet-ksp:1.14.2")
     implementation("com.google.devtools.ksp:symbol-processing-api:2.0.0-1.0.21")
+    implementation("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.4.10")
 }
 
 repositories {

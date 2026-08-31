@@ -17,9 +17,12 @@ class StateMachineBuilder<E : Enum<E>>(
     private val stateMap = mutableMapOf<E, StateMachine.State>()
 
     operator fun E.invoke(command: Command): E {
+        require(!stateMap.containsKey(this))
+
         val state = stateMachine.addState(command)
         if (log) {
-            val logPath = "States/${this::class.simpleName}/state"
+            val logPath =
+                "States/${this@StateMachineBuilder::class.simpleName}/state"
             state.onEnter {
                 Logger.recordOutput(logPath, name)
             }
@@ -56,7 +59,7 @@ class StateMachineBuilder<E : Enum<E>>(
     )
 
     inner class MultiTransitionCondition(
-        val sources: Array<out E>,
+        val sources: List<E>,
         val condition: Trigger,
     )
 
@@ -83,17 +86,13 @@ class StateMachineBuilder<E : Enum<E>>(
         }
     }
 
-    fun anyOf(vararg states: E): Array<out E> = states
+    inline fun <reified E : Enum<E>> allOf(): List<E> = enumValues<E>().toList()
 
-    inline fun <reified E : Enum<E>> allOf(): Array<out E> =
-        enumValues<E>() as Array<out E>
-
-    infix fun Array<out E>.on(trigger: Trigger): MultiTransitionCondition =
+    infix fun List<E>.on(trigger: Trigger): MultiTransitionCondition =
         MultiTransitionCondition(this, trigger)
 
-    infix fun Array<out E>.on(
-        condition: () -> Boolean
-    ): MultiTransitionCondition = on(Trigger(condition))
+    infix fun List<E>.on(condition: () -> Boolean): MultiTransitionCondition =
+        on(Trigger(condition))
 
     infix fun MultiTransitionCondition.switchTo(target: E) {
         val sourceStates = this.sources.map { getState(it) }.toTypedArray()
@@ -117,6 +116,12 @@ inline fun <reified E : Enum<E>> buildStateMachine(
 ): StateMachine {
     return StateMachineBuilder<E>(name).apply(init).stateMachine
 }
+
+context(builder: StateMachineBuilder<T>)
+infix fun <T : Enum<T>> Trigger.and(other: Trigger): Trigger = this.and(other)
+
+context(builder: StateMachineBuilder<T>)
+infix fun <T : Enum<T>> Trigger.or(other: Trigger): Trigger = this.and(other)
 
 fun StateMachine.register() {
     Scheduler.getDefault().schedule(this)
