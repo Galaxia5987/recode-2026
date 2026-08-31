@@ -1,5 +1,6 @@
 package frc.robot.lib.state_machine
 
+import java.util.function.BooleanSupplier
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Command.noRequirements
@@ -7,7 +8,6 @@ import org.wpilib.command3.Coroutine
 import org.wpilib.command3.Scheduler
 import org.wpilib.command3.StateMachine
 import org.wpilib.command3.Trigger
-import java.util.function.BooleanSupplier
 
 class StateMachineBuilder<E : Enum<E>>(
     val name: String,

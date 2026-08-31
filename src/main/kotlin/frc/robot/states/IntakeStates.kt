@@ -13,7 +13,6 @@ import frc.robot.subsystems.intake.roller.Roller
 import frc.robot.subsystems.spindexer.Spindexer
 import org.wpilib.command3.Trigger
 
-
 // TODO: Update when shooting state machine is merged
 val isShooting = Trigger { true }
 
@@ -70,23 +69,26 @@ enum class IntakeState {
                 INTAKING on !intakeButton switchTo IDLE
 
                 IDLE on
-                        (outtakeButton and !inExtendedAllianceZone
-                        and isInDoubleFeedingZone) switchTo OUTTAKING
+                    (outtakeButton and
+                        !inExtendedAllianceZone and
+                        isInDoubleFeedingZone) switchTo
+                    OUTTAKING
 
                 PUMPING on !isShooting switchTo IDLE
 
                 PUMPING on intakeButton switchTo INTAKING
 
-
                 [PUMPING, INTAKING] on
-                        (outtakeButton
-                        and isInDoubleFeedingZone
-                        and !inExtendedAllianceZone) switchTo OUTTAKING
+                    (outtakeButton and
+                        isInDoubleFeedingZone and
+                        !inExtendedAllianceZone) switchTo
+                    OUTTAKING
 
                 OUTTAKING on
-                        (!outtakeButton
-                        or !isInDoubleFeedingZone or inExtendedAllianceZone) switchTo IDLE
-
+                    (!outtakeButton or
+                        !isInDoubleFeedingZone or
+                        inExtendedAllianceZone) switchTo
+                    IDLE
             }
     }
 }
