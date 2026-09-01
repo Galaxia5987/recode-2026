@@ -5,6 +5,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.waitUntil
+import frc.robot.lib.extensions.PeriodicDelegate
 import frc.robot.lib.extensions.rps
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
@@ -26,6 +27,7 @@ object Spindexer : Mechanism(), SpindexerVelocitiesCommandFactory {
     val atSetpoint = Trigger {
         motor.inputs.velocity.isNear(setpoint, SETPOINT_TOLERANCE)
     }
+    val inputs by PeriodicDelegate { motor.inputs }
 
     init {
         addPeriodic(::periodic)

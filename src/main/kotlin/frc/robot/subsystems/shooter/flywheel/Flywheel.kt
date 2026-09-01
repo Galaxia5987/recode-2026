@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.signals.MotorAlignmentValue
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
+import frc.robot.lib.extensions.PeriodicDelegate
 import frc.robot.lib.extensions.rps
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
@@ -40,6 +41,8 @@ object Flywheel : Mechanism() {
             gearRatio = GEAR_RATIO,
             logConfig = MOTOR_LOG_CONFIG,
         )
+
+    val inputs by PeriodicDelegate { mainMotor.inputs }
 
     var setpoint = 0.rps
     val atSetpoint = Trigger {

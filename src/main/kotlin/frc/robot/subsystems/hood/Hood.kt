@@ -5,6 +5,7 @@ import com.ctre.phoenix6.hardware.CANcoder
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.waitUntil
+import frc.robot.lib.extensions.PeriodicDelegate
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.log
 import frc.robot.lib.universal_motor.UniversalTalonFX
@@ -32,6 +33,8 @@ object Hood : Mechanism() {
 
     private var positionRequest = PositionVoltage(0.deg)
     private var setpoint = 0.deg
+
+    val inputs by PeriodicDelegate { motor.inputs }
     val atSetpoint = Trigger {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
     }
