@@ -12,13 +12,12 @@ import frc.robot.subsystems.preShooter.PreShooter
 import frc.robot.subsystems.shooter.flywheel.Flywheel
 import frc.robot.subsystems.spindexer.Spindexer
 import frc.robot.subsystems.turret.Turret
-import org.littletonrobotics.junction.Logger
+import kotlin.math.cos
+import kotlin.math.sin
 import org.team5987.annotation.LogLevel
 import org.team5987.annotation.LoggedOutput
 import org.wpilib.math.geometry.*
 import org.wpilib.units.measure.Angle
-import kotlin.math.cos
-import kotlin.math.sin
 
 private val swerveModulePose: Array<Translation2d> =
     Drive.getModuleTranslations()
@@ -95,7 +94,7 @@ private object Intake {
     val extendingHopper by PeriodicDelegate {
         getPose3d(
             getTranslation3d(346.mm, 10.mm, 235.mm) +
-                    Extender.inputs.distance.toX()
+                Extender.inputs.distance.toX()
         )
     }
 
@@ -116,22 +115,24 @@ private object Intake {
 
 private object Shooter {
     private val turretRotation by
-    PeriodicDelegate<Rotation3d> { Turret.inputs.position.toYaw().inverse() }
+        PeriodicDelegate<Rotation3d> {
+            Turret.inputs.position.toYaw().inverse()
+        }
 
     private val turretTranslation by PeriodicDelegate {
         Translation3d((-116).mm, 220.5.mm, 355.mm)
     }
 
     private val hoodTranslation by
-    PeriodicDelegate<Translation3d> {
-        getTranslation3d((-48).mm, 220.5.mm, 435.mm)
-            .rotateAround(turretTranslation, turretRotation)
-    }
+        PeriodicDelegate<Translation3d> {
+            getTranslation3d((-48).mm, 220.5.mm, 435.mm)
+                .rotateAround(turretTranslation, turretRotation)
+        }
 
     private val hoodRotation by
-    PeriodicDelegate<Rotation3d> {
-        Hood.inputs.position.toPitch().rotateBy(turretRotation)
-    }
+        PeriodicDelegate<Rotation3d> {
+            Hood.inputs.position.toPitch().rotateBy(turretRotation)
+        }
 
     val turret by PeriodicDelegate {
         getPose3d(turretTranslation, turretRotation)
@@ -143,10 +144,10 @@ private object Shooter {
 
     val shooterMainRoller by PeriodicDelegate {
         getPose3d(
-            getTranslation3d((-48).mm, 220.5.mm, 436.mm)
-                .rotateAround(turretTranslation, turretRotation),
-            turretRotation,
-        )
+                getTranslation3d((-48).mm, 220.5.mm, 436.mm)
+                    .rotateAround(turretTranslation, turretRotation),
+                turretRotation,
+            )
             .plus(
                 Transform3d(
                     Translation3d(),
@@ -159,7 +160,7 @@ private object Shooter {
         hood.plus(
             Transform3d(
                 getTranslation3d((-247).mm, 220.5.mm, 489.mm) -
-                        getTranslation3d((-48).mm, 220.5.mm, 435.mm),
+                    getTranslation3d((-48).mm, 220.5.mm, 435.mm),
                 Flywheel.inputs.position.toPitch(),
             )
         )

@@ -13,7 +13,6 @@ import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.setpoint_manager.SetpointManager
 import frc.robot.states.IntakeState
 import frc.robot.subsystems.drive.DriveCommands
-import frc.robot.subsystems.hood.Hood
 import frc.robot.subsystems.intake.extender.Extender
 import frc.robot.subsystems.turret.Turret
 import org.ironmaple.simulation.SimulatedArena
