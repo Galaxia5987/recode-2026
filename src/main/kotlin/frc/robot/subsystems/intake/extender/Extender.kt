@@ -121,7 +121,6 @@ object Extender : Mechanism() {
 
     fun periodic() {
         io.updateInputs()
-
         mapOf(
                 "atSetpoint" to atSetpoint,
                 "setpoint" to setpoint,

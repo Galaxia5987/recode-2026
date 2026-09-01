@@ -25,6 +25,10 @@ class PeriodicDelegate<T>(private val calculation: () -> T) :
     private var isDirty: Boolean = true
     private var cachedValue: T? = null
 
+    init{
+        CacheManager.register(this)
+    }
+
     fun invalidate() {
         isDirty = true
     }
@@ -38,6 +42,8 @@ class PeriodicDelegate<T>(private val calculation: () -> T) :
         @Suppress("UNCHECKED_CAST")
         return cachedValue as T
     }
+
+
 }
 
 object CacheManager {

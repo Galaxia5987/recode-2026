@@ -14,6 +14,7 @@ import frc.robot.setpoint_manager.SetpointManager
 import frc.robot.states.IntakeState
 import frc.robot.subsystems.drive.DriveCommands
 import frc.robot.subsystems.hood.Hood
+import frc.robot.subsystems.intake.extender.Extender
 import frc.robot.subsystems.turret.Turret
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
@@ -68,8 +69,8 @@ object RobotContainer {
 
     private fun configureButtonBindings() {
         driverController.create().onTrue(DriveCommands.resetGyro())
-        driverController.triangle().onTrue(Hood.setPosition(70.deg))
-        driverController.circle().onTrue(Hood.setPosition(0.deg))
+        driverController.triangle().onTrue(Extender.open())
+        driverController.circle().onTrue(Extender.close())
         intakeButton = driverController.rightBumper()
         outtakeButton = driverController.leftBumper()
     }
