@@ -10,12 +10,11 @@ import frc.robot.subsystems.preShooter.PreShooter
 import frc.robot.subsystems.shooter.flywheel.Flywheel
 import frc.robot.subsystems.spindexer.Spindexer
 import frc.robot.subsystems.turret.Turret
-import org.littletonrobotics.junction.AutoLogOutput
 import org.team5987.annotation.LogLevel
-import org.team5987.annotation.Logged
 import org.team5987.annotation.LoggedOutput
 import org.wpilib.command3.Command
 
+@LoggedOutput(LogLevel.COMP)
 var shouldShoot = true
 
 @LoggedOutput(LogLevel.COMP)
@@ -26,12 +25,10 @@ fun shoot(): Command =
     command {
             while (true) {
                 while (shouldShoot) {
-                    while (isReadyToShoot.negate().asBoolean) {
-                        +Flywheel.setVelocity(SetpointManager.flywheelSetpoint)
-                        +PreShooter.stop()
-                        +Spindexer.stop()
-                        yield()
-                    }
+                    +Flywheel.setVelocity(SetpointManager.flywheelSetpoint)
+                    +PreShooter.stop()
+                    +Spindexer.stop()
+                    yield()
                     while (isReadyToShoot.asBoolean) {
                         +Flywheel.setVelocity(SetpointManager.flywheelSetpoint)
                         +PreShooter.convey()
@@ -43,4 +40,10 @@ fun shoot(): Command =
                 yield()
             }
         }
-        .named("StateMachine/Shooting/shoot")
+        .named("states/Shooting/shoot")
+
+
+fun setShouldShoot(newValue: Boolean) : Command =
+    command {
+        shouldShoot = newValue
+    }.named("states/Shooting/setShouldShoot")

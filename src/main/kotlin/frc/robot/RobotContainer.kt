@@ -4,20 +4,24 @@ import frc.robot.RobotContainer.Buttons.intakeButton
 import frc.robot.RobotContainer.Buttons.outtakeButton
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.Mode
+import frc.robot.lib.commands.command
 import frc.robot.lib.commands.emptyCommand
 import frc.robot.lib.commands.initializeAllMechanisms
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.enableAutoLogOutputFor
+import frc.robot.lib.extensions.logTrigger
 import frc.robot.lib.state_machine.register
 import frc.robot.lib.unified_controller.PS5Gamepad
 import frc.robot.setpoint_manager.SetpointManager
 import frc.robot.states.IntakeState
+import frc.robot.states.setShouldShoot
 import frc.robot.subsystems.drive.DriveCommands
 import frc.robot.subsystems.hood.Hood
 import frc.robot.subsystems.turret.Turret
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
+import org.wpilib.command3.Scheduler
 import org.wpilib.command3.Trigger
 import org.wpilib.smartdashboard.SendableChooser
 
@@ -63,15 +67,15 @@ object RobotContainer {
 
         Turret.defaultCommand = Turret.setAngle(0.deg)
 
+
         IntakeState.stateMachine.register()
     }
 
     private fun configureButtonBindings() {
         driverController.create().onTrue(DriveCommands.resetGyro())
-        driverController.triangle().onTrue(Hood.setPosition(70.deg))
-        driverController.circle().onTrue(Hood.setPosition(0.deg))
         intakeButton = driverController.rightBumper()
         outtakeButton = driverController.leftBumper()
+        driverController.circle().onFalse( setShouldShoot(true)).onTrue(setShouldShoot(false))
     }
 
     fun getAutonomousCommand(): Command = autoChooser.get()
