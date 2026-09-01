@@ -20,6 +20,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
 import org.wpilib.command3.Trigger
 import org.wpilib.smartdashboard.SendableChooser
+import org.wpilib.units.measure.Angle
 
 object RobotContainer {
     private val driverController = PS5Gamepad(0)
@@ -61,7 +62,8 @@ object RobotContainer {
                 { -driverController.rightX },
             )
 
-        Turret.defaultCommand = Turret.setAngle(0.deg)
+        Turret.defaultCommand = Turret.setAngle { SetpointManager.turretSetpoint }
+        Hood.defaultCommand = Hood.setPosition (SetpointManager.hoodSetpoint)
 
         IntakeState.stateMachine.register()
     }

@@ -37,12 +37,27 @@ object Hood : Mechanism() {
     }
 
     fun setPosition(angle: Angle): Command =
-        this {
-                setpoint = angle
-                motor.setControl(positionRequest.withPosition(setpoint))
-                atSetpoint.waitUntil()
+            this {
+
+                    setpoint = angle
+                    motor.setControl(positionRequest.withPosition(setpoint))
+                    atSetpoint.waitUntil()
+
+              while (true) {
+                  run { setPosition(angle) }
+                  yield()
+              }
+
+
+
             }
+
+
+
+
+
             .named("Subsystems/Hood/setPosition")
+
 
     fun periodic() {
         motor.periodic()
