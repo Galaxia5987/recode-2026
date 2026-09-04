@@ -25,10 +25,11 @@ fun shoot(): Command =
     command {
             while (true) {
                 while (shouldShoot) {
-                    +Flywheel.setVelocity(SetpointManager.flywheelSetpoint)
                     +PreShooter.stop()
                     +Spindexer.stop()
+                    +Flywheel.setVelocity(SetpointManager.flywheelSetpoint)
                     yield()
+                    //warm up while not in setpoint
                     while (isReadyToShoot.asBoolean) {
                         +Flywheel.setVelocity(SetpointManager.flywheelSetpoint)
                         +PreShooter.convey()
