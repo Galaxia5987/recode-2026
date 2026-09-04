@@ -32,7 +32,7 @@ object Extender : Mechanism() {
         }
     private val voltageOut = VoltageOut(0.0)
     private val positionVoltage = PositionVoltage(0.0)
-
+    val inputs = io.inputs
     val atSetpoint = Trigger { io.inputs.distance.isNear(setpoint, TOLERANCE) }
     var setpoint = 0.meters
         private set
@@ -121,7 +121,6 @@ object Extender : Mechanism() {
 
     fun periodic() {
         io.updateInputs()
-
         mapOf(
                 "atSetpoint" to atSetpoint,
                 "setpoint" to setpoint,

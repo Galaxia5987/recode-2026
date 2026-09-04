@@ -26,6 +26,7 @@ object Spindexer : Mechanism(), SpindexerVelocitiesCommandFactory {
     val atSetpoint = Trigger {
         motor.inputs.velocity.isNear(setpoint, SETPOINT_TOLERANCE)
     }
+    val inputs = motor.inputs
 
     init {
         addPeriodic(::periodic)

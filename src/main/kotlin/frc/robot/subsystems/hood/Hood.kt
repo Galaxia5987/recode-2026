@@ -32,25 +32,27 @@ object Hood : Mechanism() {
 
     private var positionRequest = PositionVoltage(0.deg)
     private var setpoint = 0.deg
+
+    val inputs = motor.inputs
     val atSetpoint = Trigger {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
     }
 
     fun setPosition(angle: Angle): Command =
         this {
-                setpoint = angle
-                motor.setControl(positionRequest.withPosition(setpoint))
-                atSetpoint.waitUntil()
-            }
+            setpoint = angle
+            motor.setControl(positionRequest.withPosition(setpoint))
+            atSetpoint.waitUntil()
+        }
             .named("Subsystems/Hood/setPosition")
 
     fun periodic() {
         motor.periodic()
         mapOf(
-                "atSetpoint" to atSetpoint,
-                "setpoint" to setpoint,
-                "setpointError" to setpoint - motor.inputs.position,
-            )
+            "atSetpoint" to atSetpoint,
+            "setpoint" to setpoint,
+            "setpointError" to setpoint - motor.inputs.position,
+        )
             .log("Subsystems/Hood")
     }
 }

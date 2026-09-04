@@ -27,6 +27,7 @@ object PreShooter : Mechanism(), PreShooterVelocityCommandFactory {
     }
 
     private val velocityVoltage = VelocityVoltage(0.0)
+    val inputs = motor.inputs
 
     init {
         addPeriodic(::periodic)

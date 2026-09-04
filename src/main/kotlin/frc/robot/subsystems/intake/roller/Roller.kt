@@ -7,6 +7,7 @@ import com.ctre.phoenix6.signals.MotorAlignmentValue
 import frc.robot.lib.commands.UnnamedCommand
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
+import frc.robot.lib.extensions.PeriodicDelegate
 import frc.robot.lib.extensions.volts
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.wpilib.command3.Command
@@ -28,6 +29,8 @@ object Roller : Mechanism() {
             config = MOTOR_CONFIG,
             logConfig = MOTOR_LOG_CONFIG,
         )
+
+    val inputs = mainMotor.inputs
 
     init {
         auxMotor.setControl(

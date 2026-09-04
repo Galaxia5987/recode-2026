@@ -41,6 +41,8 @@ object Flywheel : Mechanism() {
             logConfig = MOTOR_LOG_CONFIG,
         )
 
+    val inputs = mainMotor.inputs
+
     var setpoint = 0.rps
     val atSetpoint = Trigger {
         mainMotor.inputs.velocity.isNear(setpoint, TOLERANCE)
@@ -60,9 +62,9 @@ object Flywheel : Mechanism() {
 
     fun setVelocity(velocity: AngularVelocity): Command =
         this {
-                setpoint = velocity
-                mainMotor.setControl(velocityVoltage.withVelocity(velocity))
-            }
+            setpoint = velocity
+            mainMotor.setControl(velocityVoltage.withVelocity(velocity))
+        }
             .named("Subsystems/Flywheel/setVelocity")
 
     fun periodic() {
