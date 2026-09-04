@@ -1,7 +1,6 @@
 package frc.robot.lib.extensions
 
-import java.util.Collections
-import java.util.WeakHashMap
+import java.util.*
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
@@ -24,6 +23,10 @@ class PeriodicDelegate<T>(private val calculation: () -> T) :
 
     private var isDirty: Boolean = true
     private var cachedValue: T? = null
+
+    init {
+        CacheManager.register(this)
+    }
 
     fun invalidate() {
         isDirty = true
