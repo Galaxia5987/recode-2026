@@ -48,19 +48,14 @@ private fun getSwerveModulePoseDrive(
     )
 }
 
-private fun getAllSwerveModulePoseTurn(): Array<Pose3d> {
-    val swervePosesTurn: Array<Pose3d> =
-        arrayOf(Pose3d(), Pose3d(), Pose3d(), Pose3d())
-    for (i in 0..3) {
-        swervePosesTurn[i] =
-            getSwerveModulePoseTurn(
-                swerveModulePose[i].x,
-                swerveModulePose[i].y,
-                drive.SwerveTurnAngle[i],
-            )
+private fun getAllSwerveModulePoseTurn() =
+    Array(swerveModulePose.size) { i ->
+        getSwerveModulePoseTurn(
+            swerveModulePose[i].x,
+            swerveModulePose[i].y,
+            drive.SwerveTurnAngle[i],
+        )
     }
-    return swervePosesTurn
-}
 
 private fun getAllSwerveModulePoseDrive(): Array<Pose3d> {
     val swervePosesDrive: Array<Pose3d> =
@@ -80,7 +75,7 @@ private fun getAllSwerveModulePoseDrive(): Array<Pose3d> {
 
 private object Intake {
     private val INTAKE_ANGLE = 9.deg
-    private val EXTENDER_ANGLE_POSE by PeriodicDelegate {
+    private val extenderAnglePose by PeriodicDelegate {
         getTranslation3d(
             x = Extender.inputs.distance * cos(INTAKE_ANGLE[rad]),
             z = -Extender.inputs.distance * sin(INTAKE_ANGLE[rad]),
@@ -88,7 +83,7 @@ private object Intake {
     }
 
     val extender by PeriodicDelegate {
-        getPose3d(getTranslation3d(80.mm, 10.mm, 248.mm) + EXTENDER_ANGLE_POSE)
+        getPose3d(getTranslation3d(80.mm, 10.mm, 248.mm) + extenderAnglePose)
     }
 
     val extendingHopper by PeriodicDelegate {
@@ -100,14 +95,14 @@ private object Intake {
 
     val roller1 by PeriodicDelegate {
         getPose3d(
-            getTranslation3d(323.mm, 10.mm, 197.mm) + EXTENDER_ANGLE_POSE,
+            getTranslation3d(323.mm, 10.mm, 197.mm) + extenderAnglePose,
             Roller.inputs.position.toPitch(),
         )
     }
 
     val roller2 by PeriodicDelegate {
         getPose3d(
-            getTranslation3d(260.mm, 10.mm, 197.mm) + EXTENDER_ANGLE_POSE,
+            getTranslation3d(260.mm, 10.mm, 197.mm) + extenderAnglePose,
             Roller.inputs.position.toPitch(),
         )
     }

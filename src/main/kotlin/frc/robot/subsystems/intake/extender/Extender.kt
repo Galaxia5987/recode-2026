@@ -32,7 +32,7 @@ object Extender : Mechanism() {
         }
     private val voltageOut = VoltageOut(0.0)
     private val positionVoltage = PositionVoltage(0.0)
-    val inputs by PeriodicDelegate { io.inputs }
+    val inputs = io.inputs
     val atSetpoint = Trigger { io.inputs.distance.isNear(setpoint, TOLERANCE) }
     var setpoint = 0.meters
         private set

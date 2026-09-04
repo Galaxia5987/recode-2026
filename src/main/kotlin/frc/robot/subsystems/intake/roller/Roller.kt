@@ -30,7 +30,7 @@ object Roller : Mechanism() {
             logConfig = MOTOR_LOG_CONFIG,
         )
 
-    val inputs by PeriodicDelegate { mainMotor.inputs }
+    val inputs = mainMotor.inputs
 
     init {
         auxMotor.setControl(

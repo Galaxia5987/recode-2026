@@ -6,7 +6,6 @@ import com.ctre.phoenix6.hardware.CANcoder
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.waitUntil
-import frc.robot.lib.extensions.PeriodicDelegate
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.rot
 import frc.robot.lib.universal_motor.UniversalTalonFX
@@ -29,7 +28,7 @@ object Turret : Mechanism() {
     var setpoint: Angle = 0.deg
         private set
 
-    val inputs by PeriodicDelegate { motor.inputs }
+    val inputs = motor.inputs
     val positionVoltage = PositionVoltage(0.0)
     val atSetpoint = Trigger {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
@@ -40,20 +39,20 @@ object Turret : Mechanism() {
 
     fun setAngle(angle: Angle): Command =
         this {
-                setpoint = constraintTurretLimit(angle)
-                motor.setControl(positionVoltage.withPosition(setpoint))
-                atSetpoint.waitUntil()
-            }
+            setpoint = constraintTurretLimit(angle)
+            motor.setControl(positionVoltage.withPosition(setpoint))
+            atSetpoint.waitUntil()
+        }
             .named("Subsystems/Turret/setAngle")
 
     fun setAngle(angleSupplier: () -> Angle): Command =
         this {
-                while (true) {
-                    setpoint = constraintTurretLimit(angleSupplier())
-                    motor.setControl(positionVoltage.withPosition(setpoint))
-                    yield()
-                }
+            while (true) {
+                setpoint = constraintTurretLimit(angleSupplier())
+                motor.setControl(positionVoltage.withPosition(setpoint))
+                yield()
             }
+        }
             .named("Subsystems/Turret/setAngleWithSupplier")
 
     fun constraintTurretLimit(angle: Angle): Angle {
