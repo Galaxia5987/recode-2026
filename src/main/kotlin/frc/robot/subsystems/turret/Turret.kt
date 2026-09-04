@@ -8,15 +8,12 @@ import frc.robot.lib.commands.invoke
 import frc.robot.lib.commands.waitUntil
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.periodic
-import frc.robot.lib.extensions.radians
 import frc.robot.lib.extensions.rot
-import frc.robot.lib.math.differential.Derivative
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
-import org.wpilib.system.Timer
 import org.wpilib.units.measure.Angle
 
 object Turret : Mechanism() {
@@ -31,8 +28,7 @@ object Turret : Mechanism() {
 
     var setpoint: Angle = 0.deg
         private set
-    var lastSetpoint= 0.radians
-    var newSetpoint = 0.radians
+
     val positionVoltage = PositionVoltage(0.0)
     val atSetpoint = Trigger {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
@@ -40,7 +36,6 @@ object Turret : Mechanism() {
 
     val motorPosition: Angle
         get() = motor.inputs.position
-
 
     fun setAngle(angle: Angle): Command =
         this {
@@ -52,10 +47,7 @@ object Turret : Mechanism() {
 
     fun setAngle(angleSupplier: () -> Angle): Command =
         this {
-            val derivative = Derivative()
                 while (true) {
-                    derivative.update()
-                    derivative.get()
                     setpoint = constraintTurretLimit(angleSupplier())
                     motor.setControl(positionVoltage.withPosition(setpoint))
                     yield()
@@ -67,6 +59,7 @@ object Turret : Mechanism() {
         if (angle < REVERSE_LIMIT) return 1.rot + angle
         return angle
     }
+
     init {
         absoluteEncoder.configurator.apply(ENCODER_CONFIG)
         addPeriodic(::periodic)
