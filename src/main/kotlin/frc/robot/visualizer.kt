@@ -75,6 +75,12 @@ private fun getAllSwerveModulePoseDrive(): Array<Pose3d> {
 
 private object Intake {
     private val INTAKE_ANGLE = 9.deg
+    private val EXTENDER_TRANSLATION = getTranslation3d(80.mm, 10.mm, 248.mm)
+    private val EXTENDING_HOPPER_TRANSLATION =
+        getTranslation3d(346.mm, 10.mm, 235.mm)
+    private val ROLLER_1_TRANSLATION = getTranslation3d(323.mm, 10.mm, 197.mm)
+    private val ROLLER_2_TRANSLATION = getTranslation3d(260.mm, 10.mm, 197.mm)
+
     private val extenderAnglePose by PeriodicDelegate {
         getTranslation3d(
             x = Extender.inputs.distance * cos(INTAKE_ANGLE[rad]),
@@ -83,43 +89,47 @@ private object Intake {
     }
 
     val extender by PeriodicDelegate {
-        getPose3d(getTranslation3d(80.mm, 10.mm, 248.mm) + extenderAnglePose)
+        getPose3d(EXTENDER_TRANSLATION + extenderAnglePose)
     }
 
     val extendingHopper by PeriodicDelegate {
         getPose3d(
-            getTranslation3d(346.mm, 10.mm, 235.mm) +
-                    Extender.inputs.distance.toX()
+            EXTENDING_HOPPER_TRANSLATION + Extender.inputs.distance.toX()
         )
     }
 
     val roller1 by PeriodicDelegate {
         getPose3d(
-            getTranslation3d(323.mm, 10.mm, 197.mm) + extenderAnglePose,
+            ROLLER_1_TRANSLATION + extenderAnglePose,
             Roller.inputs.position.toPitch(),
         )
     }
 
     val roller2 by PeriodicDelegate {
         getPose3d(
-            getTranslation3d(260.mm, 10.mm, 197.mm) + extenderAnglePose,
+            ROLLER_2_TRANSLATION + extenderAnglePose,
             Roller.inputs.position.toPitch(),
         )
     }
 }
 
 private object Shooter {
+    private val TURRET_TRANSLATION = Translation3d((-116).mm, 220.5.mm, 355.mm)
+    private val HOOD_TRANSLATION = getTranslation3d((-48).mm, 220.5.mm, 435.mm)
+    private val SHOOTER_MAIN_ROLLER_TRANSLATION =
+        getTranslation3d((-48).mm, 220.5.mm, 436.mm)
+    private val HOOD_ROLLER_OFFSET =
+        getTranslation3d((-247).mm, 220.5.mm, 489.mm) - HOOD_TRANSLATION
+
     private val turretRotation by
     PeriodicDelegate<Rotation3d> {
         Turret.inputs.position.toYaw().inverse()
     }
 
-    private val TURRET_TRANSLATION = Translation3d((-116).mm, 220.5.mm, 355.mm)
 
     private val hoodTranslation by
     PeriodicDelegate<Translation3d> {
-        getTranslation3d((-48).mm, 220.5.mm, 435.mm)
-            .rotateAround(TURRET_TRANSLATION, turretRotation)
+        HOOD_TRANSLATION.rotateAround(TURRET_TRANSLATION, turretRotation)
     }
 
     private val hoodRotation by
@@ -137,10 +147,10 @@ private object Shooter {
 
     val shooterMainRoller: Pose3d by PeriodicDelegate {
         getPose3d(
-            getTranslation3d((-48).mm, 220.5.mm, 436.mm)
+            SHOOTER_MAIN_ROLLER_TRANSLATION
                 .rotateAround(TURRET_TRANSLATION, turretRotation),
             turretRotation,
-        ).plus(
+        ).transformBy(
             Transform3d(
                 Translation3d(),
                 Flywheel.inputs.position.toPitch(),
@@ -149,10 +159,9 @@ private object Shooter {
     }
 
     val hoodRoller: Pose3d by PeriodicDelegate {
-        hood.plus(
+        hood.transformBy(
             Transform3d(
-                getTranslation3d((-247).mm, 220.5.mm, 489.mm) -
-                        getTranslation3d((-48).mm, 220.5.mm, 435.mm),
+                HOOD_ROLLER_OFFSET,
                 Flywheel.inputs.position.toPitch(),
             )
         )
@@ -160,42 +169,47 @@ private object Shooter {
 }
 
 private object Conveyors {
+    private val SPINDEXER_TRANSLATION =
+        getTranslation3d((-26).mm, 43.mm, 36.66200.mm)
+    private val FIRST_ROLLER_TRANSLATION =
+        getTranslation3d((-63).mm, 90.mm, 211.mm)
+    private val SECOND_ROLLER_TRANSLATION =
+        getTranslation3d((-22).mm, 130.mm, 295.mm)
+    private val THIRD_ROLLER_TRANSLATION =
+        getTranslation3d((-23.5).mm, 315.mm, 295.mm)
+
     val spindexer by PeriodicDelegate {
         getPose3d(
-            getTranslation3d((-26).mm, 43.mm, 36.66200.mm),
+            SPINDEXER_TRANSLATION,
             Spindexer.inputs.position.toYaw(),
         )
     }
 
     val firstRoller by PeriodicDelegate {
         getPose3d(
-            getTranslation3d((-63).mm, 90.mm, 211.mm),
+            FIRST_ROLLER_TRANSLATION,
             PreShooter.inputs.position.toRoll(),
         )
     }
 
     val secondRoller by PeriodicDelegate {
         getPose3d(
-            getTranslation3d((-22).mm, 130.mm, 295.mm),
+            SECOND_ROLLER_TRANSLATION,
             PreShooter.inputs.position.toRoll(),
         )
     }
 
     val thirdRoller by PeriodicDelegate {
         getPose3d(
-            getTranslation3d((-23.5).mm, 315.mm, 295.mm),
+            THIRD_ROLLER_TRANSLATION,
             PreShooter.inputs.position.toRoll(),
         )
     }
 }
 
 private object Climb {
-    val grabber by PeriodicDelegate {
-        getPose3d(getTranslation3d((-30).mm, (-242).mm, 420.mm))
-    }
-    val wrist by PeriodicDelegate {
-        getPose3d(getTranslation3d((-250).mm, (-380).mm, 460.mm))
-    }
+    val GRABBER_POSE = getPose3d(getTranslation3d((-30).mm, (-242).mm, 420.mm))
+    val WRIST_POSE = getPose3d(getTranslation3d((-250).mm, (-380).mm, 460.mm))
 }
 
 private val subsystemPoseArray = Array(14) { Pose3d() }
@@ -214,7 +228,7 @@ val mechanismPoses by PeriodicDelegate {
     subsystemPoseArray[9] = Conveyors.firstRoller
     subsystemPoseArray[10] = Conveyors.secondRoller
     subsystemPoseArray[11] = Conveyors.thirdRoller
-    subsystemPoseArray[12] = Climb.grabber
-    subsystemPoseArray[13] = Climb.wrist
+    subsystemPoseArray[12] = Climb.GRABBER_POSE
+    subsystemPoseArray[13] = Climb.WRIST_POSE
     subsystemPoseArray
 }
