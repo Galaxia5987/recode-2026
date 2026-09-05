@@ -8,6 +8,8 @@ import frc.robot.lib.autopilot.APTarget
 import frc.robot.lib.autopilot.Autopilot
 import frc.robot.lib.commands.UnnamedCommand
 import frc.robot.lib.commands.command
+import frc.robot.lib.extensions.cm
+import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.mps
 import frc.robot.lib.extensions.rad_ps
@@ -34,12 +36,15 @@ private val autopilot = Autopilot(kProfile)
 private val anglePIDController =
     LoggedPIDController("alignAnglePIDController", 0.0, 0.0, 0.0)
 
-fun Autopilot.APResult.toChassisVelocities(omegaResult: AngularVelocity) =
+private fun Autopilot.APResult.toChassisVelocities(omegaResult: AngularVelocity) =
     ChassisVelocities(
         vx,
         vy,
         omegaResult,
     )
+
+private inline fun <T, V> T.applyIfNotNull(value: V?, block: T.(V) -> T): T =
+    if (value != null) block(value) else this
 
 fun runToPose(
     targetSupplier: () -> Pose2d,
@@ -48,11 +53,10 @@ fun runToPose(
     rotationRadius: Distance? = null,
 ): UnnamedCommand = command {
     val apTarget = {
-        var target = APTarget(targetSupplier())
-        entryAngle?.let { target = target.withEntryAngle(it) }
-        endVelocity?.let { target = target.withVelocity(it[mps]) }
-        rotationRadius?.let { target = target.withRotationRadius(it) }
-        target
+        APTarget(targetSupplier())
+            .applyIfNotNull(entryAngle) { withEntryAngle(it) }
+            .applyIfNotNull(endVelocity) { withVelocity(it[mps]) }
+            .applyIfNotNull(rotationRadius) { withRotationRadius(it) }
     }
     anglePIDController
         .update() // Update gains from network at the start of execution
