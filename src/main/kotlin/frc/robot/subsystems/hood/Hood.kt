@@ -35,11 +35,20 @@ object Hood : Mechanism() {
         motor.inputs.position.isNear(setpoint, TOLERANCE)
     }
 
-    fun setPosition(angle: () -> Angle): Command =
+    fun updatePosition(angle: Angle) {
+        setpoint = angle
+        motor.setControl(positionRequest.withPosition(setpoint))
+    }
+
+    fun setPosition(angle: Angle): Command =
+        setPosition { angle }
+            .until { atSetpoint.asBoolean }
+            .named("Subsystems/Hood/setPosition")
+
+    fun setPosition(angleSupplier: () -> Angle): Command =
         this {
                 while (true) {
-                    setpoint = angle()
-                    motor.setControl(positionRequest.withPosition(setpoint))
+                    updatePosition(angleSupplier())
                     yield()
                 }
             }
