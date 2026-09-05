@@ -40,21 +40,23 @@ fun Autopilot.APResult.toChassisVelocities(omegaResult: AngularVelocity) = Chass
 )
 
 fun runToPose(
-    target: Pose2d,
+    targetSupplier: () -> Pose2d,
     entryAngle: Rotation2d? = null,
     endVelocity: LinearVelocity? = null,
     rotationRadius: Distance? = null
 ): UnnamedCommand = command {
-    val apTarget = APTarget(target).apply {
-        entryAngle?.also { withEntryAngle(it) }
-        endVelocity?.also { withVelocity(it[mps]) }
-        rotationRadius?.also { withRotationRadius(it) }
+    val apTarget = {
+        APTarget(targetSupplier()).apply {
+            entryAngle?.also { withEntryAngle(it) }
+            endVelocity?.also { withVelocity(it[mps]) }
+            rotationRadius?.also { withRotationRadius(it) }
+        }
     }
     anglePIDController.update() // Update gains from network at the start of execution
     anglePIDController.enableContinuousInput(-PI, PI)
 
-    while (!autopilot.atTarget(drive.pose, apTarget)) {
-        val result = autopilot.calculate(drive.pose, drive.chassisSpeeds, apTarget)
+    while (!autopilot.atTarget(drive.pose, apTarget())) {
+        val result = autopilot.calculate(drive.pose, drive.chassisSpeeds, apTarget())
         val omegaResult = anglePIDController.calculate(drive.pose.rotation.radians, result.targetAngle.radians)
 
         drive.runVelocity(result.toChassisVelocities(omegaResult.rad_ps).toRobotRelative(drive.pose.rotation))
@@ -62,3 +64,10 @@ fun runToPose(
     }
     drive.stop()
 }
+
+fun runToPose(
+    target: Pose2d,
+    entryAngle: Rotation2d? = null,
+    endVelocity: LinearVelocity? = null,
+    rotationRadius: Distance? = null
+): UnnamedCommand = runToPose({target}, entryAngle, endVelocity, rotationRadius)
