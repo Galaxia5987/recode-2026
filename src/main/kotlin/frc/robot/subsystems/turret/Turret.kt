@@ -5,7 +5,6 @@ import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.CANcoder
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
-import frc.robot.lib.commands.waitUntil
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.rot
 import frc.robot.lib.universal_motor.UniversalTalonFX
@@ -41,7 +40,9 @@ object Turret : Mechanism() {
         motor.setControl(positionVoltage.withPosition(setpoint))
     }
 
-    fun setAngle(angle: Angle): Command = setAngle { angle }.until { atSetpoint.asBoolean }
+    fun setAngle(angle: Angle): Command =
+        setAngle { angle }
+            .until { atSetpoint.asBoolean }
             .named("Subsystems/Turret/setAngle")
 
     fun setAngle(angleSupplier: () -> Angle): Command =

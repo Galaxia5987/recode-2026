@@ -58,23 +58,23 @@ object Flywheel : Mechanism() {
         )
     }
 
-    private fun updateVelocity(velocity: AngularVelocity)
-    {
+    private fun updateVelocity(velocity: AngularVelocity) {
         setpoint = velocity
         mainMotor.setControl(velocityVoltage.withVelocity(velocity))
     }
 
-    fun setVelocity(velocity: AngularVelocity): Command = setVelocity { velocity }.until { atSetpoint.asBoolean }
+    fun setVelocity(velocity: AngularVelocity): Command =
+        setVelocity { velocity }
+            .until { atSetpoint.asBoolean }
             .named("Subsystems/Flywheel/setVelocity")
 
     fun setVelocity(velocitySupplier: () -> AngularVelocity): Command =
         this {
-            while (true)
-            {
-                updateVelocity(velocitySupplier())
-                yield()
+                while (true) {
+                    updateVelocity(velocitySupplier())
+                    yield()
+                }
             }
-        }
             .named("Subsystems/Flywheel/setVelocity")
 
     fun periodic() {

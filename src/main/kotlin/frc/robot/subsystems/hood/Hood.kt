@@ -4,7 +4,6 @@ import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.CANcoder
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
-import frc.robot.lib.commands.waitUntil
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.log
 import frc.robot.lib.universal_motor.UniversalTalonFX
@@ -41,7 +40,9 @@ object Hood : Mechanism() {
         motor.setControl(positionRequest.withPosition(setpoint))
     }
 
-    fun setPosition(angle: Angle): Command = setPosition { angle }.until { atSetpoint.asBoolean }
+    fun setPosition(angle: Angle): Command =
+        setPosition { angle }
+            .until { atSetpoint.asBoolean }
             .named("Subsystems/Hood/setPosition")
 
     fun setPosition(angleSupplier: () -> Angle): Command =
