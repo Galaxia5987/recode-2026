@@ -17,8 +17,6 @@ import kotlin.math.PI
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.kinematics.ChassisVelocities
-import org.wpilib.units.Units.Centimeters
-import org.wpilib.units.Units.Degrees
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
 import org.wpilib.units.measure.LinearVelocity
@@ -36,7 +34,9 @@ private val autopilot = Autopilot(kProfile)
 private val anglePIDController =
     LoggedPIDController("alignAnglePIDController", 0.0, 0.0, 0.0)
 
-private fun Autopilot.APResult.toChassisVelocities(omegaResult: AngularVelocity) =
+private fun Autopilot.APResult.toChassisVelocities(
+    omegaResult: AngularVelocity
+) =
     ChassisVelocities(
         vx,
         vy,
@@ -62,9 +62,10 @@ fun runToPose(
         .update() // Update gains from network at the start of execution
     anglePIDController.enableContinuousInput(-PI, PI)
 
-    while (!autopilot.atTarget(drive.pose, apTarget())) {
+    while (true) {
+        val target = apTarget()
         val result =
-            autopilot.calculate(drive.pose, drive.chassisSpeeds, apTarget())
+            autopilot.calculate(drive.pose, drive.chassisSpeeds, target)
         val omegaResult =
             anglePIDController.calculate(
                 drive.pose.rotation.radians,
@@ -76,6 +77,7 @@ fun runToPose(
                 .toChassisVelocities(omegaResult.rad_ps)
                 .toRobotRelative(drive.pose.rotation)
         )
+        if (autopilot.atTarget(drive.pose, target)) break
         yield()
     }
     drive.stop()
