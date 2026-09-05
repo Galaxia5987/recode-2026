@@ -58,10 +58,13 @@ object Flywheel : Mechanism() {
         )
     }
 
-    fun setVelocity(velocity: AngularVelocity): Command =
+    fun setVelocity(velocity: () -> AngularVelocity): Command =
         this {
-                setpoint = velocity
-                mainMotor.setControl(velocityVoltage.withVelocity(velocity))
+                while (true) {
+                    setpoint = velocity()
+                    mainMotor.setControl(velocityVoltage.withVelocity(setpoint))
+                    yield()
+                }
             }
             .named("Subsystems/Flywheel/setVelocity")
 
