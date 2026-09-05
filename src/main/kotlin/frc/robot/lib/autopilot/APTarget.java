@@ -1,3 +1,6 @@
+// Copied from [Autopilot](https://github.com/therekrab/autopilot) by Nolan Barker
+// Licensed under the MIT License
+
 package frc.robot.lib.autopilot;
 
 import java.util.Optional;

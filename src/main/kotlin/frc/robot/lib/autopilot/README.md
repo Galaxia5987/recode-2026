@@ -1,3 +1,5 @@
 # Autopilot
 
-Taken from [therekrab/autopilot](https://github.com/therekrab/autopilot)
+Copied from [Autopilot](https://github.com/therekrab/autopilot) by Nolan Barker
+
+Licensed under the [MIT License](../../../../../../../LICENSE-Autopilot.txt)
