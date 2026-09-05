@@ -11,6 +11,7 @@ import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.mps
 import frc.robot.lib.extensions.rad_ps
 import frc.robot.lib.loggedPIDController
+import kotlin.math.PI
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.kinematics.ChassisVelocities
@@ -19,31 +20,31 @@ import org.wpilib.units.Units.Degrees
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
 import org.wpilib.units.measure.LinearVelocity
-import kotlin.math.PI
 
+private val kConstraints = APConstraints().withAcceleration(5.0).withJerk(2.0)
 
-private val kConstraints = APConstraints()
-    .withAcceleration(5.0)
-    .withJerk(2.0)
-
-private val kProfile = APProfile(kConstraints)
-    .withErrorXY(Centimeters.of(2.0))
-    .withErrorTheta(Degrees.of(0.5))
-    .withBeelineRadius(Centimeters.of(8.0))
+private val kProfile =
+    APProfile(kConstraints)
+        .withErrorXY(Centimeters.of(2.0))
+        .withErrorTheta(Degrees.of(0.5))
+        .withBeelineRadius(Centimeters.of(8.0))
 
 private val autopilot = Autopilot(kProfile)
 
 private val anglePIDController by loggedPIDController(0.0, 0.0, 0.0)
 
-fun Autopilot.APResult.toChassisVelocities(omegaResult: AngularVelocity) = ChassisVelocities(
-    vx, vy, omegaResult
-)
+fun Autopilot.APResult.toChassisVelocities(omegaResult: AngularVelocity) =
+    ChassisVelocities(
+        vx,
+        vy,
+        omegaResult,
+    )
 
 fun runToPose(
     targetSupplier: () -> Pose2d,
     entryAngle: Rotation2d? = null,
     endVelocity: LinearVelocity? = null,
-    rotationRadius: Distance? = null
+    rotationRadius: Distance? = null,
 ): UnnamedCommand = command {
     val apTarget = {
         APTarget(targetSupplier()).apply {
@@ -52,14 +53,24 @@ fun runToPose(
             rotationRadius?.also { withRotationRadius(it) }
         }
     }
-    anglePIDController.update() // Update gains from network at the start of execution
+    anglePIDController
+        .update() // Update gains from network at the start of execution
     anglePIDController.enableContinuousInput(-PI, PI)
 
     while (!autopilot.atTarget(drive.pose, apTarget())) {
-        val result = autopilot.calculate(drive.pose, drive.chassisSpeeds, apTarget())
-        val omegaResult = anglePIDController.calculate(drive.pose.rotation.radians, result.targetAngle.radians)
+        val result =
+            autopilot.calculate(drive.pose, drive.chassisSpeeds, apTarget())
+        val omegaResult =
+            anglePIDController.calculate(
+                drive.pose.rotation.radians,
+                result.targetAngle.radians,
+            )
 
-        drive.runVelocity(result.toChassisVelocities(omegaResult.rad_ps).toRobotRelative(drive.pose.rotation))
+        drive.runVelocity(
+            result
+                .toChassisVelocities(omegaResult.rad_ps)
+                .toRobotRelative(drive.pose.rotation)
+        )
         yield()
     }
     drive.stop()
@@ -69,5 +80,6 @@ fun runToPose(
     target: Pose2d,
     entryAngle: Rotation2d? = null,
     endVelocity: LinearVelocity? = null,
-    rotationRadius: Distance? = null
-): UnnamedCommand = runToPose({target}, entryAngle, endVelocity, rotationRadius)
+    rotationRadius: Distance? = null,
+): UnnamedCommand =
+    runToPose({ target }, entryAngle, endVelocity, rotationRadius)
