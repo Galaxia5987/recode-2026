@@ -18,6 +18,15 @@ class SupplierCommandScope(
             coroutine.block()
         }
     }
+
+    /**
+     * Executes the given block only if the command was invoked with a continuous supplier.
+     */
+    inline fun whenContinuous(block: Coroutine.() -> Unit) {
+        if (isContinuous) {
+            coroutine.block()
+        }
+    }
 }
 
 class SupplierCommand<T>(
