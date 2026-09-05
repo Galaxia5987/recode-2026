@@ -48,11 +48,11 @@ fun runToPose(
     rotationRadius: Distance? = null,
 ): UnnamedCommand = command {
     val apTarget = {
-        APTarget(targetSupplier()).apply {
-            entryAngle?.also { withEntryAngle(it) }
-            endVelocity?.also { withVelocity(it[mps]) }
-            rotationRadius?.also { withRotationRadius(it) }
-        }
+        var target = APTarget(targetSupplier())
+        entryAngle?.let { target = target.withEntryAngle(it) }
+        endVelocity?.let { target = target.withVelocity(it[mps]) }
+        rotationRadius?.let { target = target.withRotationRadius(it) }
+        target
     }
     anglePIDController
         .update() // Update gains from network at the start of execution
