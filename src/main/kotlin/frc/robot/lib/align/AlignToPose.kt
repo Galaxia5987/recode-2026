@@ -1,6 +1,7 @@
 package frc.robot.lib.align
 
 import frc.robot.drive
+import frc.robot.lib.LoggedPIDController
 import frc.robot.lib.autopilot.APConstraints
 import frc.robot.lib.autopilot.APProfile
 import frc.robot.lib.autopilot.APTarget
@@ -10,7 +11,6 @@ import frc.robot.lib.commands.command
 import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.mps
 import frc.robot.lib.extensions.rad_ps
-import frc.robot.lib.loggedPIDController
 import kotlin.math.PI
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
@@ -31,7 +31,8 @@ private val kProfile =
 
 private val autopilot = Autopilot(kProfile)
 
-private val anglePIDController by loggedPIDController(0.0, 0.0, 0.0)
+private val anglePIDController =
+    LoggedPIDController("alignAnglePIDController", 0.0, 0.0, 0.0)
 
 fun Autopilot.APResult.toChassisVelocities(omegaResult: AngularVelocity) =
     ChassisVelocities(
