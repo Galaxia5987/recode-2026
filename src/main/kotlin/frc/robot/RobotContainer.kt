@@ -13,6 +13,7 @@ import frc.robot.setpoint_manager.SetpointManager
 import frc.robot.states.IntakeState
 import frc.robot.subsystems.drive.DriveCommands
 import frc.robot.subsystems.hood.Hood
+import frc.robot.subsystems.shooter.flywheel.Flywheel
 import frc.robot.subsystems.turret.Turret
 import org.ironmaple.simulation.SimulatedArena
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
@@ -63,7 +64,12 @@ object RobotContainer {
         Turret.defaultCommand = Turret.setAngle {
             SetpointManager.turretSetpoint
         }
-        Hood.defaultCommand = Hood.setPosition { SetpointManager.hoodSetpoint }
+        Flywheel.defaultCommand = Flywheel.setVelocity {
+            SetpointManager.flywheelSetpoint
+        }
+        Hood.defaultCommand = Hood.setPosition {
+            SetpointManager.hoodSetpoint
+        }
 
         IntakeState.stateMachine.register()
     }
