@@ -8,7 +8,7 @@ import org.wpilib.units.measure.Distance;
 /**
  * The APTarget class represents the goal end state of an Autopilot action.
  * <p>
- * A target needs a reference Pose2d, but can optionally have a specified entry angle and rotation
+ * A target needs a reference Pose2d, but can optionally have a specified entry angle(The angle which the robot will start to approach the target with, at the start of the path) and rotation
  * radius.
  * <p>
  * A target may also specify an end velocity or end velocity.
