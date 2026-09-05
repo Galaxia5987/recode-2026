@@ -36,23 +36,22 @@ object Turret : Mechanism() {
     val motorPosition: Angle
         get() = motor.inputs.position
 
-    fun setAngle(angle: Angle): Command =
-        this {
-                setpoint = constraintTurretLimit(angle)
-                motor.setControl(positionVoltage.withPosition(setpoint))
-                atSetpoint.waitUntil()
-            }
+    private fun updateSetpoint(angle: Angle) {
+        setpoint = constraintTurretLimit(angle)
+        motor.setControl(positionVoltage.withPosition(setpoint))
+    }
+
+    fun setAngle(angle: Angle): Command = setAngle { angle }.until { atSetpoint.asBoolean }
             .named("Subsystems/Turret/setAngle")
 
     fun setAngle(angleSupplier: () -> Angle): Command =
         this {
                 while (true) {
-                    setpoint = constraintTurretLimit(angleSupplier())
-                    motor.setControl(positionVoltage.withPosition(setpoint))
+                    updateSetpoint(angleSupplier())
                     yield()
                 }
             }
-            .named("Subsystems/Turret/setAngleWithSupplier")
+            .named("Subsystems/Turret/setAngle")
 
     fun constraintTurretLimit(angle: Angle): Angle {
         if (angle < REVERSE_LIMIT) return 1.rot + angle
