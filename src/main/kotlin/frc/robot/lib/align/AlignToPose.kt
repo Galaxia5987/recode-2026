@@ -25,9 +25,9 @@ private val kConstraints = APConstraints().withAcceleration(5.0).withJerk(2.0)
 
 private val kProfile =
     APProfile(kConstraints)
-        .withErrorXY(Centimeters.of(2.0))
-        .withErrorTheta(Degrees.of(0.5))
-        .withBeelineRadius(Centimeters.of(8.0))
+        .withErrorXY(2.cm)
+        .withErrorTheta(0.5.deg)
+        .withBeelineRadius(8.cm)
 
 private val autopilot = Autopilot(kProfile)
 
