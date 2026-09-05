@@ -1,0 +1,29 @@
+name: Post Graph Updates
+
+on:
+  pull_request:
+    paths:
+      - 'graphs/**/*.md'
+
+jobs:
+  post-graphs:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Comment Body
+        id: build-comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python .github/graphgen/graphgen.py
+
+      - name: Create or Update PR Comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: state-machine-graphs
+          message: ${{ steps.build-comment.outputs.comment_body }}
