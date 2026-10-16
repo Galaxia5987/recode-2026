@@ -15,6 +15,7 @@ package frc.robot.subsystems.drive;
 
 import static org.wpilib.units.Units.*;
 
+import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.CANBus;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.RobotConfig;
@@ -44,6 +45,7 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.driverstation.*;
+import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.*;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveDriveKinematics;
@@ -228,6 +230,24 @@ public class Drive extends Mechanism {
                 this);
          */
     }
+
+        private final PIDController xController = new PIDController(10.0 ,0 ,0);
+        private final PIDController yController = new PIDController(10.0 ,0 ,0);
+        private final PIDController headingController = new PIDController(7.5 , 0 ,0 );
+
+        public void followTrajectory(SwerveSample sample){
+
+            Pose2d pose = getPose();
+
+            ChassisVelocities velocities = new ChassisVelocities(
+                    sample.vx + xController.calculate(pose.getX() , sample.x),
+                    sample.vy + yController.calculate(pose.getY() , sample.y),
+                    sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
+            );
+            runVelocity(velocities.toRobotRelative(pose.getRotation()));
+
+        }
+
 
     public void periodic() {
         odometryLock.lock(); // Prevents odometry updates while reading data

@@ -59,6 +59,11 @@ wpi.java.debugJni = false
 
 def includeDesktopSupport = true
 
+// Rebuild Choreo against this project's WPILib instead of loading its alpha-5 binary.
+configurations.configureEach {
+    exclude group: 'choreo', module: 'ChoreoLib-java'
+}
+
 task(replayWatch, type: JavaExec) {
     mainClass = "org.littletonrobotics.junction.ReplayWatch"
     classpath = sourceSets.main.runtimeClasspath
@@ -69,6 +74,7 @@ dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
+    implementation project(':choreo-compat')
 
     systemcoreDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.systemcore)
     systemcoreDebug wpi.java.vendor.jniDebug(wpi.platforms.systemcore)
@@ -128,6 +134,9 @@ sourceSets {
 
 test {
     useJUnitPlatform()
+    // Commands v3 uses JDK continuations; match the robot launch configuration.
+    jvmArgs '--add-opens=java.base/jdk.internal.vm=ALL-UNNAMED',
+            '--add-opens=java.base/java.lang=ALL-UNNAMED'
     systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
 }
 

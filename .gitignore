@@ -160,6 +160,7 @@ gradle-app.setting
 bin/
 
 annotation/build/
+choreo-compat/build/
 
 # Simulation GUI and other tools window save file
 *-window.json
@@ -173,3 +174,6 @@ networktables.json
 /.kotlin/sessions/
 /BalisticSimulator/.idea/BalisticSimulator.iml
 /BalisticSimulator/.idea/modules.xml
+/src/test/java/choreo/ChoreoCompatibilityTest.java
+/src/test/kotlin/frc/robot/lib/commands/ChoreoAutoFactoryTest.kt
+/src/test/kotlin/frc/robot/lib/commands/V2CommandLifecycleTest.kt

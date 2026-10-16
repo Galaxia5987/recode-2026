@@ -1,0 +1,42 @@
+plugins {
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://frcmaven.wpi.edu/artifactory/release-2027/' }
+    maven { url 'https://frcmaven.wpi.edu/artifactory/sleipnirgroup-mvn-release/' }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+configurations {
+    choreoSources {
+        canBeConsumed = false
+        transitive = false
+    }
+}
+
+dependencies {
+    choreoSources 'choreo:ChoreoLib-java:2027.0.0-alpha-3:sources'
+    api rootProject.wpi.java.deps.wpilib()
+    // Choreo's v2 commands are wrapped by the robot's ChoreoAutoFactory.
+    api 'org.wpilib.commandsv2:commandsv2-java:2027.0.0-alpha-6'
+    implementation 'com.google.code.gson:gson:2.11.0'
+}
+
+def prepareChoreoSources = tasks.register('prepareChoreoSources', Sync) {
+    from { configurations.choreoSources.collect { zipTree(it) } }
+    include '**/*.java'
+    // These unused v2 dashboard helpers depend on WPILib's removed Tunable API.
+    // The robot uses LoggedDashboardChooser with Commands v3 instead.
+    exclude 'choreo/auto/AutoChooser.java', 'choreo/auto/AutoChooserOpMode.java'
+    // WPILib alpha-6 moved Alert (including Alert.Level) to driverstation.
+    filter { line -> line.replace('org.wpilib.util.Alert', 'org.wpilib.driverstation.Alert') }
+    into layout.buildDirectory.dir('generated/sources/choreo')
+}
+
+sourceSets.main.java.setSrcDirs([prepareChoreoSources])

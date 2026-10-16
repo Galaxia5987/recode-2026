@@ -39,6 +39,6 @@ enum class SpindexerVelocities(
     val velocity: AngularVelocity,
     val priority: Priority,
 ) {
-    STOP(0.rps, Priority(Command.LOWEST_PRIORITY)),
+    STOP(0.rps, Priority(Command.HIGHEST_PRIORITY)),
     CONVEY(30.rps, Priority(Command.HIGHEST_PRIORITY)),
 }
