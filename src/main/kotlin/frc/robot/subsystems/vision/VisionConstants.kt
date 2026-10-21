@@ -53,7 +53,21 @@ val FRONT_CONFIG =
         stddevFactor = 1.0,
     )
 
-val OV_NAME_TO_CONFIG = mapOf<String, CameraConfig>("front" to FRONT_CONFIG)
+val LEFT_CONFIG =
+    CameraConfig(
+        robotToCamera = {
+            Transform3d(
+                0.mm,
+                0.mm,
+                200.mm,
+                Rotation3d(0.0.deg, (-20).deg, 60.deg),
+            )
+        },
+        tagIdsToFilter = { listOf() },
+        stddevFactor = 1.0,
+    )
+
+val OV_NAME_TO_CONFIG = mapOf<String, CameraConfig>("front" to FRONT_CONFIG, "left" to LEFT_CONFIG)
 
 // Basic filtering thresholds
 const val MAX_AMBIGUITY = 0.2

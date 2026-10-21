@@ -3,13 +3,14 @@ package frc.robot.autonomous
 import frc.robot.RobotContainer
 import org.wpilib.command3.Command
 
-fun startToFuel2(): Command =
-    resetAndFollow("StartToFuel2.traj")
+fun line(): Command =
+    resetAndFollow("line")
 
-fun elinorPath(): Command =
-    resetAndFollow("elinorPath.traj")
+fun linewith180(): Command =
+    resetAndFollow("linewith180")
 
-fun joespath(): Command = resetAndFollow("joespath.traj")
+fun digonal(): Command =
+    resetAndFollow("digonal")
 
 private fun resetAndFollow(name: String): Command =
     RobotContainer.autoFactory.resetOdometry(name)

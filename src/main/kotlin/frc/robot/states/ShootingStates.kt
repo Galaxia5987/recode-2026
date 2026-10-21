@@ -12,7 +12,7 @@ import org.team5987.annotation.LogLevel
 import org.team5987.annotation.LoggedOutput
 import org.wpilib.command3.Trigger
 
-@LoggedOutput(LogLevel.COMP) var shouldShoot = true
+@LoggedOutput(LogLevel.COMP) var shouldShoot = false
 
 @LoggedOutput(LogLevel.COMP)
 val isReadyToShoot =
@@ -36,10 +36,10 @@ private val stopConveyor =
         }
         .named("states/Shooting/StopConveyor")
 
-val shouldShootTrigger =
-    Trigger { shouldShoot }
-        .whileTrue(Flywheel.setVelocity { SetpointManager.flywheelSetpoint })
+//val shouldShootTrigger =
+//    Trigger { shouldShoot }
+//        .whileTrue(Flywheel.setVelocity { SetpointManager.flywheelSetpoint })
 
-@LoggedOutput(LogLevel.COMP)
-val shoot =
-    shouldShootTrigger.and(isReadyToShoot).onTrue(convey).onFalse(stopConveyor)
+//@LoggedOutput(LogLevel.COMP)
+//val shoot =
+//    shouldShootTrigger.and(isReadyToShoot).onTrue(convey).onFalse(stopConveyor)

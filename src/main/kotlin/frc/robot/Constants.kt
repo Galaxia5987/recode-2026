@@ -26,6 +26,7 @@ val CURRENT_MODE: Mode
 
 val isSim = Trigger { CURRENT_MODE == Mode.SIM }
 
+@LoggedOutput(LogLevel.COMP)
 val isAuto = Trigger { RobotState.isAutonomous() } // TODO!!!
 
 val isEnabled = Trigger { RobotState.isEnabled() } // TODO!!

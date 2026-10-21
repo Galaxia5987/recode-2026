@@ -2,8 +2,9 @@ package frc.robot
 
 import frc.robot.RobotContainer.Buttons.intakeButton
 import frc.robot.RobotContainer.Buttons.outtakeButton
-import frc.robot.autonomous.elinorPath
-import frc.robot.autonomous.joespath
+import frc.robot.autonomous.digonal
+import frc.robot.autonomous.line
+import frc.robot.autonomous.linewith180
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.Mode
 import frc.robot.lib.commands.ChoreoAutoFactory
@@ -123,8 +124,9 @@ object RobotContainer {
 
     private fun registerAutoCommands() {
         autoChooser.addDefaultOption("Empty", emptyCommand())
-        autoChooser.addOption("elinorPath", elinorPath())
-        autoChooser.addOption("joespath", joespath())
+        autoChooser.addOption("Line.trag", line())
+        autoChooser.addOption("Linewith180.trag", linewith180())
+        autoChooser.addOption("Digonal.trag", digonal())
         // SysIds
         autoChooser.addOption(
             "Drive Wheel Radius Characterization",

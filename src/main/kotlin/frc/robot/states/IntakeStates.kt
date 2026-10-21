@@ -15,7 +15,7 @@ import org.team5987.annotation.graph.graphgen.GenerateStateMachineGraph
 import org.wpilib.command3.Trigger
 
 // TODO: Update when shooting state machine is merged
-val isShooting = Trigger { true }
+val isShooting = Trigger { false }
 
 enum class IntakeState {
     IDLE,
