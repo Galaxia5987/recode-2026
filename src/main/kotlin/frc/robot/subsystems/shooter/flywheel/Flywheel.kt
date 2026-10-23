@@ -7,14 +7,11 @@ import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.signals.MotorAlignmentValue
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.command
-import frc.robot.lib.commands.supplierCommand
-import frc.robot.lib.commands.waitUntil
 import frc.robot.lib.extensions.rps
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
-import org.wpilib.units.measure.AngularVelocity
 
 object Flywheel : Mechanism() {
     val mainMotor =
@@ -63,20 +60,22 @@ object Flywheel : Mechanism() {
     val setVelocity = command {
         mainMotor.setControl(VoltageOut(0.0))
     }
-//        supplierCommand<AngularVelocity> { velocity ->
-//                setpoint = velocity
-//                mainMotor.setControl(velocityVoltage.withVelocity(velocity))
-//
-//                whenOneShot {
-//                    atSetpoint.waitUntil()
-//                }
-//            }
-//            .configure {
-//                whenCanceled {
-//                    mainMotor.setControl(VoltageOut(0.0))
-//                }
-//            }
-//            .named("Subsystems/Flywheel/setVelocity")
+
+    //        supplierCommand<AngularVelocity> { velocity ->
+    //                setpoint = velocity
+    //
+    // mainMotor.setControl(velocityVoltage.withVelocity(velocity))
+    //
+    //                whenOneShot {
+    //                    atSetpoint.waitUntil()
+    //                }
+    //            }
+    //            .configure {
+    //                whenCanceled {
+    //                    mainMotor.setControl(VoltageOut(0.0))
+    //                }
+    //            }
+    //            .named("Subsystems/Flywheel/setVelocity")
 
     fun periodic() {
         mainMotor.periodic()
