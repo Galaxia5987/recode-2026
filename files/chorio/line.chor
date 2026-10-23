@@ -1,5 +1,5 @@
 {
- "name":"Line",
+ "name":"line",
  "version":2,
  "type":"Swerve",
  "variables":{

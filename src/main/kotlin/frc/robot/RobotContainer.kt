@@ -5,6 +5,7 @@ import frc.robot.RobotContainer.Buttons.outtakeButton
 import frc.robot.autonomous.digonal
 import frc.robot.autonomous.line
 import frc.robot.autonomous.linewith180
+import frc.robot.autonomous.pickupAuto
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.Mode
 import frc.robot.lib.commands.ChoreoAutoFactory
@@ -128,6 +129,7 @@ object RobotContainer {
         autoChooser.addOption("Line.trag", line())
         autoChooser.addOption("Linewith180.trag", linewith180())
         autoChooser.addOption("Digonal.trag", digonal())
+        autoChooser.addOption("pickup", pickupAuto())
         // SysIds
         autoChooser.addOption(
             "Drive Wheel Radius Characterization",

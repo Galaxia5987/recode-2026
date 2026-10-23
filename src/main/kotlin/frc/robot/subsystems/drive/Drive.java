@@ -176,6 +176,7 @@ public class Drive extends Mechanism {
             ModuleIO brModuleIO,
             Consumer<Pose2d> resetSimulationPoseCallBack) {
         this.gyroIO = gyroIO;
+        headingController.enableContinuousInput(-Math.PI, Math.PI);
 
         this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
         modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
@@ -236,16 +237,13 @@ public class Drive extends Mechanism {
         private final PIDController headingController = new PIDController(7.5 , 0 ,0 );
 
         public void followTrajectory(SwerveSample sample){
-
-            Pose2d pose = getPose();
-
+            Logger.recordOutput("Odometry/TrajectorySetpoint", sample.getPose());
             ChassisVelocities velocities = new ChassisVelocities(
-                    sample.vx + xController.calculate(pose.getX() , sample.x),
-                    sample.vy + yController.calculate(pose.getY() , sample.y),
-                    sample.omega + headingController.calculate(pose.getRotation().getRadians(), sample.heading)
+                    sample.vx + xController.calculate(getPose().getX() , sample.x),
+                    sample.vy + yController.calculate(getPose().getY() , sample.y),
+                    sample.omega + headingController.calculate(getRotation().getRadians(), sample.heading)
             );
-            runVelocity(velocities.toRobotRelative(pose.getRotation()));
-
+            runVelocity(velocities.toRobotRelative(getRotation()));
         }
 
 
