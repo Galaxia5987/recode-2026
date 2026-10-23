@@ -4,6 +4,7 @@ import frc.robot.RobotContainer
 import frc.robot.lib.commands.command
 import frc.robot.lib.commands.unaryPlus
 import frc.robot.subsystems.intake.roller.Roller
+import frc.robot.subsystems.spindexer.Spindexer
 import org.wpilib.command3.Command
 
 fun line(): Command = resetAndFollow("line")
@@ -30,6 +31,31 @@ fun pickupAuto(): Command {
 
     pickupTraj.atTime("startIntaking").onTrue(Roller.intake())
     pickupTraj.done().onTrue(Roller.stop())
+
+    return routine.cmd()
+}
+
+fun path1(): Command {
+    val routine = RobotContainer.autoFactory.newRoutine("path1")
+    val path1Traj = routine.trajectory("path1")
+
+    routine.active().onTrue(
+        path1Traj.resetOdometry()
+            .andThen(path1Traj.cmd()).named("auto")
+    )
+
+    path1Traj.atTime("IntakeStart").onTrue(
+        command {
+            +[Roller.intake(), Spindexer.convey()]
+        }.named("startIntake")
+
+    )
+
+    path1Traj.done().onTrue(
+        command {
+            +[Roller.stop(), Spindexer.stop()]
+        }.named("stopIntake")
+    )
 
     return routine.cmd()
 }
