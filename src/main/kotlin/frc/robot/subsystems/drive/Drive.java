@@ -25,6 +25,7 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import frc.robot.ConstantsKt;
 import frc.robot.lib.BetterPoseEstimator;
 import frc.robot.lib.Mode;
+import frc.robot.lib.TuneablePIDController;
 import frc.robot.lib.commands.MechanismExtensionsKt;
 import frc.robot.subsystems.drive.ModuleIOs.Module;
 import frc.robot.subsystems.drive.ModuleIOs.ModuleIO;
@@ -232,9 +233,9 @@ public class Drive extends Mechanism {
          */
     }
 
-        private final PIDController xController = new PIDController(10.0 ,0 ,0);
-        private final PIDController yController = new PIDController(10.0 ,0 ,0);
-        private final PIDController headingController = new PIDController(7.5 , 0 ,0 );
+        private final PIDController xController = new TuneablePIDController("xController",10.0 ,0 , 0);
+        private final PIDController yController = new TuneablePIDController("yController" ,10.0,0 , 0);
+        private final PIDController headingController = new TuneablePIDController("headingController" , 7.5,0, 0 );
 
         public void followTrajectory(SwerveSample sample){
             Logger.recordOutput("Odometry/TrajectorySetpoint", sample.getPose());
@@ -248,6 +249,7 @@ public class Drive extends Mechanism {
 
 
     public void periodic() {
+
         odometryLock.lock(); // Prevents odometry updates while reading data
         SwerveTurnAngle[0] = modules[0].getAngle().getMeasure();
         SwerveTurnAngle[1] = modules[1].getAngle().getMeasure();
@@ -345,6 +347,8 @@ public class Drive extends Mechanism {
             }
         }
         fieldPose.setRobotPose(getPose());
+
+
     }
 
     private boolean isSkidding(
