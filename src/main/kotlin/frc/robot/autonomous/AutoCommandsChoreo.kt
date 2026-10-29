@@ -1,11 +1,26 @@
 package frc.robot.autonomous
 
+import choreo.auto.AutoFactory
 import frc.robot.RobotContainer
+import frc.robot.drive
+import frc.robot.lib.commands.ChoreoAutoFactory
 import frc.robot.lib.commands.command
 import frc.robot.lib.commands.unaryPlus
 import frc.robot.subsystems.intake.roller.Roller
 import frc.robot.subsystems.spindexer.Spindexer
 import org.wpilib.command3.Command
+
+fun ad() {
+    val factory = AutoFactory(
+        drive::getPose,
+        drive::resetOdometry,
+        drive::followTrajectory,
+        true,
+        drive,
+    )
+    val routine = RobotContainer.autoFactory.newRoutine("das")
+    routine.cmd()
+}
 
 fun line(): Command = resetAndFollow("line")
 

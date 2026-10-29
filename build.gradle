@@ -17,6 +17,9 @@ repositories {
     mavenCentral()
 
     maven { url 'https://jitpack.io' }
+    maven {
+        url = uri("${projectDir}/localMaven")
+    }
 }
 
 def javaVersion = JavaVersion.VERSION_25
@@ -59,10 +62,6 @@ wpi.java.debugJni = false
 
 def includeDesktopSupport = true
 
-// Rebuild Choreo against this project's WPILib instead of loading its alpha-5 binary.
-configurations.configureEach {
-    exclude group: 'choreo', module: 'ChoreoLib-java'
-}
 
 task(replayWatch, type: JavaExec) {
     mainClass = "org.littletonrobotics.junction.ReplayWatch"
@@ -74,7 +73,6 @@ dependencies {
     annotationProcessor wpi.java.deps.wpilibAnnotations()
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
-    implementation project(':choreo-compat')
 
     systemcoreDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.systemcore)
     systemcoreDebug wpi.java.vendor.jniDebug(wpi.platforms.systemcore)
@@ -110,7 +108,9 @@ dependencies {
     kapt "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
     implementation 'org.dyn4j:dyn4j:5.0.2'
     implementation 'com.github.Galaxia5987:maple-sim:main-SNAPSHOT'
+    implementation 'choreo:ChoreoLib-java:0.0.0'
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit5:2.0.0"
+
 }
 
 sourceSets {

@@ -27,7 +27,6 @@ pluginManagement {
 }
 
 include ':annotation'
-include ':choreo-compat'
 project(':annotation').projectDir = new File(rootDir, 'annotation')
 
 Properties props = System.getProperties();
