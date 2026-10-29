@@ -1,52 +1,31 @@
 package frc.robot.autonomous
 
-import com.pathplanner.lib.path.PathConstraints
-import frc.robot.migrationError
+import choreo.auto.AutoFactory
+import frc.robot.drive
+import frc.robot.lib.commands.command
+import frc.robot.lib.commands.unaryPlus
 import org.wpilib.command3.Command
 
-var useOdometryOnlyInAuto = false
+val autoFactory =
+    AutoFactory(
+        drive::getPose,
+        drive::resetOdometry,
+        drive::followTrajectory,
+        true,
+        drive,
+    )
 
-private fun runPath(
-    path: String,
-    mirror: Boolean = false,
-    pathfindBefore: Boolean = false,
-    pathfindingConstraints: PathConstraints? = null,
-): Command {
-    /*
-    var path = PathPlannerPath.fromPathFile(path)
-    if (mirror) {
-        path = path.mirrorPath()
-    }
+fun line(): Command = resetAndFollow("line")
 
-    if (pathfindBefore) {
-        return AutoBuilder.pathfindThenFollowPath(
-            path,
-            pathfindingConstraints!!
-        )
-    }
+fun linewith180(): Command = resetAndFollow("linewith180")
 
-    return AutoBuilder.followPath(path)
+fun digonal(): Command = resetAndFollow("digonal")
 
-     */
-    migrationError()
-}
-
-private fun runPathAndReset(
-    pathName: String,
-    mirror: Boolean = false,
-): Command {
-    /*
-    val path = PathPlannerPath.fromPathFile(pathName)
-    var startPose = path.startingHolonomicPose.get()
-    if (mirror) {
-        startPose = startPose.mirror()
-    }
-
-    return Commands.runOnce({
-            BetterPoseEstimator.getInstance()
-                .resetPose(startPose.flipIfNeeded())
-        })
-        .andThen(runPath(pathName, mirror))
-     */
-    migrationError()
+private fun resetAndFollow(name: String): Command {
+    val trajectory = autoFactory.trajectory(name)
+    return command {
+            +trajectory.resetOdometry()
+            +trajectory.cmd()
+        }
+        .named("resetAndFollow/$name")
 }

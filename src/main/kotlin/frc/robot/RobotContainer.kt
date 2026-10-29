@@ -5,16 +5,12 @@ import frc.robot.RobotContainer.Buttons.outtakeButton
 import frc.robot.autonomous.digonal
 import frc.robot.autonomous.line
 import frc.robot.autonomous.linewith180
-import frc.robot.autonomous.path1
-import frc.robot.autonomous.pickupAuto
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.Mode
-import frc.robot.lib.commands.ChoreoAutoFactory
 import frc.robot.lib.commands.emptyCommand
 import frc.robot.lib.commands.initializeAllMechanisms
 import frc.robot.lib.commands.onChange
 import frc.robot.lib.extensions.enableAutoLogOutputFor
-import frc.robot.lib.extensions.not
 import frc.robot.lib.extensions.onFalse
 import frc.robot.lib.extensions.onTrue
 import frc.robot.setpoint_manager.SetpointManager
@@ -37,14 +33,6 @@ object RobotContainer {
 
     private val driverController = CommandNiDsPS5Controller(0)
     private val autoChooser: LoggedDashboardChooser<Command>
-    val autoFactory =
-        ChoreoAutoFactory(
-            drive::getPose,
-            drive::resetOdometry,
-            drive::followTrajectory,
-            true,
-            drive,
-        )
 
     object Buttons {
         var intakeButton = Trigger { false }
@@ -130,8 +118,6 @@ object RobotContainer {
         autoChooser.addOption("Line.trag", line())
         autoChooser.addOption("Linewith180.trag", linewith180())
         autoChooser.addOption("Digonal.trag", digonal())
-        autoChooser.addOption("path1",path1())
-        autoChooser.addOption("pickup", pickupAuto())
         // SysIds
         autoChooser.addOption(
             "Drive Wheel Radius Characterization",
