@@ -1,125 +1,140 @@
-// Copyright 2021-2025 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// This program is free software; you can redistribute it and/or
-// modify it under the terms of the GNU General Public License
-// version 3 as published by the Free Software Foundation or
-// available in the root directory of this project.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
 package frc.robot.subsystems.vision
 
-import frc.robot.lib.BetterPoseEstimator
-import frc.robot.lib.commands.addPeriodic
-import frc.robot.subsystems.vision.VisionIO.PoseObservation
-import kotlin.math.absoluteValue
-import org.littletonrobotics.junction.Logger
-import org.wpilib.command3.Mechanism
-import org.wpilib.driverstation.Alert
+import frc.robot.CURRENT_MODE
+import frc.robot.lib.Mode
+import java.util.Optional
+import org.photonvision.EstimatedRobotPose
+import org.photonvision.PhotonCamera
+import org.photonvision.PhotonPoseEstimator
+import org.photonvision.simulation.PhotonCameraSim
+import org.photonvision.simulation.SimCameraProperties
+import org.photonvision.simulation.VisionSystemSim
+import org.photonvision.targeting.PhotonTrackedTarget
 import org.wpilib.math.geometry.Pose2d
-import org.wpilib.math.geometry.Pose3d
+import org.wpilib.math.geometry.Rotation2d
+import org.wpilib.math.linalg.Matrix
+import org.wpilib.math.linalg.VecBuilder
+import org.wpilib.math.numbers.N1
+import org.wpilib.math.numbers.N3
+import org.wpilib.smartdashboard.Field2d
 
-open class Vision(
-    private val consumer: (BetterPoseEstimator.VisionObservation) -> Unit,
-    private val resetOdometryCallback: (Pose2d) -> Unit,
-    private vararg val ios: VisionIO,
-) : Mechanism() {
-    private val inputs = Array(ios.size) { VisionIOInputsAutoLogged() }
-    private val disconnectedAlerts =
-        Array(ios.size) { index ->
-            Alert("Vision camera $index is disconnected.", Alert.Level.MEDIUM)
-        }
+class Vision(val consumer: (Pose2d, Double, Matrix<N3, N1>) -> Unit) {
+    private lateinit var curStdDevs: Matrix<N3, N1>
+    private val photonCamera: PhotonCamera = PhotonCamera("Camera1")
+    private val photonEstimator: PhotonPoseEstimator =
+        PhotonPoseEstimator(tagLayout, robotToCam)
+    private val visionSim: VisionSystemSim = VisionSystemSim("VisionSystemSim")
+    private val camera = photonCamera
 
     init {
-        addPeriodic(::periodic)
+        if (CURRENT_MODE == Mode.SIM) {
+            val visionSim = VisionSystemSim("main")
+            visionSim.addAprilTags(tagLayout)
+            var camraProp = SimCameraProperties()
+            camraProp.setCalibration(960, 720, Rotation2d.fromDegrees(90.0))
+            camraProp.setCalibError(0.35, 0.10)
+            camraProp.setFPS(15.0)
+            camraProp.setAvgLatencyMs(50.0)
+            camraProp.setLatencyStdDevMs(15.0)
+            val camaraSim = PhotonCameraSim(camera, camraProp)
+            visionSim.addCamera(camaraSim, transform3d)
+            camaraSim.enableDrawWireframe(true)
+        }
     }
 
-    private val invalidPosesBuffer = arrayOfNulls<Pose3d>(ios.size)
-    private val emptyPoseArray = emptyArray<Pose3d>()
-
-    private var lastOdometryResetTimeStamp = -1.0
-
-    private fun PoseObservation.isInvalid(): Boolean =
-        tagCount == 0 || // Must have at least one tag
-            (tagCount == 1 &&
-                ambiguity > MAX_AMBIGUITY) || // Cannot be high ambiguity
-            pose.z.absoluteValue >
-                MAX_Z_ERROR || // Must have realistic Z coordinate
-            // Must be within the field boundaries
-            !(pose.x in 0.0..APRILTAG_LAYOUT.fieldLength &&
-                pose.y in 0.0..APRILTAG_LAYOUT.fieldWidth) ||
-            averageTagDistance > MAX_DISTANCE_METERS
-
     fun periodic() {
-        var invalidPosesCount = 0
-
-        // Standard indexed loop prevents Iterator and List/Pair allocations
-        for (i in ios.indices) {
-            val visionIO = ios[i]
-            val cameraInputs = inputs[i]
-
-            // Update IO
-            visionIO.updateInputs(cameraInputs)
-
-            // Update logging
-            Logger.processInputs(
-                "Subsystems/Vision/${inputs[i].name}",
-                cameraInputs,
-            )
-
-            // Update disconnected alert
-            disconnectedAlerts[i].set(!cameraInputs.connected)
-
-            if (!cameraInputs.connected || cameraInputs.estimatedPose == null) {
-                continue
+        var visionEst: Optional<EstimatedRobotPose>
+        photonCamera.allUnreadResults.forEach { result ->
+            visionEst = photonEstimator.estimateCoprocMultiTagPose(result)
+            if (visionEst.isEmpty) {
+                visionEst = photonEstimator.estimateLowestAmbiguityPose(result)
             }
-
-            val estimatedPose = cameraInputs.estimatedPose
-            if (estimatedPose.isInvalid()) {
-                invalidPosesBuffer[invalidPosesCount++] = estimatedPose.pose
-                continue
-            }
-
-            val tagCountDouble = estimatedPose.tagCount.toDouble()
-            val avgDist = estimatedPose.averageTagDistance
-            val stdFactor = (avgDist * avgDist) / tagCountDouble
-
-            val linearStdDev =
-                (LINEAR_STD_DEV_BASELINE * stdFactor) / tagCountDouble
-            val angularStdDev =
-                (ANGULAR_STD_DEV_BASELINE * stdFactor) / tagCountDouble
-
-            // Pass raw primitives, avoiding VecBuilder.fill() matrix
-            // allocations
-            val observation =
-                BetterPoseEstimator.VisionObservation(
-                    estimatedPose.pose,
-                    estimatedPose.timestamp,
-                    linearStdDev,
-                    linearStdDev,
-                    angularStdDev,
+            updateEstimationStdDevs(visionEst, result.getTargets())
+            visionEst.ifPresent {
+                consumer(
+                    it.estimatedPose.toPose2d(),
+                    it.timestampSeconds,
+                    curStdDevs,
                 )
-
-            if (
-                estimatedPose.tagCount > 2 &&
-                    estimatedPose.timestamp - lastOdometryResetTimeStamp > 2.5
-            ) {
-                lastOdometryResetTimeStamp = estimatedPose.timestamp
-                resetOdometryCallback.invoke(estimatedPose.pose.toPose2d())
+                var estStdDevs = getEstimatationStdDevs()
             }
-            consumer.invoke(observation)
         }
+    }
 
-        if (invalidPosesCount == 0) {
-            Logger.recordOutput("InvalidVisionMeasurements", *emptyPoseArray)
+    private fun updateEstimationStdDevs(
+        estimatedPose: Optional<EstimatedRobotPose>,
+        targets: List<PhotonTrackedTarget>,
+    ) {
+        if (estimatedPose.isEmpty()) {
+            curStdDevs = kSingleTagStdDevs
         } else {
-            val outputArray =
-                Array(invalidPosesCount) { invalidPosesBuffer[it]!! }
-            Logger.recordOutput("InvalidVisionMeasurements", *outputArray)
+            var estStdDevs = kSingleTagStdDevs
+            var numTags: Int = 0
+            var avgDist: Double = 0.0
+
+            for (tgt in targets) {
+                var tagPose =
+                    photonEstimator.fieldTags.getTagPose(tgt.getFiducialId())
+                if (tagPose.isEmpty()) continue
+                numTags++
+                avgDist +=
+                    tagPose
+                        .get()
+                        .toPose2d()
+                        .getTranslation()
+                        .getDistance(
+                            estimatedPose
+                                .get()
+                                .estimatedPose
+                                .toPose2d()
+                                .getTranslation()
+                        )
+            }
+            if (numTags == 0) {
+                curStdDevs = kSingleTagStdDevs
+            } else {
+                avgDist /= numTags
+                if (numTags > 1) {
+                    estStdDevs = kMultiTagStdDevs
+                }
+                if (numTags == 1 && avgDist > 4.0) {
+                    estStdDevs =
+                        VecBuilder.fill(
+                            Double.MAX_VALUE,
+                            Double.MAX_VALUE,
+                            Double.MAX_VALUE,
+                        )
+                } else {
+                    estStdDevs = estStdDevs.times(1 + (avgDist * avgDist / 30))
+                    curStdDevs = estStdDevs
+                }
+            }
         }
+    }
+
+    fun getEstimatationStdDevs(): Matrix<N3, N1> {
+        return curStdDevs
+    }
+
+    fun simulationPeriodic(pose2d: Pose2d, robotSimPose: Pose2d) {
+        visionSim.update(robotSimPose)
+    }
+
+    fun resetSimPose(pose: Pose2d) {
+        if (CURRENT_MODE == Mode.SIM) visionSim.resetRobotPose(pose)
+    }
+
+    fun getSimDebugField(): Field2d? {
+        if (CURRENT_MODE == Mode.SIM) return null
+        return visionSim.getDebugField()
+    }
+
+    @FunctionalInterface
+    interface EstimateConsumer {
+        fun accept(
+            pose: Pose2d,
+            timestamp: Double,
+            estimationStdDevs: Matrix<N3, N1>,
+        )
     }
 }
