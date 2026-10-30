@@ -8,7 +8,7 @@ import frc.robot.lib.extensions.with
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.wpilib.command3.Mechanism
 
-object Funnel : Mechanism(), FunnelStateCommandFactory {
+object Funnel : Mechanism, FunnelStateCommandFactory {
     private val mainMotor =
         UniversalTalonFX(
             port = MAIN_MOTOR_PORT,

@@ -12,7 +12,7 @@ import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
 import org.wpilib.units.measure.Angle
 
-object Hood : Mechanism() {
+object Hood : Mechanism {
     private val absoluteEncoder = CANcoder(ENCODER_ID, CANBUS)
     private val motor =
         UniversalTalonFX(

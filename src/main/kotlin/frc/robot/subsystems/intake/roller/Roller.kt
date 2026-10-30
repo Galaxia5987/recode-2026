@@ -13,7 +13,7 @@ import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
 import org.wpilib.units.measure.Voltage
 
-object Roller : Mechanism() {
+object Roller : Mechanism {
     private val mainMotor =
         UniversalTalonFX(
             canbus = systemcore(0),

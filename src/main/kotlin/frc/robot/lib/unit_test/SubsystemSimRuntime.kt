@@ -35,7 +35,7 @@ object SubsystemSimRuntime {
     }
 
     init {
-        check(HAL.initialize(500, 0))
+        check(HAL.initialize())
         SimHooks.pauseTiming()
 
         DriverStationSim.setEnabled(true)

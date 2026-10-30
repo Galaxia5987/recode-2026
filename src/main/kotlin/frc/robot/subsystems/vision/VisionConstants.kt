@@ -16,17 +16,17 @@ package frc.robot.subsystems.vision
 import frc.robot.drive
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.mm
+import org.wpilib.fields.Field
+import org.wpilib.fields.Fields
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.geometry.Rotation3d
 import org.wpilib.math.geometry.Transform3d
-import org.wpilib.vision.apriltag.AprilTagFieldLayout
-import org.wpilib.vision.apriltag.AprilTagFields
 
 const val LOG_PREFIX = "Subsystems/Vision/"
 
 // AprilTag layout
-val APRILTAG_LAYOUT: AprilTagFieldLayout =
-    AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark)
+val APRILTAG_LAYOUT: Field =
+    Fields.FRC_2026_REBUILT_ANDY_MARK.loadField()
 
 // stddevFactor - Standard deviation multipliers for each camera
 // (Adjust to trust some cameras more than others)

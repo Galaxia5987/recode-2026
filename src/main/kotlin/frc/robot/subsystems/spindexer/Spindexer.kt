@@ -11,7 +11,7 @@ import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
 
-object Spindexer : Mechanism(), SpindexerVelocitiesCommandFactory {
+object Spindexer : Mechanism, SpindexerVelocitiesCommandFactory {
     private val motor =
         UniversalTalonFX(
             canbus = systemcore(0),

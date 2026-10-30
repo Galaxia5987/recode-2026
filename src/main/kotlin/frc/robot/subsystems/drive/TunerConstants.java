@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.*;
 import com.ctre.phoenix6.signals.*;
 import com.ctre.phoenix6.swerve.*;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants.*;
-import com.pathplanner.lib.config.PIDConstants;
+import frc.robot.lib.PIDGains;
 import org.wpilib.math.linalg.Matrix;
 import org.wpilib.math.numbers.N1;
 import org.wpilib.math.numbers.N3;
@@ -18,8 +18,8 @@ import org.wpilib.units.measure.*;
 // https://v6.docs.ctr-electronics.com/en/stable/docs/tuner/tuner-swerve/index.html/
 public class TunerConstants {
     // Both sets of gains need to be tuned to your individual robot.
-    public static final PIDConstants autonomousTranslationPID = new PIDConstants(5.0, 0.0, 0.0);
-    public static final PIDConstants autonomousRotationPID = new PIDConstants(4.5, 0.0, 0.0);
+    public static final PIDGains autonomousTranslationPID = new PIDGains(5.0, 0.0, 0.0);
+    public static final PIDGains autonomousRotationPID = new PIDGains(4.5, 0.0, 0.0);
 
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput

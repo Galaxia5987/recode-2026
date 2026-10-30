@@ -13,7 +13,7 @@ private const val startIndex = 8
 private const val endIndex = 73
 private val BLUE = RGBWColor.fromHex("#0000FF").get()
 
-object Leds : Mechanism() {
+object Leds : Mechanism {
 
     init {
         addPeriodic(::periodic)

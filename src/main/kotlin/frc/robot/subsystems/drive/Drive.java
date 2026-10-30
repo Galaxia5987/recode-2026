@@ -17,16 +17,12 @@ import static org.wpilib.units.Units.*;
 
 import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.CANBus;
-import com.pathplanner.lib.config.ModuleConfig;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.pathfinding.LocalADStar;
-import com.pathplanner.lib.pathfinding.Pathfinding;
-import com.pathplanner.lib.util.PathPlannerLogging;
 import frc.robot.ConstantsKt;
 import frc.robot.lib.BetterPoseEstimator;
 import frc.robot.lib.Mode;
 import frc.robot.lib.TuneablePIDController;
 import frc.robot.lib.commands.MechanismExtensionsKt;
+import frc.robot.lib.extensions.GeometryKt;
 import frc.robot.subsystems.drive.ModuleIOs.Module;
 import frc.robot.subsystems.drive.ModuleIOs.ModuleIO;
 import frc.robot.subsystems.drive.gyroIOs.GyroIO;
@@ -54,19 +50,19 @@ import org.wpilib.math.kinematics.SwerveModulePosition;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.math.system.DCMotor;
 import org.wpilib.smartdashboard.Field2d;
-import org.wpilib.smartdashboard.SmartDashboard;
 import org.wpilib.system.Timer;
 import org.wpilib.units.Units;
 import org.wpilib.units.measure.Angle;
 import org.wpilib.units.measure.AngularVelocity;
 import org.wpilib.units.measure.LinearAcceleration;
 import org.wpilib.units.measure.Voltage;
+import org.wpilib.util.Alert;
 
 /*
  * 2027 Changes and problems:
  * Seems to be a problem with SysId related stuff, removed for now.
  */
-public class Drive extends Mechanism {
+public class Drive implements Mechanism {
     // TunerConstants doesn't include these constants, so they are declared locally
     public static final double ODOMETRY_FREQUENCY =
             new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
@@ -94,20 +90,6 @@ public class Drive extends Mechanism {
     private static final double ROBOT_MOI = 8.132;
     private static final double WHEEL_COF = 1.0;
 
-    private static final RobotConfig PP_CONFIG =
-            new RobotConfig(
-                    ROBOT_MASS_KG,
-                    ROBOT_MOI,
-                    new ModuleConfig(
-                            TunerConstants.FrontLeft.WheelRadius,
-                            TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
-                            WHEEL_COF,
-                            DCMotor.getKrakenX60Foc(1)
-                                    .withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
-                            TunerConstants.FrontLeft.SlipCurrent,
-                            1),
-                    getModuleTranslations());
-
     public static final DriveTrainSimulationConfig mapleSimConfig =
             DriveTrainSimulationConfig.Default()
                     .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
@@ -133,7 +115,7 @@ public class Drive extends Mechanism {
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
     private final Module[] modules = new Module[4]; // FL, FR, BL, BR
     private final Alert gyroDisconnectedAlert =
-            new Alert("Disconnected gyro, using kinematics as fallback.", Alert.Level.HIGH);
+            new Alert("gyroDisconnect","Disconnected gyro, using kinematics as fallback.", Alert.Level.HIGH);
 
     private final SwerveDriveKinematics kinematics =
             new SwerveDriveKinematics(getModuleTranslations());
@@ -191,20 +173,6 @@ public class Drive extends Mechanism {
         // Configure AutoBuilder for PathPlanner
         configureAutoBuilder();
 
-        Pathfinding.setPathfinder(new LocalADStar());
-        PathPlannerLogging.setLogActivePathCallback(
-                (activePath) -> {
-                    fieldPose.getObject("path").setPoses(activePath);
-                    Logger.recordOutput(
-                            "Odometry/Trajectory",
-                            activePath.toArray(new Pose2d[activePath.size()]));
-                });
-        PathPlannerLogging.setLogTargetPoseCallback(
-                (targetPose) -> {
-                    Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
-                });
-
-        SmartDashboard.putData("Field", fieldPose);
         MechanismExtensionsKt.addPeriodic(this, this::periodic);
     }
 
@@ -441,7 +409,7 @@ public class Drive extends Mechanism {
     public void stopWithX() {
         Rotation2d[] headings = new Rotation2d[4];
         for (int i = 0; i < 4; i++) {
-            headings[i] = getModuleTranslations()[i].getAngle();
+            headings[i] = GeometryKt.getAngleOrDefault(getModuleTranslations()[i]);
         }
         kinematics.resetHeadings(headings);
         stop();

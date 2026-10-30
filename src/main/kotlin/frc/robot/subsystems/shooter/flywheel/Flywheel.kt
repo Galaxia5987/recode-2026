@@ -13,7 +13,7 @@ import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
 
-object Flywheel : Mechanism() {
+object Flywheel : Mechanism {
     val mainMotor =
         UniversalTalonFX(
             canbus = systemcore(0),

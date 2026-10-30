@@ -5,6 +5,7 @@ import frc.robot.RobotContainer.Buttons.outtakeButton
 import frc.robot.autonomous.digonal
 import frc.robot.autonomous.line
 import frc.robot.autonomous.linewith180
+import frc.robot.lib.AutoChooser
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.Mode
 import frc.robot.lib.commands.emptyCommand
@@ -23,16 +24,15 @@ import frc.robot.subsystems.intake.roller.Roller
 import frc.robot.subsystems.spindexer.Spindexer
 import frc.robot.subsystems.turret.Turret
 import org.ironmaple.simulation.SimulatedArena
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser
 import org.wpilib.command3.Command
 import org.wpilib.command3.Trigger
 import org.wpilib.command3.button.CommandNiDsPS5Controller
-import org.wpilib.smartdashboard.SendableChooser
+import org.wpilib.tunable.Tunables
 
 object RobotContainer {
 
     private val driverController = CommandNiDsPS5Controller(0)
-    private val autoChooser: LoggedDashboardChooser<Command>
+    private val autoChooser: AutoChooser
 
     object Buttons {
         var intakeButton = Trigger { false }
@@ -41,11 +41,7 @@ object RobotContainer {
 
     init {
         drive // Ensure Drive is initialized
-        autoChooser =
-            LoggedDashboardChooser(
-                "Auto Choices",
-                SendableChooser(),
-            )
+        autoChooser = AutoChooser()
 
         registerAutoCommands()
         configureButtonBindings()
@@ -56,7 +52,6 @@ object RobotContainer {
                 .addDriveTrainSimulation(driveSimulation)
             SimulatedArena.getInstance().resetFieldForAuto()
         }
-
         enableAutoLogOutputFor(this)
         initializeAllMechanisms()
         BasicAlerts
@@ -111,21 +106,21 @@ object RobotContainer {
         }
     }
 
-    fun getAutonomousCommand(): Command = autoChooser.get()
+    fun getAutonomousCommand(): Command = autoChooser.selectedCommand()
 
     private fun registerAutoCommands() {
-        autoChooser.addDefaultOption("Empty", emptyCommand())
-        autoChooser.addOption("Line.trag", line())
-        autoChooser.addOption("Linewith180.trag", linewith180())
-        autoChooser.addOption("Digonal.trag", digonal())
+        autoChooser.addCmd("Empty", ::emptyCommand)
+        autoChooser.addCmd("Line.trag", ::line)
+        autoChooser.addCmd("Linewith180.trag", ::linewith180)
+        autoChooser.addCmd("Digonal.trag", ::digonal)
         // SysIds
-        autoChooser.addOption(
+        autoChooser.addCmd(
             "Drive Wheel Radius Characterization",
-            DriveCommands.wheelRadiusCharacterization(),
+            DriveCommands::wheelRadiusCharacterization,
         )
-        autoChooser.addOption(
+        autoChooser.addCmd(
             "Drive Simple FF Characterization",
-            DriveCommands.feedforwardCharacterization(),
+            DriveCommands::feedforwardCharacterization,
         )
 
         // TODO: Uncomment when I figure out what happened to SysId
@@ -146,9 +141,10 @@ object RobotContainer {
         //            drive.sysIdDynamic(SysIdRoutine.Direction.kReverse)
         //        )
 
-        autoChooser.addOption(
+        autoChooser.addCmd(
             "swerveFFCharacterization",
-            DriveCommands.feedforwardCharacterization(),
+            DriveCommands::feedforwardCharacterization,
         )
+        Tunables.publish("Chooser", autoChooser)
     }
 }

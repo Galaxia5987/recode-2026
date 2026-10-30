@@ -19,19 +19,19 @@ import frc.robot.subsystems.vision.VisionIO.PoseObservation
 import kotlin.math.absoluteValue
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
-import org.wpilib.driverstation.Alert
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Pose3d
+import org.wpilib.util.Alert
 
 open class Vision(
     private val consumer: (BetterPoseEstimator.VisionObservation) -> Unit,
     private val resetOdometryCallback: (Pose2d) -> Unit,
     private vararg val ios: VisionIO,
-) : Mechanism() {
+) : Mechanism {
     private val inputs = Array(ios.size) { VisionIOInputsAutoLogged() }
     private val disconnectedAlerts =
         Array(ios.size) { index ->
-            Alert("Vision camera $index is disconnected.", Alert.Level.MEDIUM)
+            Alert("cameraDisconnected","Vision camera $index is disconnected.", Alert.Level.MEDIUM)
         }
 
     init {

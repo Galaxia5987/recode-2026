@@ -20,7 +20,7 @@ import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Voltage
 
-object Extender : Mechanism() {
+object Extender : Mechanism {
     private val io =
         when (CURRENT_MODE) {
             Mode.REAL -> ExtenderIOReal()

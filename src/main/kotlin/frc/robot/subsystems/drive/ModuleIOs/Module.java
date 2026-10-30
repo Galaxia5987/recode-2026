@@ -16,11 +16,11 @@ package frc.robot.subsystems.drive.ModuleIOs;
 import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import frc.robot.lib.LoggedNetworkGains;
 import org.littletonrobotics.junction.Logger;
-import org.wpilib.driverstation.Alert;
 import org.wpilib.math.geometry.Rotation2d;
 import org.wpilib.math.kinematics.SwerveModulePosition;
 import org.wpilib.math.kinematics.SwerveModuleVelocity;
 import org.wpilib.math.util.Units;
+import org.wpilib.util.Alert;
 
 public class Module {
     private final ModuleIO io;
@@ -38,15 +38,15 @@ public class Module {
         this.index = index;
         this.constants = constants;
         driveDisconnectedAlert =
-                new Alert(
+                new Alert("driveDisconnected",
                         "Disconnected drive motor on module " + Integer.toString(index) + ".",
                         Alert.Level.HIGH);
         turnDisconnectedAlert =
-                new Alert(
+                new Alert("turnDisconnected",
                         "Disconnected turn motor on module " + Integer.toString(index) + ".",
                         Alert.Level.HIGH);
         turnEncoderDisconnectedAlert =
-                new Alert(
+                new Alert("turnEncoderDisconnected",
                         "Disconnected turn encoder on module " + Integer.toString(index) + ".",
                         Alert.Level.HIGH);
     }

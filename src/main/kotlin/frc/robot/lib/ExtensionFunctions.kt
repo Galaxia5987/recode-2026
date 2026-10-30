@@ -69,30 +69,6 @@ inline fun <reified T : List<Any>> LogTable.get(
     else result as T
 }
 
-fun CommandGamepad.rumbleAll(strength: Double) {
-    this.setRumble(GenericHID.RumbleType.RIGHT_RUMBLE, strength)
-    this.setRumble(GenericHID.RumbleType.LEFT_RUMBLE, strength)
-}
-
-fun CommandGamepad.stopRumble() {
-    rumbleAll(0.0)
-}
-
-fun CommandGamepad.rumbleCommand(): Command {
-    return Command.noRequirements {
-            this.rumbleAll(1.0)
-            it.park()
-        }
-        .named("RumbleController")
-        .andThen(
-            Command.noRequirements {
-                    this.stopRumble()
-                }
-                .named("StopRumbleController")
-        )
-        .withAutomaticName()
-}
-
 fun Any?.ifNotNull(action: (it: Any) -> Unit) {
     if (this != null) {
         action(this)

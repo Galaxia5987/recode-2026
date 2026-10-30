@@ -1,13 +1,13 @@
 package frc.robot.field
 
-import com.pathplanner.lib.util.FlippingUtil
+import frc.robot.lib.FlippingUtil
 import frc.robot.lib.extensions.flipIfNeeded
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.mirror
 import frc.robot.lib.extensions.mm
 import frc.robot.lib.extensions.periodic
-import org.wpilib.math.geometry.Rectangle2d
 import org.wpilib.math.geometry.Translation2d
+import org.wpilib.math.shape.Rectangle2d
 import org.wpilib.units.measure.Distance
 
 val ALLIANCE_ZONE_WIDTH: Distance = 4.03.m

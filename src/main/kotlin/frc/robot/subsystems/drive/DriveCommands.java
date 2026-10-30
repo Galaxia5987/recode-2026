@@ -17,7 +17,6 @@ import static frc.robot.subsystems.drive.Drive.DRIVE_BASE_RADIUS;
 import static org.wpilib.units.Units.Degrees;
 import static org.wpilib.units.Units.Second;
 
-import com.pathplanner.lib.config.PIDConstants;
 import frc.robot.InitializerKt;
 import frc.robot.lib.*;
 import java.text.DecimalFormat;
@@ -55,7 +54,7 @@ public class DriveCommands {
 
     private static final double accelerationLimitShootOnMove = 2.2; // m/s^2
 
-    private static final PIDConstants angleGains = new PIDConstants(5.0, 0.0, 0.0);
+    private static final PIDGains angleGains = new PIDGains(5.0, 0.0, 0.0);
     private static final TrapezoidProfile.Constraints angleConstraints =
             new TrapezoidProfile.Constraints(100000, 100000);
 
@@ -64,7 +63,7 @@ public class DriveCommands {
     private static final SlewRateLimiter slewRateLimiterY =
             new SlewRateLimiter(accelerationLimitShootOnMove);
 
-    private static Rotation2d lastRotationSetpoint = Rotation2d.kZero;
+    private static Rotation2d lastRotationSetpoint = Rotation2d.ZERO;
 
     private DriveCommands() {}
 
@@ -171,7 +170,7 @@ public class DriveCommands {
         // Create PID controller
         ProfiledPIDController angleController =
                 new ProfiledPIDController(
-                        angleGains.kP, angleGains.kI, angleGains.kD, angleConstraints);
+                        angleGains.kP(), angleGains.kI(), angleGains.kD(), angleConstraints);
 
         angleController.enableContinuousInput(-Math.PI, Math.PI);
 

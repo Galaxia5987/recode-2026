@@ -83,7 +83,6 @@ class Robot : LoggedRobot() {
 
         LoggedOutputManager
 
-        DriverStationBackend.silenceJoystickConnectionWarning(true)
 
         // TODO: Update when PathPlanner works with CommandsV3
         //        Scheduler.getDefault()

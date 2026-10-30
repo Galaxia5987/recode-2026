@@ -1,8 +1,10 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.wpilib.gradlerio.simulation.JavaExternalSimulationTask
 
 plugins {
     id "java"
-    id("org.wpilib.GradleRIO") version "2027.0.0-alpha-6"
+    id "application"
+    id("org.wpilib.GradleRIO") version "2027.0.0-alpha-8"
     id "com.gradleup.shadow" version "9.6.1"
     id "org.jetbrains.kotlin.jvm" version "2.4.10"
     id "org.jetbrains.kotlin.kapt" version "2.4.10"
@@ -12,11 +14,22 @@ plugins {
     id "idea"
 }
 
+
+application {
+    mainClass = "frc.robot.Main"
+}
+
+tasks.named("simulateExternalJava", JavaExternalSimulationTask).configure {
+    // Calls the setApplication method defined in the GradleRIO Java source
+    setApplication(project.extensions.getByType(JavaApplication))
+}
+
 repositories {
     mavenLocal()
     mavenCentral()
 
     maven { url 'https://jitpack.io' }
+    maven { url 'https://frcmaven.wpi.edu/artifactory/wpilib-mvn-development-local'}
     maven {
         url = uri("${projectDir}/localMaven")
     }
@@ -58,7 +71,6 @@ deploy {
 
 def deployArtifact = deploy.targets.systemcore.artifacts.wpilibJava
 
-wpi.java.debugJni = false
 
 def includeDesktopSupport = true
 
@@ -104,13 +116,15 @@ dependencies {
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
     testImplementation "org.jetbrains.kotlin:kotlin-test:2.0.0"
 
+    implementation("org.wpilib:commandsv3-java:2027.0.0-alpha-8")
+
     def akitJson = new groovy.json.JsonSlurper().parseText(new File(projectDir.getAbsolutePath() + "/vendordeps/AdvantageKit-27.0.0-alpha-4.json").text)
     kapt "org.littletonrobotics.akit:akit-autolog:$akitJson.version"
     implementation 'org.dyn4j:dyn4j:5.0.2'
     implementation 'com.github.Galaxia5987:maple-sim:main-SNAPSHOT'
+    implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'choreo:ChoreoLib-java:0.0.0'
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit5:2.0.0"
-
 }
 
 sourceSets {
@@ -152,9 +166,9 @@ shadowJar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-deployArtifact.jarTask = shadowJar
-wpi.java.configureExecutableTasks(shadowJar)
-wpi.java.configureTestTasks(test)
+//deployArtifact.jarTask = shadowJar
+//wpi.java.configureExecutableTasks(shadowJar)
+//wpi.java.configureTestTasks(test)
 
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add '-XDstringConcat=inline'

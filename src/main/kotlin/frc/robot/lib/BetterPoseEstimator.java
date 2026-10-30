@@ -26,8 +26,8 @@ public class BetterPoseEstimator {
     private static final Matrix<N3, N1> odometryStateStdDevs =
             new Matrix<>(VecBuilder.fill(0.3, 0.3, 0.01));
 
-    private Pose2d odometryPose = Pose2d.kZero;
-    private Pose2d estimatedPose = Pose2d.kZero;
+    private Pose2d odometryPose = Pose2d.ZERO;
+    private Pose2d estimatedPose = Pose2d.ZERO;
 
     private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
             TimeInterpolatableBuffer.createBuffer(poseBufferSizeSec);
@@ -47,7 +47,7 @@ public class BetterPoseEstimator {
                 new SwerveModulePosition(),
                 new SwerveModulePosition()
             };
-    private Rotation2d gyroOffset = Rotation2d.kZero;
+    private Rotation2d gyroOffset = Rotation2d.ZERO;
 
     private ChassisVelocities robotVelocity = new ChassisVelocities();
     private ChassisVelocities robotSetpointVelocity = new ChassisVelocities();

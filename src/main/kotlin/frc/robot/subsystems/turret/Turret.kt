@@ -14,7 +14,7 @@ import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
 import org.wpilib.units.measure.Angle
 
-object Turret : Mechanism() {
+object Turret : Mechanism {
     private val absoluteEncoder = CANcoder(ENCODER_ID, systemcore(3))
     private val motor: UniversalTalonFX =
         UniversalTalonFX(
