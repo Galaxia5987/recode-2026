@@ -19,11 +19,6 @@ application {
     mainClass = "frc.robot.Main"
 }
 
-tasks.named("simulateExternalJava", JavaExternalSimulationTask).configure {
-    // Calls the setApplication method defined in the GradleRIO Java source
-    setApplication(project.extensions.getByType(JavaApplication))
-}
-
 repositories {
     mavenLocal()
     mavenCentral()
@@ -166,9 +161,9 @@ shadowJar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
-//deployArtifact.jarTask = shadowJar
-//wpi.java.configureExecutableTasks(shadowJar)
-//wpi.java.configureTestTasks(test)
+deployArtifact.configureApplication(application)
+wpi.java.configureApplication(application)
+wpi.java.configureTestTasks(test)
 
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add '-XDstringConcat=inline'

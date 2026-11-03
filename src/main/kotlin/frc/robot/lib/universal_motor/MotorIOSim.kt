@@ -46,8 +46,8 @@ class MotorIOSim(
             simGains.kI,
             simGains.kD,
             TrapezoidProfile.Constraints(
-                config.MotionMagic.MotionMagicCruiseVelocity,
-                config.MotionMagic.MotionMagicAcceleration,
+                if (config.MotionMagic.MotionMagicCruiseVelocity > 0) config.MotionMagic.MotionMagicCruiseVelocity else 1.0,
+                if (config.MotionMagic.MotionMagicAcceleration > 0) config.MotionMagic.MotionMagicAcceleration else 1.0,
             ),
         )
     private val controller =

@@ -23,6 +23,7 @@ import org.wpilib.math.util.Units;
 import org.wpilib.util.Alert;
 
 public class Module {
+    private static int moduleId = 0;
     private final ModuleIO io;
     private final ModuleIOInputsAutoLogged inputs = new ModuleIOInputsAutoLogged();
     private final int index;
@@ -38,17 +39,18 @@ public class Module {
         this.index = index;
         this.constants = constants;
         driveDisconnectedAlert =
-                new Alert("driveDisconnected",
+                new Alert("driveDisconnected"+moduleId,
                         "Disconnected drive motor on module " + Integer.toString(index) + ".",
                         Alert.Level.HIGH);
         turnDisconnectedAlert =
-                new Alert("turnDisconnected",
+                new Alert("turnDisconnected"+moduleId,
                         "Disconnected turn motor on module " + Integer.toString(index) + ".",
                         Alert.Level.HIGH);
         turnEncoderDisconnectedAlert =
-                new Alert("turnEncoderDisconnected",
+                new Alert("turnEncoderDisconnected"+moduleId,
                         "Disconnected turn encoder on module " + Integer.toString(index) + ".",
                         Alert.Level.HIGH);
+        moduleId++;
     }
 
     public void periodic() {
