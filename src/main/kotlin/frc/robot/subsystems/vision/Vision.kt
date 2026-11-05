@@ -31,7 +31,11 @@ open class Vision(
     private val inputs = Array(ios.size) { VisionIOInputsAutoLogged() }
     private val disconnectedAlerts =
         Array(ios.size) { index ->
-            Alert("cameraDisconnected$index","Vision camera $index is disconnected.", Alert.Level.MEDIUM)
+            Alert(
+                "cameraDisconnected$index",
+                "Vision camera $index is disconnected.",
+                Alert.Level.MEDIUM,
+            )
         }
 
     init {

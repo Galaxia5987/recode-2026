@@ -25,8 +25,7 @@ import org.wpilib.math.geometry.Transform3d
 const val LOG_PREFIX = "Subsystems/Vision/"
 
 // AprilTag layout
-val APRILTAG_LAYOUT: Field =
-    Fields.FRC_2026_REBUILT_ANDY_MARK.loadField()
+val APRILTAG_LAYOUT: Field = Fields.FRC_2026_REBUILT_ANDY_MARK.loadField()
 
 // stddevFactor - Standard deviation multipliers for each camera
 // (Adjust to trust some cameras more than others)

@@ -2,13 +2,13 @@ package frc.robot.lib.extensions
 
 import frc.robot.lib.FlippingUtil
 import frc.robot.lib.IS_RED
+import kotlin.jvm.optionals.getOrDefault
 import org.wpilib.math.geometry.*
 import org.wpilib.math.shape.Rectangle2d
 import org.wpilib.units.Units
 import org.wpilib.units.Units.Rotations
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.Distance
-import kotlin.jvm.optionals.getOrDefault
 
 fun Pose2d.moveBack(distance: Distance): Pose2d =
     this + Transform2d(-distance, Units.Meters.zero(), Rotation2d.ZERO)
@@ -22,7 +22,8 @@ fun Pose2d.moveTowards(target: Pose2d, distance: Distance): Pose2d {
         .withRotation(this.rotation)
 }
 
-fun Translation2d.getAngleOrDefault(): Rotation2d = angle.getOrDefault(Rotation2d.ZERO)
+fun Translation2d.getAngleOrDefault(): Rotation2d =
+    angle.getOrDefault(Rotation2d.ZERO)
 
 fun Translation2d.getRotationToTranslation(other: Translation2d): Rotation2d =
     (this - other).angle.getOrDefault(Rotation2d.ZERO)

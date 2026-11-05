@@ -4,27 +4,10 @@ import frc.robot.drive
 import frc.robot.lib.IS_RED
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.logTrigger
-import frc.robot.subsystems.turret.turretTranslation
 import org.wpilib.command3.Trigger
 import org.wpilib.units.measure.Angle
 
 const val FIELD_LOGGING_PATH = "Field"
-
-val inClimbRectangle =
-    Trigger {
-            CLIMB_RECTANGLE.contains(turretTranslation)
-        }
-        .logTrigger("$FIELD_LOGGING_PATH/inClimbRectangle")
-
-val inAllianceZone =
-    Trigger { ALLIANCE_ZONE.contains(turretTranslation) }
-        .and(inClimbRectangle.negate())
-        .logTrigger("$FIELD_LOGGING_PATH/inAllianceZone")
-
-val inExtendedAllianceZone =
-    Trigger { EXTENDED_ALLIANCE_ZONE.contains(turretTranslation) }
-        .and(inClimbRectangle.negate())
-        .logTrigger("$FIELD_LOGGING_PATH/inExtendedAllianceZone")
 
 val isCloserToDepotSide: Trigger =
     Trigger { OUTPOST_CROSS_LINE_RECTANGLE.contains(drive.pose.translation) }

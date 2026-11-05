@@ -15,7 +15,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader
 import org.littletonrobotics.junction.wpilog.WPILOGWriter
 import org.wpilib.command3.Command
 import org.wpilib.command3.Scheduler
-import org.wpilib.driverstation.internal.DriverStationBackend
 import org.wpilib.hardware.power.PowerDistribution
 import org.wpilib.math.linalg.VecBuilder
 import org.wpilib.system.Timer
@@ -82,7 +81,6 @@ class Robot : LoggedRobot() {
         enableAutoLogOutputFor(this)
 
         LoggedOutputManager
-
 
         // TODO: Update when PathPlanner works with CommandsV3
         //        Scheduler.getDefault()

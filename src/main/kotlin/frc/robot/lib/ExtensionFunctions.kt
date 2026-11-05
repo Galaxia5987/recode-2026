@@ -3,9 +3,6 @@ package frc.robot.lib
 import frc.robot.lib.extensions.deg
 import kotlin.math.*
 import org.littletonrobotics.junction.LogTable
-import org.wpilib.command3.Command
-import org.wpilib.command3.button.CommandGamepad
-import org.wpilib.driverstation.GenericHID
 import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.geometry.Translation2d
