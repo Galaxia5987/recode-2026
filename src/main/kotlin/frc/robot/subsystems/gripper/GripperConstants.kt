@@ -34,5 +34,4 @@ val LOG_CONFIG =
         velocity = false,
         absoluteEncoder = false,
         voltage = true,
-        controlRequest = true,
     )

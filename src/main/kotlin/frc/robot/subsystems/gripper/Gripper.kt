@@ -15,10 +15,8 @@ object Gripper : Mechanism() {
             canbus = systemcore(0),
             config = CONFIG,
             simGains = SIM_GAINS,
-            logConfig = LOG_CONFIG,
         )
     private val voltageOut = VoltageOut(0.0)
-
     private fun setVoltage(voltage: Voltage): UnnamedCommand = this {
         motor.setControl(voltageOut.withOutput(voltage))
     }
@@ -28,8 +26,6 @@ object Gripper : Mechanism() {
     }
 
     fun intake() = setVoltage(INTAKE)
-
     fun outtake() = setVoltage(OUTAKE)
-
     fun stop() = setVoltage(STOP)
 }
