@@ -2,9 +2,6 @@ package frc.robot
 
 import frc.robot.RobotContainer.Buttons.intakeButton
 import frc.robot.RobotContainer.Buttons.outtakeButton
-import frc.robot.autonomous.digonal
-import frc.robot.autonomous.line
-import frc.robot.autonomous.linewith180
 import frc.robot.lib.AutoChooser
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.Mode
@@ -110,9 +107,6 @@ object RobotContainer {
 
     private fun registerAutoCommands() {
         autoChooser.addCmd("Empty", ::emptyCommand)
-        autoChooser.addCmd("Line.trag", ::line)
-        autoChooser.addCmd("Linewith180.trag", ::linewith180)
-        autoChooser.addCmd("Digonal.trag", ::digonal)
         // SysIds
         autoChooser.addCmd(
             "Drive Wheel Radius Characterization",

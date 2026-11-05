@@ -15,7 +15,6 @@ package frc.robot.subsystems.drive;
 
 import static org.wpilib.units.Units.*;
 
-import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.CANBus;
 import frc.robot.ConstantsKt;
 import frc.robot.lib.BetterPoseEstimator;
@@ -205,15 +204,15 @@ public class Drive implements Mechanism {
         private final PIDController yController = new TuneablePIDController("yController" ,10.0,0 , 0);
         private final PIDController headingController = new TuneablePIDController("headingController" , 7.5,0, 0 );
 
-        public void followTrajectory(SwerveSample sample){
-            Logger.recordOutput("Odometry/TrajectorySetpoint", sample.getPose());
-            ChassisVelocities velocities = new ChassisVelocities(
-                    sample.vx + xController.calculate(getPose().getX() , sample.x),
-                    sample.vy + yController.calculate(getPose().getY() , sample.y),
-                    sample.omega + headingController.calculate(getRotation().getRadians(), sample.heading)
-            );
-            runVelocity(velocities.toRobotRelative(getRotation()));
-        }
+//        public void followTrajectory(SwerveSample sample){
+//            Logger.recordOutput("Odometry/TrajectorySetpoint", sample.getPose());
+//            ChassisVelocities velocities = new ChassisVelocities(
+//                    sample.vx + xController.calculate(getPose().getX() , sample.x),
+//                    sample.vy + yController.calculate(getPose().getY() , sample.y),
+//                    sample.omega + headingController.calculate(getRotation().getRadians(), sample.heading)
+//            );
+//            runVelocity(velocities.toRobotRelative(getRotation()));
+//        }
 
 
     public void periodic() {

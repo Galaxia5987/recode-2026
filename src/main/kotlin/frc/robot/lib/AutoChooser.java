@@ -4,7 +4,6 @@ package frc.robot.lib;
 
 import static org.wpilib.util.Alert.Level.HIGH;
 
-import choreo.util.ChoreoAlert;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -28,8 +27,6 @@ import org.wpilib.util.Alert;
  */
 public class AutoChooser implements ComplexTunable {
     private final String DO_NOTHING_NAME;
-    private static final Alert selectedNonexistentAuto =
-            ChoreoAlert.alert("Selected an auto that isn't an option", HIGH);
 
     private final HashMap<String, Supplier<Command>> autoRoutines = new HashMap<>();
 
@@ -90,9 +87,7 @@ public class AutoChooser implements ComplexTunable {
         if (dsValid || force) {
             if (!autoRoutines.containsKey(selected) && !selected.equals(DO_NOTHING_NAME)) {
                 selected = DO_NOTHING_NAME;
-                selectedNonexistentAuto.set(true);
             } else {
-                selectedNonexistentAuto.set(false);
             }
             allianceAtGeneration = MatchState.getAlliance();
             nameAtGeneration = selected;
