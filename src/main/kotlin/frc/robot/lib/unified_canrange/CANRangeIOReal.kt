@@ -3,10 +3,11 @@ package frc.robot.lib.unified_canrange
 import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.configs.CANrangeConfiguration
 import com.ctre.phoenix6.hardware.CANrange
+import org.wpilib.hardware.bus.CANPort
 
 class CANRangeIOReal(
     private val port: Int,
-    private val canbus: CANBus = CANBus("rio"),
+    private val canbus: CANBus = CANBus(CANPort.CAN_S0),
     configuration: CANrangeConfiguration,
     private val loggingConfig: UnifiedCANRangeLogging,
 ) : CANRangeIO {

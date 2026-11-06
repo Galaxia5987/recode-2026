@@ -64,7 +64,7 @@ import org.wpilib.util.Alert;
 public class Drive implements Mechanism {
     // TunerConstants doesn't include these constants, so they are declared locally
     public static final double ODOMETRY_FREQUENCY =
-            new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
+            TunerConstants.DrivetrainConstants.Network.isNetworkFD() ? 250.0 : 100.0;
     public static final double DRIVE_BASE_RADIUS =
             Math.max(
                     Math.max(

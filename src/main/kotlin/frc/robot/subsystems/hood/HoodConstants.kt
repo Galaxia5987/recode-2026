@@ -1,6 +1,6 @@
 package frc.robot.subsystems.hood
 
-import com.ctre.phoenix6.CANBus.systemcore
+import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.configs.CANcoderConfiguration
 import com.ctre.phoenix6.configs.FeedbackConfigs
 import com.ctre.phoenix6.configs.MotorOutputConfigs
@@ -14,9 +14,10 @@ import frc.robot.lib.Gains
 import frc.robot.lib.createCurrentLimits
 import frc.robot.lib.extensions.amps
 import frc.robot.lib.extensions.deg
+import org.wpilib.hardware.bus.CANPort
 
 const val PORT = 0
-val CANBUS = systemcore(0)
+val CANBUS = CANBus(CANPort.CAN_S0)
 
 val SIM_GAINS = Gains(kP = 1.43, kD = 0.36)
 val REAL_GAINS = Gains(kP = 1.0)

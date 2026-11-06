@@ -1,6 +1,6 @@
 package frc.robot.subsystems.turret
 
-import com.ctre.phoenix6.CANBus.systemcore
+import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.controls.PositionVoltage
 import com.ctre.phoenix6.hardware.CANcoder
 import frc.robot.lib.commands.addPeriodic
@@ -12,10 +12,11 @@ import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
+import org.wpilib.hardware.bus.CANPort
 import org.wpilib.units.measure.Angle
 
 object Turret : Mechanism {
-    private val absoluteEncoder = CANcoder(ENCODER_ID, systemcore(3))
+    private val absoluteEncoder = CANcoder(ENCODER_ID, CANBus(CANPort.CAN_S0))
     private val motor: UniversalTalonFX =
         UniversalTalonFX(
             port = PORT,

@@ -1,6 +1,6 @@
 package frc.robot.subsystems.shooter.flywheel
 
-import com.ctre.phoenix6.CANBus.systemcore
+import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.VelocityVoltage
 import com.ctre.phoenix6.controls.VoltageOut
@@ -12,11 +12,12 @@ import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
+import org.wpilib.hardware.bus.CANPort
 
 object Flywheel : Mechanism {
     val mainMotor =
         UniversalTalonFX(
-            canbus = systemcore(0),
+            canbus = CANBus(CANPort.CAN_S0),
             port = MAIN_MOTOR_PORT,
             config = MOTOR_CONFIG,
             gearRatio = GEAR_RATIO,
@@ -25,7 +26,7 @@ object Flywheel : Mechanism {
 
     val auxMotor1 =
         UniversalTalonFX(
-            canbus = systemcore(0),
+            canbus = CANBus(CANPort.CAN_S0),
             port = FIRST_AUX_MOTOR_PORT,
             config = MOTOR_CONFIG,
             gearRatio = GEAR_RATIO,
@@ -33,7 +34,7 @@ object Flywheel : Mechanism {
         )
     val auxMotor2 =
         UniversalTalonFX(
-            canbus = systemcore(0),
+            canbus = CANBus(CANPort.CAN_S0),
             port = SECOND_AUX_MOTOR_PORT,
             config = MOTOR_CONFIG,
             gearRatio = GEAR_RATIO,

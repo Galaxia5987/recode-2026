@@ -12,6 +12,7 @@ import frc.robot.lib.extensions.m
 import frc.robot.lib.getFileNameFromStack
 import frc.robot.lib.unit_test.allMotorsFromPorts
 import org.littletonrobotics.junction.Logger
+import org.wpilib.hardware.bus.CANPort
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.Distance
 import org.wpilib.units.measure.MomentOfInertia
@@ -35,7 +36,7 @@ import org.wpilib.units.measure.MomentOfInertia
  */
 class UniversalTalonFX(
     val port: Int,
-    private val canbus: CANBus = CANBus("rio"),
+    private val canbus: CANBus = CANBus(CANPort.CAN_S0),
     private val subsystem: String = getFileNameFromStack(),
     private val motorName: String = "motorId $port",
     private val config: TalonFXConfiguration = TalonFXConfiguration(),

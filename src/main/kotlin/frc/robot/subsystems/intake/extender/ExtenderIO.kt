@@ -1,6 +1,6 @@
 package frc.robot.subsystems.intake.extender
 
-import com.ctre.phoenix6.CANBus.systemcore
+import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.controls.ControlRequest
 import frc.robot.lib.createDisableTriggerForCoast
 import frc.robot.lib.extensions.deg
@@ -8,6 +8,7 @@ import frc.robot.lib.extensions.deg_ps
 import frc.robot.lib.universal_motor.LoggedMotorInputs
 import frc.robot.lib.universal_motor.MotorLogConfig
 import frc.robot.lib.universal_motor.UniversalTalonFX
+import org.wpilib.hardware.bus.CANPort
 
 interface ExtenderIO {
     val inputs: LoggedMotorInputs
@@ -22,7 +23,7 @@ open class ExtenderIOReal : ExtenderIO {
     protected val motor =
         UniversalTalonFX(
             port = PORT,
-            canbus = systemcore(0),
+            canbus = CANBus(CANPort.CAN_S0),
             config = CONFIG,
             simGains = SIM_GAINS,
             gearRatio = GEAR_RATIO,

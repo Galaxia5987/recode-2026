@@ -1,6 +1,6 @@
 package frc.robot.subsystems.spindexer
 
-import com.ctre.phoenix6.CANBus.systemcore
+import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.controls.VelocityVoltage
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.commands.invoke
@@ -10,11 +10,12 @@ import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
 import org.wpilib.command3.Trigger
+import org.wpilib.hardware.bus.CANPort
 
 object Spindexer : Mechanism, SpindexerVelocitiesCommandFactory {
     private val motor =
         UniversalTalonFX(
-            canbus = systemcore(0),
+            canbus = CANBus(CANPort.CAN_S0),
             port = PORT,
             config = MOTOR_CONFIG,
             simGains = SIM_GAINS,

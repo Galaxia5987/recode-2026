@@ -6,6 +6,7 @@ import frc.robot.CURRENT_MODE
 import frc.robot.lib.Mode
 import frc.robot.lib.getFileNameFromStack
 import org.littletonrobotics.junction.Logger
+import org.wpilib.hardware.bus.CANPort
 
 data class UnifiedCANRangeLogging(
     val distance: Boolean = true,
@@ -15,7 +16,7 @@ data class UnifiedCANRangeLogging(
 
 class UnifiedCANRange(
     private val port: Int,
-    private val canbus: CANBus = CANBus("rio"),
+    private val canbus: CANBus = CANBus(CANPort.CAN_S0),
     private val subsystemName: String = getFileNameFromStack(),
     private val sensorName: String = "CANRangeId $port",
     configuration: CANrangeConfiguration,

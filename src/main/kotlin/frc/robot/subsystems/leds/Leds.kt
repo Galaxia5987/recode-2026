@@ -1,6 +1,6 @@
 package frc.robot.subsystems.leds
 
-import com.ctre.phoenix6.CANBus.systemcore
+import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.controls.LarsonAnimation
 import com.ctre.phoenix6.controls.RainbowAnimation
 import com.ctre.phoenix6.hardware.CANdle
@@ -8,6 +8,7 @@ import com.ctre.phoenix6.signals.RGBWColor
 import frc.robot.lib.commands.addPeriodic
 import org.wpilib.command3.Mechanism
 import org.wpilib.driverstation.RobotState
+import org.wpilib.hardware.bus.CANPort
 
 private const val startIndex = 8
 private const val endIndex = 73
@@ -19,7 +20,7 @@ object Leds : Mechanism {
         addPeriodic(::periodic)
     }
 
-    private val candle = CANdle(39, systemcore(0))
+    private val candle = CANdle(39, CANBus(CANPort.CAN_S0))
     private val rainbowRequest = RainbowAnimation(startIndex, endIndex)
     private val chaseRequest = LarsonAnimation(startIndex, endIndex).withSize(5)
 

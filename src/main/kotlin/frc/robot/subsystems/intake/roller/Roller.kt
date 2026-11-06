@@ -1,6 +1,6 @@
 package frc.robot.subsystems.intake.roller
 
-import com.ctre.phoenix6.CANBus.systemcore
+import com.ctre.phoenix6.CANBus
 import com.ctre.phoenix6.controls.Follower
 import com.ctre.phoenix6.controls.VoltageOut
 import com.ctre.phoenix6.signals.MotorAlignmentValue
@@ -11,19 +11,20 @@ import frc.robot.lib.extensions.volts
 import frc.robot.lib.universal_motor.UniversalTalonFX
 import org.wpilib.command3.Command
 import org.wpilib.command3.Mechanism
+import org.wpilib.hardware.bus.CANPort
 import org.wpilib.units.measure.Voltage
 
 object Roller : Mechanism {
     private val mainMotor =
         UniversalTalonFX(
-            canbus = systemcore(0),
+            canbus = CANBus(CANPort.CAN_S0),
             port = MAIN_MOTOR_PORT,
             config = MOTOR_CONFIG,
             logConfig = MOTOR_LOG_CONFIG,
         )
     private val auxMotor =
         UniversalTalonFX(
-            canbus = systemcore(0),
+            canbus = CANBus(CANPort.CAN_S0),
             port = AUX_MOTOR_PORT,
             config = MOTOR_CONFIG,
             logConfig = MOTOR_LOG_CONFIG,
