@@ -66,8 +66,7 @@ val LEFT_CONFIG =
         stddevFactor = 1.0,
     )
 
-val OV_NAME_TO_CONFIG =
-    mapOf<String, CameraConfig>("front" to FRONT_CONFIG)
+val OV_NAME_TO_CONFIG = mapOf<String, CameraConfig>("front" to FRONT_CONFIG)
 
 // Basic filtering thresholds
 const val MAX_AMBIGUITY = 0.2
