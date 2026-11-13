@@ -47,6 +47,8 @@ object Turret : Mechanism {
             }
             .named("Subsystem/Turret/setAngle")
 
+
+
     fun constraintTurretLimit(angle: Angle): Angle {
         if (angle < REVERSE_LIMIT) return 1.rot + angle
         return angle
@@ -61,5 +63,7 @@ object Turret : Mechanism {
         motor.periodic()
         Logger.recordOutput("Subsystems/Turret/setpoint", setpoint)
         Logger.recordOutput("Subsystems/Turret/atSetpoint", atSetpoint)
+        Turret.defaultCommand = setAngle( setpoint)
+
     }
 }
