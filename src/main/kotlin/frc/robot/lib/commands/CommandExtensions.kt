@@ -7,6 +7,10 @@ import org.wpilib.command3.NeedsNameBuilderStage
 import org.wpilib.command3.Scheduler
 import org.wpilib.command3.Trigger
 
+interface Cancellable {
+    fun onCancel()
+}
+
 /**
  * A typealias for a command that hasn't finished it's building. This command
  * cannot be scheduled and `.named` must be called.
@@ -36,6 +40,10 @@ inline operator fun Mechanism.invoke(
 ): UnnamedCommand {
     return this.run { coroutine ->
         coroutine.block()
+    }.apply {
+        if(this is Cancellable) {
+            whenCanceled { onCancel() }
+        }
     }
 }
 
