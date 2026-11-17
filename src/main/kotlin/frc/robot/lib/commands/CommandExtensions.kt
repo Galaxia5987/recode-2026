@@ -39,12 +39,13 @@ inline operator fun Mechanism.invoke(
     crossinline block: Coroutine.() -> Unit
 ): UnnamedCommand {
     return this.run { coroutine ->
-        coroutine.block()
-    }.apply {
-        if(this is Cancellable) {
-            whenCanceled { onCancel() }
+            coroutine.block()
         }
-    }
+        .apply {
+            if (this@invoke is Cancellable) {
+                whenCanceled { onCancel() }
+            }
+        }
 }
 
 context(coroutine: Coroutine)
