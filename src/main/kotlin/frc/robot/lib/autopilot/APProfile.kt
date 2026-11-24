@@ -3,8 +3,8 @@
 
 package frc.robot.lib.autopilot
 
-import org.wpilib.units.Units.Meters
-import org.wpilib.units.Units.Rotations
+import frc.robot.lib.extensions.m
+import frc.robot.lib.extensions.rot
 import org.wpilib.units.measure.Angle
 import org.wpilib.units.measure.Distance
 
@@ -23,7 +23,7 @@ import org.wpilib.units.measure.Distance
  */
 data class APProfile(
     val constraints: APConstraints,
-    val errorXY: Distance = Meters.of(0.0),
-    val errorTheta: Angle = Rotations.of(0.0),
-    val beelineRadius: Distance = Meters.of(0.0),
+    val errorXY: Distance = 0.m,
+    val errorTheta: Angle = 0.rot,
+    val beelineRadius: Distance = 0.m,
 )

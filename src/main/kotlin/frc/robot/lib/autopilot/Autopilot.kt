@@ -4,6 +4,11 @@
 package frc.robot.lib.autopilot
 
 import frc.robot.lib.extensions.get
+import frc.robot.lib.extensions.getAngleOrDefault
+import frc.robot.lib.extensions.m
+import frc.robot.lib.extensions.mps
+import frc.robot.lib.extensions.rad
+import frc.robot.lib.toTranslation2d
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.ln
@@ -11,9 +16,6 @@ import org.wpilib.math.geometry.Pose2d
 import org.wpilib.math.geometry.Rotation2d
 import org.wpilib.math.geometry.Translation2d
 import org.wpilib.math.kinematics.ChassisVelocities
-import org.wpilib.units.Units.Meters
-import org.wpilib.units.Units.MetersPerSecond
-import org.wpilib.units.Units.Radians
 import org.wpilib.units.measure.LinearVelocity
 
 /**
@@ -47,21 +49,16 @@ class Autopilot(private val profile: APProfile) {
             )
 
         if (offset == Translation2d.ZERO) {
-            return APResult(
-                MetersPerSecond.zero(),
-                MetersPerSecond.zero(),
-                target.reference.rotation,
-            )
+            return APResult(0.mps, 0.mps, target.reference.rotation)
         }
 
         val fieldRelativeSpeeds =
-            Translation2d(robotRelativeSpeeds.vx, robotRelativeSpeeds.vy)
-                .rotateBy(current.rotation)
+            robotRelativeSpeeds.toTranslation2d().rotateBy(current.rotation)
 
         val initial = toTargetCoordinateFrame(fieldRelativeSpeeds, target)
         val disp = offset.norm
         val goal =
-            if (target.entryAngle == null || disp < profile.beelineRadius[Meters]) {
+            if (target.entryAngle == null || disp < profile.beelineRadius[m]) {
                 val towardsTarget = offset / disp
                 towardsTarget *
                     (profile.constraints.calculateMaxVelocity(disp) +
@@ -71,11 +68,7 @@ class Autopilot(private val profile: APProfile) {
             }
         val velocity = toGlobalCoordinateFrame(correct(initial, goal), target)
         val rotation = getRotationTarget(current.rotation, target, disp)
-        return APResult(
-            MetersPerSecond.of(velocity.x),
-            MetersPerSecond.of(velocity.y),
-            rotation,
-        )
+        return APResult(velocity.x.mps, velocity.y.mps, rotation)
     }
 
     /**
@@ -101,9 +94,7 @@ class Autopilot(private val profile: APProfile) {
      * @param goal The goal translation to drive to
      */
     private fun correct(initial: Translation2d, goal: Translation2d): Translation2d {
-        val angleOffset =
-            if (goal != Translation2d.ZERO) Rotation2d(goal.x, goal.y)
-            else Rotation2d.ZERO
+        val angleOffset = goal.getAngleOrDefault()
         val adjustedGoal = goal.rotateBy(-angleOffset)
         val adjustedInitial = initial.rotateBy(-angleOffset)
         val initialI = adjustedInitial.x
@@ -140,7 +131,7 @@ class Autopilot(private val profile: APProfile) {
         target: APTarget,
     ): Translation2d {
         val disp = offset.norm
-        val theta = Rotation2d(offset.x, offset.y)
+        val theta = offset.getAngleOrDefault()
         val rads = theta.radians
         val dist = calculateSwirlyLength(rads, disp)
         val vx = theta.cos - rads * theta.sin
@@ -181,7 +172,7 @@ class Autopilot(private val profile: APProfile) {
         target: APTarget,
         dist: Double,
     ): Rotation2d {
-        val radius = target.rotationRadius?.get(Meters)
+        val radius = target.rotationRadius?.get(m)
         return if (radius == null || radius > dist) target.reference.rotation
         else current
     }
@@ -197,10 +188,10 @@ class Autopilot(private val profile: APProfile) {
         val goal = target.reference
         val okXY =
             hypot(current.x - goal.x, current.y - goal.y) <=
-                profile.errorXY[Meters]
+                profile.errorXY[m]
         val okTheta =
             abs((current.rotation - goal.rotation).radians) <=
-                profile.errorTheta[Radians]
+                profile.errorTheta[rad]
         return okXY && okTheta
     }
 
