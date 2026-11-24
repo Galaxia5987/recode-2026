@@ -39,3 +39,21 @@ enum class ShooterState {
     }
 }
 ```
+
+## Enter and exit callbacks
+
+```kotlin
+SHOOT onEnter { leds.flash() }
+
+// Runs on every transition out of SHOOT and when the whole machine is
+// cancelled, so it is the right place to stop motors the state started.
+SHOOT onExit { feeder.stop() }
+```
+
+`onStateChange { }` can be called more than once; every callback runs.
+
+## Forcing a transition
+
+`stateMachine.forceTransition(IDLE)` leaves the current state on the next loop,
+running its exit callbacks and then the target's enter callbacks. It does
+nothing while the machine is not scheduled.

@@ -26,54 +26,98 @@ class StateMachine<E : Enum<E>>(
 
     private val stateMap = mutableMapOf<E, State>()
     private var initialState: State? = null
-    private var stateChangeCallback: (newState: E) -> Unit = {}
+    private val stateChangeCallbacks = mutableListOf<(newState: E) -> Unit>()
+
+    /** The state that is currently running, or null while not scheduled. */
+    private var activeState: State? = null
+
+    /** Set by [forceTransition], consumed on the next loop iteration. */
+    private var forcedState: State? = null
+
+    /** True from the start of [run] until the machine is cancelled. */
+    private var running = false
+
+    /** The state marked with [initial], or null if none was marked yet. */
+    val initialStateValue: E?
+        get() = initialState?.enumVal
 
     override fun name(): String = name
 
     override fun requirements(): Set<Mechanism> = emptySet()
 
     override fun run(coroutine: Coroutine) {
-        var currentState =
+        var state =
             initialState
                 ?: error(
                     "$name does not have an initial state. Use .initial() to provide one."
                 )
+        forcedState = null
+        running = true
 
-        outer_loop@ while (true) {
-            val currentCommand = currentState.command
-            coroutine.fork(currentCommand)
-            currentState.runEnterCallbacks()
-            var didYield = false
-
-            while (true) {
-                for (transition in currentState.transitions) {
-                    if (transition.shouldTransition()) {
-                        currentState.runExitCallbacks()
-                        coroutine.scheduler().cancel(currentCommand)
-
-                        val nextState = transition.nextState()
-                        currentState = nextState ?: initialState!!
-                        // Return control to the scheduler even when transitions
-                        // form a cycle.
-                        coroutine.yield()
-                        continue@outer_loop
-                    }
-                }
-
-                if (!coroutine.scheduler().isRunning(currentCommand)) {
-                    val next = currentState.nextState()
-                    if (next != null) {
-                        currentState.runExitCallbacks()
-                        currentState = next
-                        if (!didYield) coroutine.yield()
-                        continue@outer_loop
-                    }
-                }
-
-                coroutine.yield()
-                didYield = true
-            }
+        while (true) {
+            enter(state, coroutine)
+            val next = awaitNextState(state, coroutine)
+            exit(state, coroutine)
+            // Always hand control back to the scheduler between states, so a
+            // cycle of states that finish instantly cannot stall the robot
+            // loop.
+            coroutine.yield()
+            // A forced transition requested during the yield takes precedence.
+            state = forcedState?.also { forcedState = null } ?: next
         }
+    }
+
+    private fun enter(state: State, coroutine: Coroutine) {
+        activeState = state
+        coroutine.fork(state.command)
+        state.enterCallbacks.forEach { it.run() }
+    }
+
+    private fun exit(state: State, coroutine: Coroutine) {
+        state.exitCallbacks.forEach { it.run() }
+        coroutine.scheduler().cancel(state.command)
+        activeState = null
+    }
+
+    /** Blocks until the current state should be left, and returns the next. */
+    private fun awaitNextState(state: State, coroutine: Coroutine): State {
+        while (true) {
+            forcedState?.let {
+                forcedState = null
+                return it
+            }
+
+            state.transitions
+                .firstOrNull { it.shouldTransition() }
+                ?.let {
+                    return it.target()
+                }
+
+            if (!coroutine.scheduler().isRunning(state.command)) {
+                state.nextStateOnComplete()?.let {
+                    return it
+                }
+            }
+
+            coroutine.yield()
+        }
+    }
+
+    // Exit callbacks often stop motors, so they must also run when the whole
+    // machine is cancelled, not only on transitions.
+    override fun onCancel() {
+        activeState?.exitCallbacks?.forEach { it.run() }
+        activeState = null
+        forcedState = null
+        running = false
+    }
+
+    /**
+     * Leaves the current state and enters [target] on the next loop, running
+     * the usual exit and enter callbacks. Has no effect while not scheduled.
+     */
+    fun forceTransition(target: E) {
+        if (running) forcedState = getState(target)
     }
 
     // --------------------------------------------------------
@@ -81,33 +125,20 @@ class StateMachine<E : Enum<E>>(
     // --------------------------------------------------------
 
     inner class State(val enumVal: E, val command: Command) {
-        val completions = mutableListOf<Completion>()
-        var defaultNextState: (() -> State?)? = null
         val transitions = mutableListOf<Transition>()
+        val completions = mutableListOf<Transition>()
+        var defaultNextState: (() -> State)? = null
         val enterCallbacks = mutableListOf<Runnable>()
         val exitCallbacks = mutableListOf<Runnable>()
 
-        fun addTransition(transition: Transition) {
-            transitions.add(transition)
-        }
-
-        fun addCompletion(condition: BooleanSupplier, next: () -> State?) {
+        fun addCompletion(condition: BooleanSupplier, next: () -> State) {
             completions.removeIf { it.condition === condition }
-            completions.add(Completion(next, condition))
+            completions.add(Transition(next, condition))
         }
 
-        fun nextState(): State? {
-            for (completion in completions) {
-                if (completion.shouldTransition()) {
-                    return completion.nextState()
-                }
-            }
-            return defaultNextState?.invoke()
-        }
-
-        fun runEnterCallbacks() = enterCallbacks.forEach { it.run() }
-
-        fun runExitCallbacks() = exitCallbacks.forEach { it.run() }
+        fun nextStateOnComplete(): State? =
+            completions.firstOrNull { it.shouldTransition() }?.target()
+                ?: defaultNextState?.invoke()
 
         fun onEnter(callback: Runnable) {
             enterCallbacks.add(callback)
@@ -118,50 +149,38 @@ class StateMachine<E : Enum<E>>(
         }
     }
 
-    inner class Completion(
-        private val nextSupplier: () -> State?,
+    inner class Transition(
+        val target: () -> State,
         val condition: BooleanSupplier,
     ) {
         fun shouldTransition(): Boolean = condition.asBoolean
-
-        fun nextState(): State? = nextSupplier()
-    }
-
-    inner class Transition(
-        private val nextSupplier: () -> State?,
-        private val condition: BooleanSupplier,
-    ) {
-
-        fun shouldTransition(): Boolean = condition.asBoolean
-
-        fun nextState(): State? = nextSupplier()
     }
 
     // --------------------------------------------------------
     // Kotlin DSL
     // --------------------------------------------------------
 
+    /** Adds a callback that runs every time a state is entered. */
     fun onStateChange(callback: (newState: E) -> Unit) {
-        stateChangeCallback = callback
+        stateChangeCallbacks.add(callback)
     }
-
-    inline fun <reified S : Enum<S>> allOf(): List<S> = enumValues<S>().toList()
 
     operator fun E.invoke(command: Command): E {
         require(!stateMap.containsKey(this)) {
             "State $this is already defined."
         }
 
-        val state = State(this, command)
+        val stateEnum = this
+        val state = State(stateEnum, command)
         if (log) {
-            val logPath = "States/${this::class.simpleName}/state"
-            state.onEnter {
-                Logger.recordOutput(logPath, name)
-            }
+            // Keyed by machine name, so two machines sharing an enum don't
+            // overwrite each other's log entry.
+            val logPath = "States/${this@StateMachine.name}/state"
+            state.onEnter { Logger.recordOutput(logPath, stateEnum.name) }
         }
-        state.onEnter { stateChangeCallback(this) }
-        stateMap[this] = state
-        return this
+        state.onEnter { stateChangeCallbacks.forEach { it(stateEnum) } }
+        stateMap[stateEnum] = state
+        return stateEnum
     }
 
     operator fun E.invoke(block: Coroutine.() -> Unit): E {
@@ -172,6 +191,15 @@ class StateMachine<E : Enum<E>>(
     fun E.initial() {
         initialState = getState(this)
     }
+
+    /** Runs [callback] every time this state is entered. */
+    infix fun E.onEnter(callback: () -> Unit) = getState(this).onEnter(callback)
+
+    /**
+     * Runs [callback] every time this state is left, including when the whole
+     * machine is cancelled. Use it to stop anything the state started.
+     */
+    infix fun E.onExit(callback: () -> Unit) = getState(this).onExit(callback)
 
     private fun getState(enumVal: E): State {
         return stateMap[enumVal]
@@ -215,12 +243,12 @@ class StateMachine<E : Enum<E>>(
         val targetSupplier = { getState(target) }
 
         when (transitionType) {
-            TransitionType.ON -> {
-                sourceState.addTransition(Transition(targetSupplier, condition))
-            }
-            TransitionType.COMPLETE_AND -> {
+            TransitionType.ON ->
+                sourceState.transitions.add(
+                    Transition(targetSupplier, condition)
+                )
+            TransitionType.COMPLETE_AND ->
                 sourceState.addCompletion(condition, targetSupplier)
-            }
         }
     }
 
@@ -234,7 +262,8 @@ class StateMachine<E : Enum<E>>(
         val targetSupplier = { getState(target) }
         this.sources.forEach { sourceEnum ->
             getState(sourceEnum)
-                .addTransition(Transition(targetSupplier, condition))
+                .transitions
+                .add(Transition(targetSupplier, condition))
         }
     }
 
@@ -259,11 +288,22 @@ fun <E : Enum<E>> buildStateMachine(
     return StateMachine<E>(name).apply(init)
 }
 
-@RequiresOptIn annotation class Unsafe
+abstract class StateMachineCompanion<T : Enum<T>>(
+    private val stateClass: KClass<T>
+) {
+    private var currentState: T? = null
 
-abstract class StateMachineCompanion<T : Enum<T>>(stateClass: KClass<T>) {
-    var state: T = stateClass.java.enumConstants.first()
-        private set
+    /**
+     * The state the machine is in, or its initial state before it has been
+     * registered.
+     */
+    val state: T
+        get() =
+            currentState
+                ?: stateMachine.initialStateValue
+                ?: error(
+                    "${stateClass.simpleName} does not have an initial state."
+                )
 
     protected abstract val states: StateMachine<T>.() -> Unit
 
@@ -273,15 +313,17 @@ abstract class StateMachineCompanion<T : Enum<T>>(stateClass: KClass<T>) {
 
     fun trigger(state: T) = Trigger { state == this.state }
 
-    @Unsafe
-    fun set(state: T) {
-        this.state = state
-    }
+    /**
+     * Moves the running machine to [state]; see [StateMachine.forceTransition].
+     */
+    fun forceTransition(state: T) = stateMachine.forceTransition(state)
 
-    private val stateMachine by lazy {
+    val stateMachine by lazy {
         buildStateMachine<T>(stateClass.simpleName!!) {
+            // Registered first so `state` is already updated when user
+            // onStateChange callbacks run.
+            onStateChange { currentState = it }
             states()
-            onStateChange { state = it }
         }
     }
 
