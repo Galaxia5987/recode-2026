@@ -33,23 +33,6 @@ data class APConstraints(
     /** Velocity at cutoff distance */
     private val v0 = jerkConstrainedVelocity(x0)
 
-    /** Returns a copy of this object with the given max velocity, in m/s. */
-    fun withVelocity(newVelocity: Double) = copy(velocity = newVelocity)
-
-    /**
-     * Returns a copy of this object with the given acceleration, in m/s^2. Autopilot's acceleration
-     * is used at the beginning and end of an action.
-     */
-    fun withAcceleration(newAcceleration: Double) =
-        copy(acceleration = newAcceleration)
-
-    /**
-     * Returns a copy of this object with the given max jerk, in m/s^3. Higher values mean a faster
-     * deceleration. Autopilot's jerk is used at the end of an action (not relevant to Autopilot's
-     * start behavior).
-     */
-    fun withJerk(newJerk: Double) = copy(jerk = newJerk)
-
     /**
      * Determines the maximum velocity required to travel the given distance and end at 0 m/s.
      *

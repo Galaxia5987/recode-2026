@@ -27,7 +27,7 @@ import org.wpilib.units.measure.AngularVelocity
 import org.wpilib.units.measure.Distance
 import org.wpilib.units.measure.LinearVelocity
 
-private val kConstraints = APConstraints().withAcceleration(5.5).withJerk(300.0)
+private val kConstraints = APConstraints(acceleration = 5.5, jerk = 300.0)
 
 class AngleUnwrapper {
     private var last: Double? = null
@@ -52,10 +52,12 @@ class AngleUnwrapper {
 private val setpointUnwrapper = AngleUnwrapper()
 
 private val kProfile =
-    APProfile(kConstraints)
-        .withErrorXY(1.cm)
-        .withErrorTheta(1.deg)
-        .withBeelineRadius(8.cm)
+    APProfile(
+        kConstraints,
+        errorXY = 1.cm,
+        errorTheta = 1.deg,
+        beelineRadius = 8.cm,
+    )
 
 private val autopilot = Autopilot(kProfile)
 
@@ -71,9 +73,6 @@ private fun Autopilot.APResult.toChassisVelocities(
         omegaResult,
     )
 
-private inline fun <T, V> T.applyIfNotNull(value: V?, block: T.(V) -> T): T =
-    if (value != null) block(value) else this
-
 fun runToPose(
     targetSupplier: () -> Pose2d,
     entryAngle: Rotation2d? = null,
@@ -81,10 +80,12 @@ fun runToPose(
     rotationRadius: Distance? = null,
 ): UnnamedCommand = drive {
     val apTarget = {
-        APTarget(targetSupplier())
-            .applyIfNotNull(entryAngle) { withEntryAngle(it) }
-            .applyIfNotNull(endVelocity) { withVelocity(it[mps]) }
-            .applyIfNotNull(rotationRadius) { withRotationRadius(it) }
+        APTarget(
+            reference = targetSupplier(),
+            entryAngle = entryAngle,
+            velocity = endVelocity?.get(mps) ?: 0.0,
+            rotationRadius = rotationRadius,
+        )
     }
     anglePIDController
         .update() // Update gains from network at the start of execution

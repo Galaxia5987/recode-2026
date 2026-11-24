@@ -21,31 +21,9 @@ import org.wpilib.units.measure.Distance
  *
  * Tolerated error and beeline radius default to zero.
  */
-class APProfile(
-    var constraints: APConstraints,
-    var errorXY: Distance = Meters.of(0.0),
-    var errorTheta: Angle = Rotations.of(0.0),
-    var beelineRadius: Distance = Meters.of(0.0),
-) {
-    /** Modifies this profile's tolerated error in the XY plane and returns itself. */
-    fun withErrorXY(errorXY: Distance) = apply { this.errorXY = errorXY }
-
-    /** Modifies this profile's tolerated angular error and returns itself. */
-    fun withErrorTheta(errorTheta: Angle) = apply { this.errorTheta = errorTheta }
-
-    /** Modifies this profile's path generation constraints and returns itself. */
-    fun withConstraints(constraints: APConstraints) = apply {
-        this.constraints = constraints
-    }
-
-    /**
-     * Modifies this profile's beeline radius and returns itself.
-     *
-     * The beeline radius is a distance where, under that range, entry angle is no longer respected.
-     * This prevents small overshoots from causing the robot to make a full arc and instead correct
-     * itself.
-     */
-    fun withBeelineRadius(beelineRadius: Distance) = apply {
-        this.beelineRadius = beelineRadius
-    }
-}
+data class APProfile(
+    val constraints: APConstraints,
+    val errorXY: Distance = Meters.of(0.0),
+    val errorTheta: Angle = Rotations.of(0.0),
+    val beelineRadius: Distance = Meters.of(0.0),
+)

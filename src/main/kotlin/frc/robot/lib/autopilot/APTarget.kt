@@ -26,23 +26,4 @@ data class APTarget(
     val entryAngle: Rotation2d? = null,
     val velocity: Double = 0.0,
     val rotationRadius: Distance? = null,
-) {
-    /** Returns a copy of this target with the given reference pose. */
-    fun withReference(reference: Pose2d) = copy(reference = reference)
-
-    /** Returns a copy of this target with the given entry angle. */
-    fun withEntryAngle(entryAngle: Rotation2d) = copy(entryAngle = entryAngle)
-
-    /** Returns a copy of this target with the given end velocity. */
-    fun withVelocity(velocity: Double) = copy(velocity = velocity)
-
-    /** Returns a copy of this target with the given rotation radius. */
-    fun withRotationRadius(radius: Distance) = copy(rotationRadius = radius)
-
-    /**
-     * Returns a copy of this target, without the entry angle set.
-     *
-     * This is useful if trying to make two different targets with and without entry angle set.
-     */
-    fun withoutEntryAngle() = copy(entryAngle = null)
-}
+)
