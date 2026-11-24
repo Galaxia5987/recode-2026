@@ -10,7 +10,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 const val ANNOTATION_PACKAGE =
     "org.team5987.annotation.command_enum.CommandEnum"
 
-val snakeRegex = "_[a-zA-Z]".toRegex()
+val snakeRegex = "_[a-zA-Z0-9]".toRegex()
 
 fun String.snakeToCamelCase(): String {
     return snakeRegex.replace(lowercase()) {
@@ -123,7 +123,13 @@ class CreateCommandProcessor(env: SymbolProcessorEnvironment) :
                 priorityPropertyName,
             )
 
-        generated.writeTo(code, Dependencies(false))
+        generated.writeTo(
+            code,
+            Dependencies(
+                false,
+                *listOfNotNull(enumDecl.containingFile).toTypedArray(),
+            ),
+        )
     }
 }
 
