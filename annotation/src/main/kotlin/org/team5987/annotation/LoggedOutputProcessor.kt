@@ -68,7 +68,7 @@ class LoggedOutputProcessor(
         // change and disable incremental processing for all processors.
         val sources =
             symbols
-                .mapNotNull { (it as? KSDeclaration)?.containingFile }
+                .mapNotNull { (it.target() as? KSDeclaration)?.containingFile }
                 .distinct()
                 .toTypedArray()
         fileSpec.writeTo(codeGenerator, Dependencies(true, *sources))
@@ -91,8 +91,11 @@ class LoggedOutputProcessor(
         var path = arg("path").orEmpty()
         val logLevel = arg("level")?.substringAfterLast(".") ?: "COMP"
 
-        when (symbol) {
+        // An annotated getter is registered as its property: the arguments
+        // come from the getter, the callable reference from the property.
+        when (val target = symbol.target()) {
             is KSPropertyDeclaration -> {
+                val symbol = target
                 val name = symbol.simpleName.asString()
                 val owner = symbol.parentDeclaration as? KSClassDeclaration
                 if (owner == null) {
@@ -125,6 +128,7 @@ class LoggedOutputProcessor(
             }
 
             is KSFunctionDeclaration -> {
+                val symbol = target
                 val name = symbol.simpleName.asString()
                 val owner = symbol.parentDeclaration as? KSClassDeclaration
                 if (owner == null) {
@@ -157,6 +161,7 @@ class LoggedOutputProcessor(
             }
 
             is KSClassDeclaration -> {
+                val symbol = target
                 if (!requireObject(symbol, symbol)) return
                 // Every property is logged under "<path>/<propertyName>".
                 val basePath =
@@ -185,6 +190,10 @@ class LoggedOutputProcessor(
                 )
         }
     }
+
+    /** The declaration a symbol is registered as. */
+    private fun KSAnnotated.target(): KSAnnotated =
+        (this as? KSPropertyGetter)?.receiver ?: this
 
     /**
      * Generated code references members as `Owner::member`, which is only a
