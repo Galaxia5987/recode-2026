@@ -5,7 +5,9 @@ import com.google.devtools.ksp.getDeclaredProperties
 import com.google.devtools.ksp.processing.*
 import com.google.devtools.ksp.symbol.*
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.toClassName
+import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 
 // Call `LoggedRegistry.registerAll()` on robot init!!!!!!
@@ -24,6 +26,8 @@ class LoggedOutputProcessor(
     private val logger: KSPLogger,
 ) : SymbolProcessor {
     private var generated = false
+    private val registered = mutableSetOf<String>()
+    private lateinit var resolver: Resolver
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val symbols =
@@ -40,6 +44,7 @@ class LoggedOutputProcessor(
             return emptyList()
         }
         generated = true
+        this.resolver = resolver
 
         logger.info("Found ${symbols.size} @LoggedOutput symbols.")
 
@@ -52,7 +57,11 @@ class LoggedOutputProcessor(
                     "// [LoggedOutputManager] registers all LoggedOutput fields and methods"
                 )
 
-        for (symbol in symbols) registerSymbol(symbol, funSpecBuilder)
+        // Member annotations win over an enclosing annotated object, so
+        // register classes last.
+        symbols
+            .sortedBy { it.target() is KSClassDeclaration }
+            .forEach { registerSymbol(it, funSpecBuilder) }
 
         val fileSpec =
             FileSpec.builder(GENERATED_PACKAGE, GENERATED_FILE)
@@ -79,110 +88,41 @@ class LoggedOutputProcessor(
         return emptyList()
     }
 
-    private fun registerSymbol(symbol: KSAnnotated, fn: FunSpec.Builder) {
+    private class Args(val key: String, val path: String, val level: String)
+
+    private fun KSAnnotated.loggedOutputArgs(): Args {
         val args =
-            symbol.annotations
+            annotations
                 .first { it.shortName.asString() == "LoggedOutput" }
                 .arguments
         fun arg(name: String) =
             args.firstOrNull { it.name?.asString() == name }?.value?.toString()
+        return Args(
+            key = arg("key").orEmpty(),
+            path = arg("path").orEmpty(),
+            level = arg("level")?.substringAfterLast(".") ?: "COMP",
+        )
+    }
 
-        val key = arg("key").orEmpty()
-        var path = arg("path").orEmpty()
-        val logLevel = arg("level")?.substringAfterLast(".") ?: "COMP"
-
-        // An annotated getter is registered as its property: the arguments
-        // come from the getter, the callable reference from the property.
+    /**
+     * Supports every target @LoggedOutput allows:
+     * - properties and fields (`val`, `var`, `const val`, `@field:`),
+     * - property getters (`@get:` or an annotation on `get()`), registered as
+     *   their property,
+     * - zero-argument functions,
+     * - objects (or Java classes with static fields), registering each of their
+     *   properties.
+     *
+     * Members must be top-level, inside an object or companion object, or Java
+     * statics, so the generated `::member` / `Owner::member` reference needs no
+     * instance.
+     */
+    private fun registerSymbol(symbol: KSAnnotated, fn: FunSpec.Builder) {
+        val args = symbol.loggedOutputArgs()
         when (val target = symbol.target()) {
-            is KSPropertyDeclaration -> {
-                val symbol = target
-                val name = symbol.simpleName.asString()
-                val owner = symbol.parentDeclaration as? KSClassDeclaration
-                if (owner == null) {
-                    val pkg = symbol.packageName.asString()
-                    if (path.isEmpty() && key.isBlank()) path = name
-                    fn.addStatement(
-                        "LoggedOutputManager.registerField(%S, %T.%L, ::%M, %S)",
-                        key,
-                        LogLevel::class,
-                        logLevel,
-                        MemberName(pkg, name),
-                        path,
-                    )
-                    return
-                }
-                if (!requireObject(owner, symbol)) return
-                val ownerName = owner.simpleName.asString()
-                if (path.isEmpty() && isMechanism(owner))
-                    path = "Subsystems/$ownerName"
-                if (path.isEmpty() && key.isBlank()) path = ownerName
-                fn.addStatement(
-                    "LoggedOutputManager.registerField(%S, %T.%L, %T::%L, %S)",
-                    key,
-                    LogLevel::class,
-                    logLevel,
-                    owner.toClassName(),
-                    name,
-                    path,
-                )
-            }
-
-            is KSFunctionDeclaration -> {
-                val symbol = target
-                val name = symbol.simpleName.asString()
-                val owner = symbol.parentDeclaration as? KSClassDeclaration
-                if (owner == null) {
-                    val pkg = symbol.packageName.asString()
-                    if (path.isEmpty() && key.isBlank()) path = name
-                    fn.addStatement(
-                        "LoggedOutputManager.registerMethod(%S, %T.%L, ::%M, %S)",
-                        key,
-                        LogLevel::class,
-                        logLevel,
-                        MemberName(pkg, name),
-                        path,
-                    )
-                    return
-                }
-                if (!requireObject(owner, symbol)) return
-                val ownerName = owner.simpleName.asString()
-                if (path.isEmpty() && isMechanism(owner))
-                    path = "Subsystems/$ownerName"
-                if (path.isEmpty() && key.isBlank()) path = ownerName
-                fn.addStatement(
-                    "LoggedOutputManager.registerMethod(%S, %T.%L, %T::%L, %S)",
-                    key,
-                    LogLevel::class,
-                    logLevel,
-                    owner.toClassName(),
-                    name,
-                    path,
-                )
-            }
-
-            is KSClassDeclaration -> {
-                val symbol = target
-                if (!requireObject(symbol, symbol)) return
-                // Every property is logged under "<path>/<propertyName>".
-                val basePath =
-                    listOf(path, key)
-                        .filter { it.isNotBlank() }
-                        .joinToString("/")
-                        .ifBlank { symbol.simpleName.asString() }
-                val classType = symbol.toClassName()
-                symbol.getDeclaredProperties().forEach { property ->
-                    fn.addStatement(
-                        "LoggedOutputManager.registerField(%S, %T.%L, %T::%L, %S)",
-                        "",
-                        LogLevel::class,
-                        logLevel,
-                        classType,
-                        property.simpleName.asString(),
-                        basePath,
-                    )
-                }
-            }
-
+            is KSPropertyDeclaration,
+            is KSFunctionDeclaration -> registerMember(target, args, symbol, fn)
+            is KSClassDeclaration -> registerClass(target, args, fn)
             else ->
                 logger.error(
                     "@LoggedOutput is not supported on this element",
@@ -191,30 +131,185 @@ class LoggedOutputProcessor(
         }
     }
 
+    private fun registerMember(
+        member: KSDeclaration,
+        args: Args,
+        errorNode: KSNode,
+        fn: FunSpec.Builder,
+    ) {
+        if (!checkMember(member, errorNode)) return
+        val qualifiedName = member.qualifiedName?.asString() ?: return
+        // Annotating both a property and its getter (or a member of an
+        // annotated object) must not log it twice.
+        if (!registered.add(qualifiedName)) return
+
+        val isFunction = member is KSFunctionDeclaration
+        val register = if (isFunction) "registerMethod" else "registerField"
+        val name = member.simpleName.asString()
+        val owner = member.parentDeclaration as? KSClassDeclaration
+
+        var path = args.path
+        if (owner != null && path.isEmpty() && isMechanism(owner))
+            path = "Subsystems/${owner.displayName()}"
+        if (path.isEmpty() && args.key.isBlank())
+            path = owner?.displayName() ?: name
+
+        val reference =
+            if (owner == null)
+                CodeBlock.of(
+                    "::%M",
+                    MemberName(member.packageName.asString(), name),
+                )
+            else CodeBlock.of("%T::%L", owner.toClassName(), name)
+
+        // `::f` is ambiguous when `f` is overloaded; an expected type picks
+        // the zero-argument overload.
+        val callable =
+            if (
+                member is KSFunctionDeclaration && isOverloaded(member, owner)
+            ) {
+                val returnType = member.returnType?.toTypeName() ?: UNIT
+                val type =
+                    ClassName("kotlin.reflect", "KFunction0")
+                        .parameterizedBy(returnType)
+                CodeBlock.of("run<%T> { %L }", type, reference)
+            } else reference
+
+        fn.addStatement(
+            "LoggedOutputManager.$register(%S, %T.%L, %L, %S)",
+            args.key,
+            LogLevel::class,
+            args.level,
+            callable,
+            path,
+        )
+    }
+
+    private fun registerClass(
+        cls: KSClassDeclaration,
+        args: Args,
+        fn: FunSpec.Builder,
+    ) {
+        val isJava = cls.origin == Origin.JAVA || cls.origin == Origin.JAVA_LIB
+        if (cls.classKind != ClassKind.OBJECT && !isJava) {
+            logger.error(
+                "@LoggedOutput on a class requires an object (${cls.simpleName.asString()} is a ${cls.classKind})",
+                cls,
+            )
+            return
+        }
+        // Every property is logged under "<path>/<propertyName>".
+        val basePath =
+            listOf(args.path, args.key)
+                .filter { it.isNotBlank() }
+                .joinToString("/")
+                .ifBlank { cls.displayName() }
+        cls.getDeclaredProperties()
+            .filter {
+                Modifier.PRIVATE !in it.modifiers &&
+                    it.extensionReceiver == null &&
+                    (cls.classKind == ClassKind.OBJECT ||
+                        Modifier.JAVA_STATIC in it.modifiers)
+            }
+            .forEach { property ->
+                registerMember(
+                    property,
+                    Args("", basePath, args.level),
+                    property,
+                    fn,
+                )
+            }
+    }
+
+    /** Reports why a member can't be referenced from generated code. */
+    private fun checkMember(member: KSDeclaration, errorNode: KSNode): Boolean {
+        fun fail(reason: String): Boolean {
+            logger.error(
+                "@LoggedOutput on ${member.simpleName.asString()}: $reason",
+                errorNode,
+            )
+            return false
+        }
+        val modifiers = member.modifiers
+        if (Modifier.PRIVATE in modifiers || Modifier.PROTECTED in modifiers)
+            return fail(
+                "private or protected members can't be referenced from generated code; make it internal or public"
+            )
+        val owner = member.parentDeclaration as? KSClassDeclaration
+        if (
+            owner != null &&
+                owner.classKind != ClassKind.OBJECT &&
+                Modifier.JAVA_STATIC !in modifiers
+        )
+            return fail(
+                "members must be top-level, inside an object or companion object, or Java static (${owner.simpleName.asString()} is a ${owner.classKind})"
+            )
+        when (member) {
+            is KSPropertyDeclaration ->
+                if (member.extensionReceiver != null)
+                    return fail("extension properties are not supported")
+            is KSFunctionDeclaration -> {
+                if (member.extensionReceiver != null)
+                    return fail("extension functions are not supported")
+                if (member.parameters.isNotEmpty())
+                    return fail("only zero-argument functions are supported")
+                if (member.typeParameters.isNotEmpty())
+                    return fail("generic functions are not supported")
+                if (Modifier.SUSPEND in modifiers)
+                    return fail("suspend functions are not supported")
+                val returnType =
+                    member.returnType?.resolve()?.declaration?.qualifiedName
+                if (returnType?.asString() == "kotlin.Unit")
+                    return fail(
+                        "the function returns Unit, so there is nothing to log"
+                    )
+            }
+        }
+        return true
+    }
+
+    private fun isOverloaded(
+        function: KSFunctionDeclaration,
+        owner: KSClassDeclaration?,
+    ): Boolean {
+        val name = function.simpleName.asString()
+        val count =
+            if (owner != null)
+                owner.declarations
+                    .filterIsInstance<KSFunctionDeclaration>()
+                    .count { it.simpleName.asString() == name }
+            else
+                function.qualifiedName
+                    ?.let {
+                        resolver.getFunctionDeclarationsByName(
+                            it,
+                            includeTopLevel = true,
+                        )
+                    }
+                    ?.count() ?: 1
+        return count > 1
+    }
+
+    /** A companion object is named after the class that contains it. */
+    private fun KSClassDeclaration.displayName(): String =
+        (parentDeclaration as? KSClassDeclaration)
+            ?.takeIf { isCompanionObject }
+            ?.displayName() ?: simpleName.asString()
+
     /** The declaration a symbol is registered as. */
     private fun KSAnnotated.target(): KSAnnotated =
         (this as? KSPropertyGetter)?.receiver ?: this
 
-    /**
-     * Generated code references members as `Owner::member`, which is only a
-     * zero-argument reference when `Owner` is an object.
-     */
-    private fun requireObject(
-        owner: KSClassDeclaration,
-        symbol: KSNode,
-    ): Boolean {
-        if (owner.classKind == ClassKind.OBJECT) return true
-        logger.error(
-            "@LoggedOutput members must be top-level or inside an object (${owner.simpleName.asString()} is a ${owner.classKind})",
-            symbol,
-        )
-        return false
-    }
-
-    private fun isMechanism(owner: KSClassDeclaration) =
-        owner.getAllSuperTypes().any {
+    private fun isMechanism(owner: KSClassDeclaration): Boolean {
+        // A companion's logs belong to the class that contains it.
+        val cls =
+            (owner.parentDeclaration as? KSClassDeclaration)?.takeIf {
+                owner.isCompanionObject
+            } ?: owner
+        return cls.getAllSuperTypes().any {
             it.declaration.qualifiedName?.asString() in MECHANISM_BASE_TYPES
         }
+    }
 }
 
 class LoggedOutputProcessorProvider : SymbolProcessorProvider {
