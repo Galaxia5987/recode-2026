@@ -1,4 +1,5 @@
-// Copied from [Autopilot](https://github.com/therekrab/autopilot) by Nolan Barker
+// Copied from [Autopilot](https://github.com/therekrab/autopilot) by Nolan
+// Barker
 // Licensed under the MIT License
 
 package frc.robot.lib.autopilot
@@ -206,8 +207,7 @@ class Autopilot(private val profile: APProfile) {
     fun atTarget(current: Pose2d, target: APTarget): Boolean {
         val goal = target.reference
         val okXY =
-            hypot(current.x - goal.x, current.y - goal.y) <=
-                profile.errorXY[m]
+            hypot(current.x - goal.x, current.y - goal.y) <= profile.errorXY[m]
         val okTheta =
             abs((current.rotation - goal.rotation).radians) <=
                 profile.errorTheta[rad]
