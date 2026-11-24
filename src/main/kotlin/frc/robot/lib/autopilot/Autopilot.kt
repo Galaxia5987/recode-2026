@@ -21,10 +21,11 @@ import org.wpilib.units.measure.LinearVelocity
 /**
  * Autopilot tries to drive a robot to a goal in 2-D space.
  *
- * Autopilot is a stateless algorithm; as such, it does not "think ahead" and cannot avoid
- * obstacles. Any math that Autopilot needs is already worked out such that only a small amount of
- * computation is necessary on the fly. Autopilot is designed to be used in a drivetrain's control
- * loop, where the current state of the robot is passed in, and the next velocity is returned.
+ * Autopilot is a stateless algorithm; as such, it does not "think ahead" and
+ * cannot avoid obstacles. Any math that Autopilot needs is already worked out
+ * such that only a small amount of computation is necessary on the fly.
+ * Autopilot is designed to be used in a drivetrain's control loop, where the
+ * current state of the robot is passed in, and the next velocity is returned.
  *
  * @param profile The profile that the autopilot will use for all actions.
  */
@@ -33,7 +34,8 @@ class Autopilot(private val profile: APProfile) {
      * Returns the next field relative velocity for the trajectory.
      *
      * @param current The robot's current position.
-     * @param robotRelativeSpeeds The robot's current **robot relative** [ChassisVelocities].
+     * @param robotRelativeSpeeds The robot's current **robot relative**
+     *   [ChassisVelocities].
      * @param target The target the robot should drive towards.
      * @return an [APResult] containing the next velocity and target angle
      */
@@ -72,28 +74,35 @@ class Autopilot(private val profile: APProfile) {
     }
 
     /**
-     * Turns any other coordinate frame into a coordinate frame with positive x meaning in the
-     * direction of the target's entry angle, if applicable (otherwise no change to angles).
+     * Turns any other coordinate frame into a coordinate frame with positive x
+     * meaning in the direction of the target's entry angle, if applicable
+     * (otherwise no change to angles).
      */
     private fun toTargetCoordinateFrame(
         coords: Translation2d,
         target: APTarget,
     ) = coords.rotateBy(-(target.entryAngle ?: Rotation2d.ZERO))
 
-    /** Turns a translation from a target-relative coordinate frame to a global coordinate frame. */
+    /**
+     * Turns a translation from a target-relative coordinate frame to a global
+     * coordinate frame.
+     */
     private fun toGlobalCoordinateFrame(
         coords: Translation2d,
         target: APTarget,
     ) = coords.rotateBy(target.entryAngle ?: Rotation2d.ZERO)
 
     /**
-     * Attempts to drive the initial translation to the goal translation using the parameters for
-     * acceleration given in the profile.
+     * Attempts to drive the initial translation to the goal translation using
+     * the parameters for acceleration given in the profile.
      *
      * @param initial The initial translation to drive from
      * @param goal The goal translation to drive to
      */
-    private fun correct(initial: Translation2d, goal: Translation2d): Translation2d {
+    private fun correct(
+        initial: Translation2d,
+        goal: Translation2d,
+    ): Translation2d {
         val angleOffset = goal.getAngleOrDefault()
         val adjustedGoal = goal.rotateBy(-angleOffset)
         val adjustedInitial = initial.rotateBy(-angleOffset)
@@ -101,14 +110,19 @@ class Autopilot(private val profile: APProfile) {
         // we cap the adjusted I because we'd rather adjust now than overshoot.
         val goalI = adjustedGoal.x.coerceAtMost(profile.constraints.velocity)
         val adjustedI =
-            minOf(goalI, push(initialI, goalI, profile.constraints.acceleration))
+            minOf(
+                goalI,
+                push(initialI, goalI, profile.constraints.acceleration),
+            )
         return Translation2d(adjustedI, 0.0).rotateBy(angleOffset)
     }
 
     /**
-     * Using the provided acceleration, "pushes" the start point towards the end point.
+     * Using the provided acceleration, "pushes" the start point towards the end
+     * point.
      *
-     * This is used for ensuring that changes in velocity are within the acceleration threshold.
+     * This is used for ensuring that changes in velocity are within the
+     * acceleration threshold.
      */
     private fun push(start: Double, end: Double, accel: Double): Double {
         val maxChange = accel * DT
@@ -120,10 +134,11 @@ class Autopilot(private val profile: APProfile) {
     }
 
     /**
-     * Uses the swirly method to calculate the correct velocities for the robot, respecting entry
-     * angles.
+     * Uses the swirly method to calculate the correct velocities for the robot,
+     * respecting entry angles.
      *
-     * @param offset The offset from the robot to the target, in the target's coordinate frame
+     * @param offset The offset from the robot to the target, in the target's
+     *   coordinate frame
      * @param target The target that Autopilot is trying to reach
      */
     private fun calculateSwirlyVelocity(
@@ -142,13 +157,17 @@ class Autopilot(private val profile: APProfile) {
     }
 
     /**
-     * Using a precomputed integral, returns the length of the path that the swirly method generates.
+     * Using a precomputed integral, returns the length of the path that the
+     * swirly method generates.
      *
-     * More specifically, this calculates the arc length of the polar curve r=theta from the given
-     * angle to zero, then scales it to match the current state.
+     * More specifically, this calculates the arc length of the polar curve
+     * r=theta from the given angle to zero, then scales it to match the current
+     * state.
      *
-     * @param theta The angle of the offset from the robot to the target, in radians
-     * @param radius The normalized offset from the robot to the target, in meters
+     * @param theta The angle of the offset from the robot to the target, in
+     *   radians
+     * @param radius The normalized offset from the robot to the target, in
+     *   meters
      */
     private fun calculateSwirlyLength(theta: Double, radius: Double): Double {
         if (theta == 0.0) return radius
@@ -160,8 +179,8 @@ class Autopilot(private val profile: APProfile) {
     }
 
     /**
-     * Returns the target's rotation if the robot is within a specified rotation radius; otherwise,
-     * returns the current rotation of the robot.
+     * Returns the target's rotation if the robot is within a specified rotation
+     * radius; otherwise, returns the current rotation of the robot.
      *
      * @param current The current rotation of the robot.
      * @param target The [APTarget] that Autopilot is trying to reach.

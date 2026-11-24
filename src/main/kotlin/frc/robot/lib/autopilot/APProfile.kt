@@ -13,11 +13,13 @@ import org.wpilib.units.measure.Distance
  *
  * The constraints property of the profile limits the robot's behavior.
  *
- * Acceptable error for the controller (both translational and rotational) are stored here.
+ * Acceptable error for the controller (both translational and rotational) are
+ * stored here.
  *
- * The "beeline radius" determines the distance at which the robot drives directly at the target and
- * no longer respects entry angle. This is helpful because if the robot overshoots by a small
- * amount, that error should not cause the robot do completely circle back around.
+ * The "beeline radius" determines the distance at which the robot drives
+ * directly at the target and no longer respects entry angle. This is helpful
+ * because if the robot overshoots by a small amount, that error should not
+ * cause the robot do completely circle back around.
  *
  * Tolerated error and beeline radius default to zero.
  */

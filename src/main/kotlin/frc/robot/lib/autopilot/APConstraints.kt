@@ -9,23 +9,25 @@ import kotlin.math.sqrt
 /**
  * Holds constraint information for an Autopilot action.
  *
- * Constraints are max velocity, acceleration, and jerk. The defaults are unlimited.
+ * Constraints are max velocity, acceleration, and jerk. The defaults are
+ * unlimited.
  *
  * @property velocity The maximum velocity that Autopilot will demand, in m/s
- * @property acceleration The maximum acceleration that Autopilot will use to correct initial
- *   velocities, in m/s^2
- * @property jerk The maximum jerk that Autopilot will use to decelerate at the end of an action, in
- *   m/s^3
+ * @property acceleration The maximum acceleration that Autopilot will use to
+ *   correct initial velocities, in m/s^2
+ * @property jerk The maximum jerk that Autopilot will use to decelerate at the
+ *   end of an action, in m/s^3
  */
 data class APConstraints(
     val velocity: Double = Double.POSITIVE_INFINITY,
     val acceleration: Double = Double.POSITIVE_INFINITY,
     val jerk: Double = Double.POSITIVE_INFINITY,
 ) {
-    // These values represent the "cutoff" parameters that Autopilot uses to determine what should
-    // be happening during the end behavior of a path. These are always the same for a constant
-    // constraint, so to save the most computational time, they're precomputed with the constraint,
-    // rather than each time Autopilot.calculate is called.
+    // These values represent the "cutoff" parameters that Autopilot uses to
+    // determine what should be happening during the end behavior of a path.
+    // These are always the same for a constant constraint, so to save the most
+    // computational time, they're precomputed with the constraint, rather than
+    // each time Autopilot.calculate is called.
 
     /** Cutoff distance */
     private val x0 = acceleration.pow(3.0) / (18.0 * jerk * jerk)
@@ -34,7 +36,8 @@ data class APConstraints(
     private val v0 = jerkConstrainedVelocity(x0)
 
     /**
-     * Determines the maximum velocity required to travel the given distance and end at 0 m/s.
+     * Determines the maximum velocity required to travel the given distance and
+     * end at 0 m/s.
      *
      * @param dist The distance to travel, in meters
      */
