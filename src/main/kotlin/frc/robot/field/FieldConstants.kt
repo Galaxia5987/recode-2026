@@ -1,7 +1,9 @@
 package frc.robot.field
 
 import frc.robot.lib.FlippingUtil
+import frc.robot.lib.extensions.flip
 import frc.robot.lib.extensions.flipIfNeeded
+import frc.robot.lib.extensions.get
 import frc.robot.lib.extensions.m
 import frc.robot.lib.extensions.mirror
 import frc.robot.lib.extensions.mm
@@ -85,3 +87,32 @@ val DEPOT_SIDE_DOUBLE_FEEDING_RECTANGLE: Rectangle2d by periodic {
 val OUTPOST_SIDE_DOUBLE_FEEDING_RECTANGLE: Rectangle2d by periodic {
     OUTPOST_SIDE_DOUBLE_FEEDING_RECTANGLE_BLUE.flipIfNeeded()
 }
+
+/**
+ * Side length of the hub's square base.
+ *
+ * TODO: Verify against the field drawings.
+ */
+val HUB_SIZE: Distance = 1.194.m
+
+private val HUB_HALF_DIAGONAL = Translation2d(HUB_SIZE[m] / 2, HUB_SIZE[m] / 2)
+
+private val HUB_RECTANGLE_BLUE =
+    Rectangle2d(
+        HUB_TRANSLATION_BLUE - HUB_HALF_DIAGONAL,
+        HUB_TRANSLATION_BLUE + HUB_HALF_DIAGONAL,
+    )
+
+/**
+ * Static obstacles the robot must drive around, for both alliances, in
+ * blue-origin field coordinates. These do not change with the alliance color,
+ * since both sides of the field are listed.
+ *
+ * The field walls are not included; navigation adds them itself.
+ *
+ * TODO: Add the trench and bump structures once their geometry is measured.
+ */
+val FIELD_OBSTACLES: List<Rectangle2d> =
+    listOf(HUB_RECTANGLE_BLUE, CLIMB_RECTANGLE_BLUE).flatMap {
+        listOf(it, it.flip())
+    }
