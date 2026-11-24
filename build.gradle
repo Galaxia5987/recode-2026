@@ -100,7 +100,9 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0"
     implementation "org.jetbrains.kotlin:kotlin-reflect"
 
-    implementation project(':annotation')
+    // Only the annotation classes are needed at runtime. The processor's
+    // dependencies (Kotlin compiler, KotlinPoet, KSP API) stay off the robot jar.
+    implementation(project(':annotation')) { transitive = false }
     ksp project(':annotation')
 
     testImplementation platform("org.junit:junit-bom:5.10.1")

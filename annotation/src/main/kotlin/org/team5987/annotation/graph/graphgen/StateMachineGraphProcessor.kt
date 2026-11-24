@@ -313,7 +313,8 @@ class StateMachineGraphProcessor(
 
         val fileStream =
             codeGenerator.createNewFileByPath(
-                dependencies = Dependencies(aggregating = true, containingFile),
+                dependencies =
+                    Dependencies(aggregating = false, containingFile),
                 path = fileName,
                 extensionName = "md",
             )
