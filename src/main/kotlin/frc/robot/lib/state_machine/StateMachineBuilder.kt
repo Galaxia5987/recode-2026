@@ -34,6 +34,9 @@ class StateMachine<E : Enum<E>>(
     /** Set by [forceTransition], consumed on the next loop iteration. */
     private var forcedState: State? = null
 
+    /** True from the start of [run] until the machine is cancelled. */
+    private var running = false
+
     /** The state marked with [initial], or null if none was marked yet. */
     val initialStateValue: E?
         get() = initialState?.enumVal
@@ -49,6 +52,7 @@ class StateMachine<E : Enum<E>>(
                     "$name does not have an initial state. Use .initial() to provide one."
                 )
         forcedState = null
+        running = true
 
         while (true) {
             enter(state, coroutine)
@@ -58,7 +62,8 @@ class StateMachine<E : Enum<E>>(
             // cycle of states that finish instantly cannot stall the robot
             // loop.
             coroutine.yield()
-            state = next
+            // A forced transition requested during the yield takes precedence.
+            state = forcedState?.also { forcedState = null } ?: next
         }
     }
 
@@ -104,6 +109,7 @@ class StateMachine<E : Enum<E>>(
         activeState?.exitCallbacks?.forEach { it.run() }
         activeState = null
         forcedState = null
+        running = false
     }
 
     /**
@@ -111,7 +117,7 @@ class StateMachine<E : Enum<E>>(
      * the usual exit and enter callbacks. Has no effect while not scheduled.
      */
     fun forceTransition(target: E) {
-        if (activeState != null) forcedState = getState(target)
+        if (running) forcedState = getState(target)
     }
 
     // --------------------------------------------------------
@@ -314,8 +320,10 @@ abstract class StateMachineCompanion<T : Enum<T>>(
 
     val stateMachine by lazy {
         buildStateMachine<T>(stateClass.simpleName!!) {
-            states()
+            // Registered first so `state` is already updated when user
+            // onStateChange callbacks run.
             onStateChange { currentState = it }
+            states()
         }
     }
 
