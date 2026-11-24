@@ -73,11 +73,23 @@ private fun Autopilot.APResult.toChassisVelocities(
         omegaResult,
     )
 
+/**
+ * Drives to a pose with Autopilot and stops there.
+ *
+ * @param targetSupplier The pose to drive to, read every loop.
+ * @param entryAngle The direction to approach the target from.
+ * @param endVelocity The speed to arrive with.
+ * @param rotationRadius Only turn to the target heading within this distance.
+ * @param passThrough Ends the command early, without stopping the drive, as
+ *   soon as this returns `true` for the robot's pose. Use it to drive through a
+ *   waypoint at [endVelocity] and hand over to the next command.
+ */
 fun runToPose(
     targetSupplier: () -> Pose2d,
     entryAngle: Rotation2d? = null,
     endVelocity: LinearVelocity? = null,
     rotationRadius: Distance? = null,
+    passThrough: ((Pose2d) -> Boolean)? = null,
 ): UnnamedCommand = drive {
     val apTarget = {
         APTarget(
@@ -92,6 +104,7 @@ fun runToPose(
     anglePIDController.enableContinuousInput(-PI, PI)
     setpointUnwrapper.reset()
 
+    var passedThrough = false
     while (true) {
         val target = apTarget()
         val result =
@@ -113,10 +126,14 @@ fun runToPose(
         Logger.recordOutput("Alignment/targetAngle", setpoint)
         Logger.recordOutput("Alignment/measuredAngle", measured)
         drive.runVelocity(velocities)
+        if (passThrough?.invoke(drive.pose) == true) {
+            passedThrough = true
+            break
+        }
         if (autopilot.atTarget(drive.pose, target)) break
         yield()
     }
-    drive.stop()
+    if (!passedThrough) drive.stop()
 }
 
 fun runToPose(
@@ -124,5 +141,6 @@ fun runToPose(
     entryAngle: Rotation2d? = null,
     endVelocity: LinearVelocity? = null,
     rotationRadius: Distance? = null,
+    passThrough: ((Pose2d) -> Boolean)? = null,
 ): UnnamedCommand =
-    runToPose({ target }, entryAngle, endVelocity, rotationRadius)
+    runToPose({ target }, entryAngle, endVelocity, rotationRadius, passThrough)
