@@ -1,5 +1,6 @@
 package frc.robot
 
+import frc.robot.autonomous.paths.ChoreoPaths
 import frc.robot.lib.AutoChooser
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.MechanismRegistry
@@ -55,6 +56,14 @@ object RobotContainer {
 
     private fun registerAutoCommands() {
         autoChooser.addCmd("Empty", ::emptyCommand)
+
+        ChoreoPaths.all.forEach { path ->
+            autoChooser.addCmd(path.name) { path.follow() }
+            autoChooser.addCmd("${path.name} (Mirrored)") {
+                path.follow(mirrored = true)
+            }
+        }
+
         // SysIds
         autoChooser.addCmd(
             "Drive Wheel Radius Characterization",

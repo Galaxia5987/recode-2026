@@ -3,3 +3,4 @@ org.team5987.annotation.LoggedOutputProcessorProvider
 org.team5987.annotation.command_enum.CommandEnumProcessorProvider
 org.team5987.annotation.autoMechanismInitializer.MechanismProcessorProvider
 org.team5987.annotation.graph.graphgen.StateMachineGraphProcessorProvider
+org.team5987.annotation.choreo.ChoreoPathProcessorProvider
