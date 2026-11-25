@@ -37,7 +37,6 @@ abstract class ChoreoPath(val name: String) {
     /**
      * Follows the path, flipped for the red alliance, running each event
      * marker's binding in this command's coroutine when its time is reached.
-     * The first path an [autoRoutine] follows resets odometry to its start.
      *
      * A binding that awaits a command blocks the path: the drive stops and the
      * path's timer pauses until the binding returns. Fork a command to run it
@@ -49,10 +48,6 @@ abstract class ChoreoPath(val name: String) {
     fun follow(mirrored: Boolean = false): Command =
         drive {
                 val trajectory = resolve(mirrored)
-                if (AutoRoutineState.resetOdometryOnNextPath) {
-                    drive.resetOdometry(trajectory.getInitialPose(false).get())
-                    AutoRoutineState.resetOdometryOnNextPath = false
-                }
                 Logger.recordOutput("Autonomous/Trajectory", *trajectory.poses)
 
                 val pendingEvents =
@@ -75,6 +70,18 @@ abstract class ChoreoPath(val name: String) {
                 pendingEvents.forEach { runEvent(it.event) }
             }
             .named(if (mirrored) "$name (Mirrored)" else name)
+
+    /**
+     * Resets odometry to the start of the path, as [follow] with the same
+     * [mirrored] would drive it.
+     */
+    fun resetOdometry(mirrored: Boolean = false): Command =
+        drive {
+                drive.resetOdometry(
+                    resolve(mirrored).getInitialPose(false).get()
+                )
+            }
+            .named("$name/resetOdometry")
 
     private fun resolve(mirrored: Boolean): Trajectory<SwerveSample> =
         trajectory

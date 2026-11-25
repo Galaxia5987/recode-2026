@@ -55,6 +55,7 @@ auto chooser when it is created.
 object Autos {
     val twoPiece =
         autoRoutine("Two Piece") {
+            +StartToFuel.resetOdometry()
             Intake.open().fork()
             +StartToFuel.follow()
             +Shooter.shoot()
@@ -63,4 +64,5 @@ object Autos {
 }
 ```
 
-The first path a routine follows resets odometry to its start pose.
+Start a routine by awaiting `resetOdometry` on its first path, with the same `mirrored`
+value it is followed with.

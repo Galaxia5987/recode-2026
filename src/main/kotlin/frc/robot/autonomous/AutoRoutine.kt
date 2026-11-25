@@ -4,10 +4,6 @@ import frc.robot.lib.commands.command
 import org.wpilib.command3.Command
 import org.wpilib.command3.Coroutine
 
-internal object AutoRoutineState {
-    var resetOdometryOnNextPath = false
-}
-
 private val routines = mutableListOf<Command>()
 
 /** Every routine created with [autoRoutine], in declaration order. */
@@ -20,19 +16,14 @@ val autoRoutines: List<Command>
  * ```kotlin
  * val twoPiece =
  *     autoRoutine("Two Piece") {
+ *         +StartToFuel.resetOdometry()
  *         +StartToFuel.follow()
  *         +Shooter.shoot()
  *         +FuelToHub.follow(mirrored = true)
  *     }
  * ```
  *
- * The first path the routine follows resets odometry to its start pose. Declare
- * routines in [Autos] so they are registered on startup.
+ * Declare routines in [Autos] so they are registered on startup.
  */
 fun autoRoutine(name: String, block: Coroutine.() -> Unit): Command =
-    command {
-            AutoRoutineState.resetOdometryOnNextPath = true
-            block()
-        }
-        .named(name)
-        .also(routines::add)
+    command(block).named(name).also(routines::add)
