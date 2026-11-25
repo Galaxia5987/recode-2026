@@ -20,9 +20,10 @@ const val CHOREO_DIR_OPTION = "choreoDir"
 
 private const val GENERATED_PACKAGE = "frc.robot.autonomous.paths"
 private const val MARKERS_CLASS = "ChoreoMarkers"
-private val choreoPathClass = ClassName("frc.robot.autonomous", "ChoreoPath")
+private val choreoPathClass =
+    ClassName("frc.robot.lib.autonomous", "ChoreoPath")
 private val markerBindingsClass =
-    ClassName("frc.robot.autonomous", "MarkerBindings")
+    ClassName("frc.robot.lib.autonomous", "MarkerBindings")
 private val markersObject = ClassName("frc.robot.autonomous", "Markers")
 private val coroutineClass = ClassName("org.wpilib.command3", "Coroutine")
 

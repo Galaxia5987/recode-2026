@@ -1,4 +1,4 @@
-package frc.robot.autonomous
+package frc.robot.lib.autonomous
 
 import org.wpilib.command3.Coroutine
 
@@ -7,7 +7,7 @@ import org.wpilib.command3.Coroutine
  *
  * KSP generates `ChoreoMarkers`, which implements this with one abstract
  * function per marker name across every `.traj` file. Bind them all in the
- * [Markers] object.
+ * [frc.robot.autonomous.Markers] object.
  */
 interface MarkerBindings {
     fun Coroutine.runMarker(marker: String)

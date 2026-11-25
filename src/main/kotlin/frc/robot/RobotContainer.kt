@@ -1,11 +1,11 @@
 package frc.robot
 
 import frc.robot.autonomous.Autos
-import frc.robot.autonomous.autoRoutines
 import frc.robot.lib.AutoChooser
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.MechanismRegistry
 import frc.robot.lib.Mode
+import frc.robot.lib.autonomous.autoRoutines
 import frc.robot.lib.commands.emptyCommand
 import frc.robot.lib.commands.initializeAllMechanisms
 import frc.robot.lib.extensions.enableAutoLogOutputFor

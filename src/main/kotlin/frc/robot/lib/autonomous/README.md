@@ -2,6 +2,14 @@
 
 Paths are drawn in [Choreo](https://choreo.autos) and saved to `src/main/deploy/choreo`.
 
+## Layout
+
+- `frc.robot.lib.autonomous` holds the year-agnostic code: `ChoreoPath`, `MarkerBindings`
+  and `autoRoutine`.
+- `frc.robot.autonomous` holds what changes each season: the `Markers` bindings and the
+  `Autos` routines.
+- `frc.robot.autonomous.paths` holds the generated code.
+
 ## Generated code
 
 KSP reads every `.traj` file and generates, in `frc.robot.autonomous.paths`:

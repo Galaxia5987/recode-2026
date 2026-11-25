@@ -1,4 +1,4 @@
-package frc.robot.autonomous
+package frc.robot.lib.autonomous
 
 import choreo.Choreo
 import choreo.trajectory.EventMarker

@@ -1,4 +1,4 @@
-package frc.robot.autonomous
+package frc.robot.lib.autonomous
 
 import frc.robot.lib.commands.command
 import org.wpilib.command3.Command
@@ -23,7 +23,8 @@ val autoRoutines: List<Command>
  *     }
  * ```
  *
- * Declare routines in [Autos] so they are registered on startup.
+ * Declare routines in [frc.robot.autonomous.Autos] so they are registered on
+ * startup.
  */
 fun autoRoutine(name: String, block: Coroutine.() -> Unit): Command =
     command(block).named(name).also(routines::add)
