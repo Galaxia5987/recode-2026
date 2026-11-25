@@ -1,7 +1,7 @@
 package frc.robot
 
-import frc.robot.autonomous.autoRoutine
-import frc.robot.autonomous.paths.ChoreoPaths
+import frc.robot.autonomous.Autos
+import frc.robot.autonomous.autoRoutines
 import frc.robot.lib.AutoChooser
 import frc.robot.lib.BasicAlerts
 import frc.robot.lib.MechanismRegistry
@@ -58,14 +58,9 @@ object RobotContainer {
     private fun registerAutoCommands() {
         autoChooser.addCmd("Empty", ::emptyCommand)
 
-        ChoreoPaths.all.forEach { path ->
-            for (mirrored in listOf(false, true)) {
-                val name =
-                    if (mirrored) "${path.name} (Mirrored)" else path.name
-                autoChooser.addCmd(name) {
-                    autoRoutine(name, mirrored) { path.follow() }
-                }
-            }
+        Autos // Registers the routines declared in it
+        autoRoutines.forEach { routine ->
+            autoChooser.addCmd(routine.name()) { routine }
         }
 
         // SysIds

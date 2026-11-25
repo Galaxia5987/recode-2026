@@ -6,22 +6,15 @@ import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
-import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.gson.JsonParser
 import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.STRING
 import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.asTypeName
-import com.squareup.kotlinpoet.joinToCode
 import java.io.File
-import org.team5987.annotation.SubtypeCollector
 
 const val CHOREO_DIR_OPTION = "choreoDir"
 
@@ -33,8 +26,7 @@ private data class TrajectoryFile(val name: String, val events: Set<String>)
 
 /**
  * Generates an abstract [choreoPathClass] subclass for every Choreo `.traj`
- * file, with one abstract function per event marker, and a `ChoreoPaths`
- * registry of every object that implements one of them.
+ * file, with one abstract function per event marker.
  */
 class ChoreoPathProcessor(
     private val codeGenerator: CodeGenerator,
@@ -48,24 +40,14 @@ class ChoreoPathProcessor(
             .sortedBy { it.name }
             .map(::parseTrajectory)
 
-    private val implementations =
-        SubtypeCollector(choreoPathClass.canonicalName) {
-            it.classKind == ClassKind.OBJECT
-        }
-
-    private var generatedPathClasses = false
+    private var generated = false
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        if (!generatedPathClasses) {
+        if (!generated) {
             trajectories.forEach(::generatePathClass)
-            generatedPathClasses = true
+            generated = true
         }
-        implementations.collect(resolver)
         return emptyList()
-    }
-
-    override fun finish() {
-        generateRegistry()
     }
 
     private fun parseTrajectory(file: File): TrajectoryFile {
@@ -120,30 +102,6 @@ class ChoreoPathProcessor(
             .addType(pathClass)
             .build()
             .writeTo(Dependencies(aggregating = false))
-    }
-
-    private fun generateRegistry() {
-        val listType = List::class.asTypeName().parameterizedBy(choreoPathClass)
-        val all =
-            PropertySpec.builder("all", listType)
-                .initializer(
-                    implementations.classNames
-                        .map { CodeBlock.of("%T", it) }
-                        .joinToCode(prefix = "listOf(", suffix = ")")
-                )
-                .build()
-
-        FileSpec.builder(GENERATED_PACKAGE, "ChoreoPaths")
-            .addType(
-                TypeSpec.objectBuilder("ChoreoPaths").addProperty(all).build()
-            )
-            .build()
-            .writeTo(
-                Dependencies(
-                    aggregating = true,
-                    *implementations.sourceFiles.toTypedArray(),
-                )
-            )
     }
 
     private fun FileSpec.writeTo(dependencies: Dependencies) {

@@ -31,36 +31,36 @@ object StartToFuel : StartToFuelPath() {
 }
 ```
 
-Bindings are blocking: awaiting a command (`+command`) stops the drive and pauses the
-path until it finishes. To run a command alongside the path, fork it. Forked commands
-keep running until the routine ends, even across paths.
+Bindings run in the path command's coroutine. Awaiting a command (`+command`) blocks:
+the drive stops and the path's timer pauses until it finishes. To run a command
+alongside the path, fork it. Forked commands are canceled when the path ends, so fork
+them from the routine instead to keep them running longer.
+
+Event bindings must not require the drive, since the path holds it.
+
+## Following
+
+`StartToFuel.follow(mirrored = false)` is a command that follows the path, flipped for
+the red alliance. `mirrored` mirrors it across the field's long axis, to run a path
+drawn for one side of the field on the other side. It uses `Drive.followTrajectory`,
+which uses each sample's velocity as feedforward plus PID on x, y and heading.
 
 ## Routines
 
-`autoRoutine` creates a command that requires the drive. Inside it, paths are followed
-one after another, and any other command can be awaited or forked between them:
+An auto routine is the whole autonomous: a name and a coroutine that awaits or forks
+paths and any other commands. Declare routines in `Autos`; each one is added to the
+auto chooser when it is created.
 
 ```kotlin
-fun twoPiece(mirrored: Boolean) =
-    autoRoutine("Two Piece", mirrored) {
-        StartToFuel.follow()
-        +Shooter.shoot()
-        FuelToHub.follow()
-    }
+object Autos {
+    val twoPiece =
+        autoRoutine("Two Piece") {
+            Intake.open().fork()
+            +StartToFuel.follow()
+            +Shooter.shoot()
+            +FuelToHub.follow(mirrored = true)
+        }
+}
 ```
 
-A routine:
-
-1. Resets odometry to the start of its first path.
-2. Mirrors every path across the field's long axis if `mirrored` is set, and flips it
-   for the red alliance.
-3. Follows the samples with `Drive.followTrajectory`, which uses each sample's velocity as
-   feedforward plus PID on x, y and heading.
-4. Runs each marker's binding when its time is reached. Markers at the very end of a path
-   run after the drive stops.
-
-Event bindings must not require the drive, since the routine holds it.
-
-Every path object is collected into `ChoreoPaths.all` and added to the auto chooser as a
-single-path routine, twice: as is, and mirrored. Register multi-path routines in
-`RobotContainer` yourself.
+The first path a routine follows resets odometry to its start pose.
