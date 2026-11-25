@@ -69,6 +69,7 @@ abstract class ChoreoPath(val name: String) {
                 drive.stop()
                 pendingEvents.forEach { runEvent(it.event) }
             }
+            .whenCanceled(drive::stop)
             .named(if (mirrored) "$name (Mirrored)" else name)
 
     /**

@@ -51,21 +51,32 @@ class ChoreoPathProcessor(
     }
 
     private fun parseTrajectory(file: File): TrajectoryFile {
-        val json = JsonParser.parseString(file.readText()).asJsonObject
         val events =
-            json
-                .getAsJsonArray("events")
-                .map { it.asJsonObject.get("name").asString }
-                .filter { it.isNotBlank() }
-                .toSortedSet()
+            try {
+                JsonParser.parseString(file.readText())
+                    .asJsonObject
+                    .getAsJsonArray("events")
+                    .map { it.asJsonObject.get("name").asString }
+                    .filter { it.isNotBlank() }
+                    .toSortedSet()
+            } catch (e: RuntimeException) {
+                throw IllegalArgumentException(
+                    "Invalid Choreo trajectory ${file.name}",
+                    e,
+                )
+            }
         return TrajectoryFile(file.nameWithoutExtension, events)
     }
 
     private fun generatePathClass(trajectory: TrajectoryFile) {
-        val className = trajectory.name.toPascalCase() + "Path"
+        val baseName = trajectory.name.toPascalCase()
+        require(baseName.isIdentifier()) {
+            "Choreo trajectory '${trajectory.name}' doesn't form a valid class name"
+        }
+        val className = baseName + "Path"
         val eventFunctions =
-            trajectory.events.associateWith {
-                FunSpec.builder(it.toCamelCase())
+            eventFunctionNames(trajectory).mapValues { (_, functionName) ->
+                FunSpec.builder(functionName)
                     .addModifiers(KModifier.PROTECTED, KModifier.ABSTRACT)
                     .receiver(coroutineClass)
                     .build()
@@ -104,6 +115,27 @@ class ChoreoPathProcessor(
             .writeTo(Dependencies(aggregating = false))
     }
 
+    private fun eventFunctionNames(
+        trajectory: TrajectoryFile
+    ): Map<String, String> {
+        val names = trajectory.events.associateWith { it.toCamelCase() }
+        names.forEach { (event, name) ->
+            require(name.isIdentifier()) {
+                "Event '$event' in ${trajectory.name} doesn't form a valid function name"
+            }
+        }
+        names.entries
+            .groupBy({ it.value }, { it.key })
+            .filterValues { it.size > 1 }
+            .forEach { (name, events) ->
+                throw IllegalArgumentException(
+                    "Events ${events.joinToString { "'$it'" }} in " +
+                        "${trajectory.name} all map to the function $name"
+                )
+            }
+        return names
+    }
+
     private fun FileSpec.writeTo(dependencies: Dependencies) {
         codeGenerator
             .createNewFile(dependencies, packageName, name)
@@ -117,6 +149,8 @@ private fun String.words(): List<String> =
 
 private fun String.toPascalCase(): String =
     words().joinToString("") { it.replaceFirstChar(Char::uppercaseChar) }
+
+private fun String.isIdentifier(): Boolean = firstOrNull()?.isLetter() == true
 
 private fun String.toCamelCase(): String =
     toPascalCase().replaceFirstChar(Char::lowercaseChar)
