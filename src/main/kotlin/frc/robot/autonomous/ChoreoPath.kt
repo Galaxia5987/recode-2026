@@ -5,80 +5,73 @@ import choreo.trajectory.EventMarker
 import choreo.trajectory.SwerveSample
 import choreo.trajectory.Trajectory
 import frc.robot.drive
-import frc.robot.lib.IS_RED
-import frc.robot.lib.commands.fork
-import frc.robot.lib.commands.invoke
 import org.littletonrobotics.junction.Logger
-import org.wpilib.command3.Command
+import org.wpilib.command3.Coroutine
 import org.wpilib.system.Timer
 
 /**
  * A Choreo trajectory from `deploy/choreo`.
  *
  * Don't extend this directly: KSP generates an abstract `<Name>Path` class for
- * every `.traj` file, with an abstract command function per event marker.
- * Implement it as an object to bind the events and add it to the auto chooser:
+ * every `.traj` file, with an abstract function per event marker. Implement it
+ * as an object to bind the events and add it to the auto chooser:
  * ```kotlin
  * object StartToFuel : StartToFuelPath() {
- *     override fun intake() = Intake.open()
+ *     override fun Coroutine.intakeDown() = Intake.open().fork()
+ *     override fun Coroutine.shoot() = +Shooter.shoot()
  * }
  * ```
  */
 abstract class ChoreoPath(val name: String) {
-    protected abstract val eventCommands: Map<String, () -> Command>
-
     private val trajectory: Trajectory<SwerveSample> by lazy {
         Choreo.loadTrajectory<SwerveSample>(name).orElseThrow {
             IllegalStateException("Failed to load Choreo trajectory '$name'")
         }
     }
 
+    protected abstract fun Coroutine.runEvent(event: String)
+
     /**
-     * Resets odometry to the start of the path, follows it, and forks each
-     * event marker's command when its time is reached. The path is flipped for
-     * the red alliance.
+     * Follows the path as part of [routine], running each event marker's
+     * binding in the routine's coroutine when its time is reached.
      *
-     * Event commands are children of this command, so they are canceled when
-     * the path ends and must not require the drive.
-     *
-     * @param mirrored Mirror the path across the field's long axis, to run a
-     *   path drawn for one side of the field on the other side.
+     * A binding that awaits a command blocks the path: the drive stops and the
+     * path's timer pauses until the binding returns. Fork a command to run it
+     * alongside the path; forked commands live until the routine ends.
      */
-    fun follow(mirrored: Boolean = false): Command =
-        drive {
-                val trajectory = resolveTrajectory(mirrored)
-                val pendingEvents =
-                    ArrayDeque(trajectory.events().sortedBy { it.timestamp })
-                Logger.recordOutput(
-                    "Autonomous/Trajectory",
-                    *trajectory.poses,
-                )
-                drive.resetOdometry(trajectory.getInitialPose(false).get())
+    context(routine: AutoRoutine, coroutine: Coroutine)
+    fun follow() {
+        val trajectory = routine.resolve(trajectory)
+        routine.start(trajectory.getInitialPose(false).get())
+        Logger.recordOutput("Autonomous/Trajectory", *trajectory.poses)
 
-                val timer = Timer().apply { start() }
-                while (timer.get() < trajectory.totalTime) {
-                    pendingEvents.popReached(timer.get()).forEach {
-                        eventCommands.getValue(it.event)().fork()
-                    }
-                    drive.followTrajectory(
-                        trajectory.sampleAt(timer.get(), false).get()
-                    )
-                    yield()
-                }
+        val pendingEvents =
+            ArrayDeque(trajectory.events().sortedBy { it.timestamp })
+        val timer = Timer().apply { start() }
+        while (timer.get() < trajectory.totalTime) {
+            val reached = pendingEvents.popReached(timer.get())
+            if (reached.isNotEmpty()) {
+                timer.stop()
                 drive.stop()
+                reached.forEach { coroutine.runEvent(it.event) }
+                timer.start()
             }
-            .named(if (mirrored) "$name (Mirrored)" else name)
-
-    private fun resolveTrajectory(mirrored: Boolean) =
-        trajectory
-            .let { if (mirrored) it.mirrorY() else it }
-            .let { if (IS_RED) it.flipped() else it }
+            drive.followTrajectory(
+                trajectory.sampleAt(timer.get(), false).get()
+            )
+            coroutine.yield()
+        }
+        drive.stop()
+        pendingEvents.forEach { coroutine.runEvent(it.event) }
+    }
 
     private fun ArrayDeque<EventMarker>.popReached(
         time: Double
-    ): List<EventMarker> = buildList {
+    ): List<EventMarker> {
+        val reached = mutableListOf<EventMarker>()
         while (firstOrNull()?.let { it.timestamp <= time } == true) {
-            add(removeFirst())
+            reached += removeFirst()
         }
+        return reached
     }
 }

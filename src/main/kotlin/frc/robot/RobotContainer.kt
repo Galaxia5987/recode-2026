@@ -1,5 +1,6 @@
 package frc.robot
 
+import frc.robot.autonomous.autoRoutine
 import frc.robot.autonomous.paths.ChoreoPaths
 import frc.robot.lib.AutoChooser
 import frc.robot.lib.BasicAlerts
@@ -58,9 +59,12 @@ object RobotContainer {
         autoChooser.addCmd("Empty", ::emptyCommand)
 
         ChoreoPaths.all.forEach { path ->
-            autoChooser.addCmd(path.name) { path.follow() }
-            autoChooser.addCmd("${path.name} (Mirrored)") {
-                path.follow(mirrored = true)
+            for (mirrored in listOf(false, true)) {
+                val name =
+                    if (mirrored) "${path.name} (Mirrored)" else path.name
+                autoChooser.addCmd(name) {
+                    autoRoutine(name, mirrored) { path.follow() }
+                }
             }
         }
 

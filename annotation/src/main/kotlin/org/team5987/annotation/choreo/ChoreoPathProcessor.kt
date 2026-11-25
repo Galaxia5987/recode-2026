@@ -14,8 +14,6 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.LambdaTypeName
-import com.squareup.kotlinpoet.MAP
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.STRING
@@ -29,14 +27,14 @@ const val CHOREO_DIR_OPTION = "choreoDir"
 
 private const val GENERATED_PACKAGE = "frc.robot.autonomous.paths"
 private val choreoPathClass = ClassName("frc.robot.autonomous", "ChoreoPath")
-private val commandClass = ClassName("org.wpilib.command3", "Command")
+private val coroutineClass = ClassName("org.wpilib.command3", "Coroutine")
 
 private data class TrajectoryFile(val name: String, val events: Set<String>)
 
 /**
  * Generates an abstract [choreoPathClass] subclass for every Choreo `.traj`
- * file, with one abstract command function per event marker, and a
- * `ChoreoPaths` registry of every object that implements one of them.
+ * file, with one abstract function per event marker, and a `ChoreoPaths`
+ * registry of every object that implements one of them.
  */
 class ChoreoPathProcessor(
     private val codeGenerator: CodeGenerator,
@@ -86,26 +84,27 @@ class ChoreoPathProcessor(
         val eventFunctions =
             trajectory.events.associateWith {
                 FunSpec.builder(it.toCamelCase())
-                    .addModifiers(KModifier.ABSTRACT)
-                    .returns(commandClass)
+                    .addModifiers(KModifier.PROTECTED, KModifier.ABSTRACT)
+                    .receiver(coroutineClass)
                     .build()
             }
 
-        val eventCommandsType =
-            MAP.parameterizedBy(
-                STRING,
-                LambdaTypeName.get(returnType = commandClass),
-            )
-        val eventCommands =
-            PropertySpec.builder("eventCommands", eventCommandsType)
+        val runEvent =
+            FunSpec.builder("runEvent")
                 .addModifiers(KModifier.FINAL, KModifier.OVERRIDE)
-                .initializer(
-                    eventFunctions.entries
-                        .map { (event, function) ->
-                            CodeBlock.of("%S to ::%N", event, function)
-                        }
-                        .joinToCode(prefix = "mapOf(", suffix = ")")
+                .receiver(coroutineClass)
+                .addParameter("event", STRING)
+                .beginControlFlow("when (event)")
+                .apply {
+                    eventFunctions.forEach { (event, function) ->
+                        addStatement("%S -> %N()", event, function)
+                    }
+                }
+                .addStatement(
+                    "else -> throw IllegalArgumentException(%P)",
+                    "Unknown event '\$event' in ${trajectory.name}",
                 )
+                .endControlFlow()
                 .build()
 
         val pathClass =
@@ -114,7 +113,7 @@ class ChoreoPathProcessor(
                 .superclass(choreoPathClass)
                 .addSuperclassConstructorParameter("%S", trajectory.name)
                 .addFunctions(eventFunctions.values)
-                .addProperty(eventCommands)
+                .addFunction(runEvent)
                 .build()
 
         FileSpec.builder(GENERATED_PACKAGE, className)
