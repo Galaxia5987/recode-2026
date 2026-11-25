@@ -57,8 +57,7 @@ abstract class ChoreoPath(val name: String) {
                     val reached = pendingEvents.popReached(timer.get())
                     if (reached.isNotEmpty()) {
                         timer.stop()
-                        drive.stop()
-                        reached.forEach { runEvent(it.event) }
+                        runEvents(reached)
                         timer.start()
                     }
                     drive.followTrajectory(
@@ -71,6 +70,24 @@ abstract class ChoreoPath(val name: String) {
             }
             .whenCanceled(drive::stop)
             .named(if (mirrored) "$name (Mirrored)" else name)
+
+    /** Runs the bindings of [events], stopping the drive while they block. */
+    private fun Coroutine.runEvents(events: List<EventMarker>) {
+        val stopWhileBlocked =
+            drive {
+                    // Bindings that don't block return in this cycle, and the
+                    // path drives on before this ever stops the drive.
+                    yield()
+                    while (true) {
+                        drive.stop()
+                        yield()
+                    }
+                }
+                .named("$name/stopWhileBlocked")
+        fork(stopWhileBlocked)
+        events.forEach { runEvent(it.event) }
+        scheduler().cancel(stopWhileBlocked)
+    }
 
     /**
      * Resets odometry to the start of the path, as [follow] with the same
