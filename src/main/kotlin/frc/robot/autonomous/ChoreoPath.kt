@@ -13,26 +13,21 @@ import org.wpilib.command3.Coroutine
 import org.wpilib.system.Timer
 
 /**
- * A Choreo trajectory from `deploy/choreo`.
+ * A Choreo trajectory from `deploy/choreo`, whose event markers run their
+ * bindings in [markers].
  *
- * Don't extend this directly: KSP generates an abstract `<Name>Path` class for
- * every `.traj` file, with an abstract function per event marker. Implement it
- * as an object to bind the events:
- * ```kotlin
- * object StartToFuel : StartToFuelPath() {
- *     override fun Coroutine.intakeDown() = Intake.open().fork()
- *     override fun Coroutine.shoot() = +Shooter.shoot()
- * }
- * ```
+ * Don't extend this directly: KSP generates an object for every `.traj` file in
+ * `frc.robot.autonomous.paths`.
  */
-abstract class ChoreoPath(val name: String) {
+abstract class ChoreoPath(
+    val name: String,
+    private val markers: MarkerBindings,
+) {
     private val trajectory: Trajectory<SwerveSample> by lazy {
         Choreo.loadTrajectory<SwerveSample>(name).orElseThrow {
             IllegalStateException("Failed to load Choreo trajectory '$name'")
         }
     }
-
-    protected abstract fun Coroutine.runEvent(event: String)
 
     /**
      * Follows the path, flipped for the red alliance, running each event
@@ -57,7 +52,7 @@ abstract class ChoreoPath(val name: String) {
                     val reached = pendingEvents.popReached(timer.get())
                     if (reached.isNotEmpty()) {
                         timer.stop()
-                        runEvents(reached)
+                        runMarkers(reached)
                         timer.start()
                     }
                     drive.followTrajectory(
@@ -66,13 +61,13 @@ abstract class ChoreoPath(val name: String) {
                     yield()
                 }
                 drive.stop()
-                pendingEvents.forEach { runEvent(it.event) }
+                with(markers) { pendingEvents.forEach { runMarker(it.event) } }
             }
             .whenCanceled(drive::stop)
             .named(if (mirrored) "$name (Mirrored)" else name)
 
     /** Runs the bindings of [events], stopping the drive while they block. */
-    private fun Coroutine.runEvents(events: List<EventMarker>) {
+    private fun Coroutine.runMarkers(events: List<EventMarker>) {
         val stopWhileBlocked =
             drive {
                     // Bindings that don't block return in this cycle, and the
@@ -85,7 +80,7 @@ abstract class ChoreoPath(val name: String) {
                 }
                 .named("$name/stopWhileBlocked")
         fork(stopWhileBlocked)
-        events.forEach { runEvent(it.event) }
+        with(markers) { events.forEach { runMarker(it.event) } }
         scheduler().cancel(stopWhileBlocked)
     }
 

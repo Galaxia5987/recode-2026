@@ -19,14 +19,19 @@ import java.io.File
 const val CHOREO_DIR_OPTION = "choreoDir"
 
 private const val GENERATED_PACKAGE = "frc.robot.autonomous.paths"
+private const val MARKERS_CLASS = "ChoreoMarkers"
 private val choreoPathClass = ClassName("frc.robot.autonomous", "ChoreoPath")
+private val markerBindingsClass =
+    ClassName("frc.robot.autonomous", "MarkerBindings")
+private val markersObject = ClassName("frc.robot.autonomous", "Markers")
 private val coroutineClass = ClassName("org.wpilib.command3", "Coroutine")
 
 private data class TrajectoryFile(val name: String, val events: Set<String>)
 
 /**
- * Generates an abstract [choreoPathClass] subclass for every Choreo `.traj`
- * file, with one abstract function per event marker.
+ * Generates an object for every Choreo `.traj` file, and an abstract
+ * `ChoreoMarkers` class with one abstract function per event marker name across
+ * all of them, which the `Markers` object implements.
  */
 class ChoreoPathProcessor(
     private val codeGenerator: CodeGenerator,
@@ -44,7 +49,8 @@ class ChoreoPathProcessor(
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         if (!generated) {
-            trajectories.forEach(::generatePathClass)
+            generateMarkers()
+            generatePaths()
             generated = true
         }
         return emptyList()
@@ -68,72 +74,102 @@ class ChoreoPathProcessor(
         return TrajectoryFile(file.nameWithoutExtension, events)
     }
 
-    private fun generatePathClass(trajectory: TrajectoryFile) {
-        val baseName = trajectory.name.toPascalCase()
-        require(baseName.isIdentifier()) {
-            "Choreo trajectory '${trajectory.name}' doesn't form a valid class name"
-        }
-        val className = baseName + "Path"
-        val eventFunctions =
-            eventFunctionNames(trajectory).mapValues { (_, functionName) ->
-                FunSpec.builder(functionName)
-                    .addModifiers(KModifier.PROTECTED, KModifier.ABSTRACT)
-                    .receiver(coroutineClass)
-                    .build()
-            }
+    private fun generateMarkers() {
+        val markerFunctions =
+            identifiers(
+                    trajectories.flatMap { it.events }.toSortedSet(),
+                    "marker",
+                    String::toCamelCase,
+                )
+                .mapValues { (_, functionName) ->
+                    FunSpec.builder(functionName)
+                        .addModifiers(KModifier.PROTECTED, KModifier.ABSTRACT)
+                        .receiver(coroutineClass)
+                        .build()
+                }
 
-        val runEvent =
-            FunSpec.builder("runEvent")
+        val runMarker =
+            FunSpec.builder("runMarker")
                 .addModifiers(KModifier.FINAL, KModifier.OVERRIDE)
                 .receiver(coroutineClass)
-                .addParameter("event", STRING)
-                .beginControlFlow("when (event)")
+                .addParameter("marker", STRING)
+                .beginControlFlow("when (marker)")
                 .apply {
-                    eventFunctions.forEach { (event, function) ->
-                        addStatement("%S -> %N()", event, function)
+                    markerFunctions.forEach { (marker, function) ->
+                        addStatement("%S -> %N()", marker, function)
                     }
                 }
                 .addStatement(
                     "else -> throw IllegalArgumentException(%P)",
-                    "Unknown event '\$event' in ${trajectory.name}",
+                    "Unknown Choreo marker '\$marker'",
                 )
                 .endControlFlow()
                 .build()
 
-        val pathClass =
-            TypeSpec.classBuilder(className)
+        val markersClass =
+            TypeSpec.classBuilder(MARKERS_CLASS)
+                .addKdoc(
+                    "The bindings of every Choreo event marker, implemented by %T.",
+                    markersObject,
+                )
                 .addModifiers(KModifier.ABSTRACT)
-                .superclass(choreoPathClass)
-                .addSuperclassConstructorParameter("%S", trajectory.name)
-                .addFunctions(eventFunctions.values)
-                .addFunction(runEvent)
+                .addSuperinterface(markerBindingsClass)
+                .addFunctions(markerFunctions.values)
+                .addFunction(runMarker)
                 .build()
 
-        FileSpec.builder(GENERATED_PACKAGE, className)
-            .addType(pathClass)
+        FileSpec.builder(GENERATED_PACKAGE, MARKERS_CLASS)
+            .addType(markersClass)
             .build()
             .writeTo(Dependencies(aggregating = false))
     }
 
-    private fun eventFunctionNames(
-        trajectory: TrajectoryFile
+    private fun generatePaths() {
+        val pathObjects =
+            identifiers(
+                    trajectories.map { it.name },
+                    "trajectory",
+                    String::toPascalCase,
+                )
+                .map { (trajectory, objectName) ->
+                    TypeSpec.objectBuilder(objectName)
+                        .superclass(choreoPathClass)
+                        .addSuperclassConstructorParameter("%S", trajectory)
+                        .addSuperclassConstructorParameter("%T", markersObject)
+                        .build()
+                }
+
+        FileSpec.builder(GENERATED_PACKAGE, "ChoreoPaths")
+            .apply { pathObjects.forEach(::addType) }
+            .build()
+            .writeTo(Dependencies(aggregating = false))
+    }
+
+    /**
+     * Maps each of [names] to the identifier [convert] makes of it, failing
+     * when one isn't valid or several map to the same identifier.
+     */
+    private fun identifiers(
+        names: Collection<String>,
+        kind: String,
+        convert: (String) -> String,
     ): Map<String, String> {
-        val names = trajectory.events.associateWith { it.toCamelCase() }
-        names.forEach { (event, name) ->
-            require(name.isIdentifier()) {
-                "Event '$event' in ${trajectory.name} doesn't form a valid function name"
+        val identifiers = names.associateWith(convert)
+        identifiers.forEach { (name, identifier) ->
+            require(identifier.isIdentifier()) {
+                "Choreo $kind '$name' doesn't form a valid identifier"
             }
         }
-        names.entries
+        identifiers.entries
             .groupBy({ it.value }, { it.key })
             .filterValues { it.size > 1 }
-            .forEach { (name, events) ->
+            .forEach { (identifier, clashing) ->
                 throw IllegalArgumentException(
-                    "Events ${events.joinToString { "'$it'" }} in " +
-                        "${trajectory.name} all map to the function $name"
+                    "Choreo ${kind}s ${clashing.joinToString { "'$it'" }} " +
+                        "all map to $identifier"
                 )
             }
-        return names
+        return identifiers
     }
 
     private fun FileSpec.writeTo(dependencies: Dependencies) {

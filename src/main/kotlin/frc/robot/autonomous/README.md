@@ -4,39 +4,43 @@ Paths are drawn in [Choreo](https://choreo.autos) and saved to `src/main/deploy/
 
 ## Generated code
 
-For every `.traj` file, KSP generates an abstract class in `frc.robot.autonomous.paths`
-named after the trajectory with a `Path` suffix. It has one abstract function per event
-marker name, converted to camel case (`Intake Down` → `intakeDown()`). Each function runs
-in the routine's `Coroutine`.
+KSP reads every `.traj` file and generates, in `frc.robot.autonomous.paths`:
+
+- An object per trajectory, named after it in Pascal case (`fuel to hub` → `FuelToHub`).
+- `ChoreoMarkers`, an abstract class with one abstract function per marker name across
+  all trajectories, converted to camel case (`Intake Down` → `intakeDown()`).
 
 ```kotlin
-// Generated from StartToFuel.traj
-abstract class StartToFuelPath : ChoreoPath("StartToFuel") {
+// Generated from StartToFuel.traj and FuelToHub.traj
+object StartToFuel : ChoreoPath("StartToFuel", Markers)
+object FuelToHub : ChoreoPath("FuelToHub", Markers)
+
+abstract class ChoreoMarkers : MarkerBindings {
     protected abstract fun Coroutine.intakeDown()
     protected abstract fun Coroutine.shoot()
 }
 ```
 
-The code is regenerated on every build, so renaming or adding a marker in Choreo
-becomes a compile error until the matching binding is written.
+The code is regenerated on every build, so adding or renaming a marker in Choreo becomes
+a compile error until its binding is written. Names that don't form a valid identifier,
+or that map to the same identifier, fail the build.
 
-## Binding events
+## Binding markers
 
-Implement the generated class as an object:
+Every marker is bound once, globally, in the `Markers` object:
 
 ```kotlin
-object StartToFuel : StartToFuelPath() {
+object Markers : ChoreoMarkers() {
     override fun Coroutine.intakeDown() = Intake.open().fork()
     override fun Coroutine.shoot() = +Shooter.shoot()
 }
 ```
 
-Bindings run in the path command's coroutine. Awaiting a command (`+command`) blocks:
-the drive stops and the path's timer pauses until it finishes. To run a command
-alongside the path, fork it. Forked commands are canceled when the path ends, so fork
-them from the routine instead to keep them running longer.
-
-Event bindings must not require the drive, since the path holds it.
+A marker with the same name runs the same binding in every path. Bindings run in the
+path command's coroutine. Awaiting a command (`+command`) blocks: the drive stops and the
+path's timer pauses until it finishes. To run a command alongside the path, fork it.
+Forked commands are canceled when the path ends, so fork them from the routine instead
+to keep them running longer.
 
 ## Following
 
