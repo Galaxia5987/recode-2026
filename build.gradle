@@ -25,6 +25,7 @@ repositories {
 
     maven { url 'https://jitpack.io' }
     maven { url 'https://frcmaven.wpi.edu/artifactory/wpilib-mvn-development-local'}
+    maven { url 'https://frcmaven.wpi.edu/artifactory/sleipnirgroup-mvn-release' }
     maven {
         url = uri("${projectDir}/localMaven")
     }
@@ -32,8 +33,11 @@ repositories {
 
 def javaVersion = JavaVersion.VERSION_25
 
+def choreoDir = file("src/main/deploy/choreo")
+
 ksp {
     arg("graphRootDir", project.rootDir.absolutePath + "/graphs")
+    arg("choreoDir", choreoDir.absolutePath)
 }
 
 java {
@@ -120,6 +124,8 @@ dependencies {
     implementation 'org.dyn4j:dyn4j:5.0.2'
     implementation 'com.github.Galaxia5987:maple-sim:main-SNAPSHOT'
     implementation 'com.google.code.gson:gson:2.10.1'
+    // The ChoreoLib vendordep is rejected by GradleRIO for targeting an older 2027 alpha.
+    implementation 'choreo:ChoreoLib-java:2027.0.0-alpha-3'
     testImplementation "org.jetbrains.kotlin:kotlin-test-junit5:2.0.0"
 }
 
@@ -198,6 +204,9 @@ tasks.register('syncStateMachineGraphs', Copy) {
 
 tasks.matching { it.name.startsWith("ksp") && it.name.toLowerCase().endsWith("kotlin") }.configureEach { kspTask ->
     kspTask.finalizedBy 'syncStateMachineGraphs'
+    kspTask.inputs.files(fileTree(choreoDir) { include "*.traj" })
+            .withPropertyName("choreoTrajectories")
+            .withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 gversion {

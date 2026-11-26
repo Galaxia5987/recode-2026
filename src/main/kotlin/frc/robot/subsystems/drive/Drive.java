@@ -15,6 +15,7 @@ package frc.robot.subsystems.drive;
 
 import static org.wpilib.units.Units.*;
 
+import choreo.trajectory.SwerveSample;
 import com.ctre.phoenix6.CANBus;
 import frc.robot.ConstantsKt;
 import frc.robot.lib.BetterPoseEstimator;
@@ -41,7 +42,6 @@ import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.wpilib.command3.Command;
 import org.wpilib.command3.Mechanism;
 import org.wpilib.driverstation.*;
-import org.wpilib.math.controller.PIDController;
 import org.wpilib.math.geometry.*;
 import org.wpilib.math.kinematics.ChassisVelocities;
 import org.wpilib.math.kinematics.SwerveDriveKinematics;
@@ -200,20 +200,30 @@ public class Drive implements Mechanism {
          */
     }
 
-        private final PIDController xController = new TuneablePIDController("xController",10.0 ,0 , 0);
-        private final PIDController yController = new TuneablePIDController("yController" ,10.0,0 , 0);
-        private final PIDController headingController = new TuneablePIDController("headingController" , 7.5,0, 0 );
+    private final TuneablePIDController xController =
+            new TuneablePIDController("xController", 10.0, 0, 0);
+    private final TuneablePIDController yController =
+            new TuneablePIDController("yController", 10.0, 0, 0);
+    private final TuneablePIDController headingController =
+            new TuneablePIDController("headingController", 7.5, 0, 0);
 
-//        public void followTrajectory(SwerveSample sample){
-//            Logger.recordOutput("Odometry/TrajectorySetpoint", sample.getPose());
-//            ChassisVelocities velocities = new ChassisVelocities(
-//                    sample.vx + xController.calculate(getPose().getX() , sample.x),
-//                    sample.vy + yController.calculate(getPose().getY() , sample.y),
-//                    sample.omega + headingController.calculate(getRotation().getRadians(), sample.heading)
-//            );
-//            runVelocity(velocities.toRobotRelative(getRotation()));
-//        }
+    /** Drives toward a Choreo trajectory sample, using its velocity as feedforward. */
+    public void followTrajectory(SwerveSample sample) {
+        xController.update();
+        yController.update();
+        headingController.update();
 
+        Logger.recordOutput("Odometry/TrajectorySetpoint", sample.getPose());
+        Pose2d pose = getPose();
+        ChassisVelocities velocities =
+                new ChassisVelocities(
+                        sample.vx + xController.calculate(pose.getX(), sample.x),
+                        sample.vy + yController.calculate(pose.getY(), sample.y),
+                        sample.omega
+                                + headingController.calculate(
+                                        pose.getRotation().getRadians(), sample.heading));
+        runVelocity(velocities.toRobotRelative(pose.getRotation()));
+    }
 
     public void periodic() {
 
