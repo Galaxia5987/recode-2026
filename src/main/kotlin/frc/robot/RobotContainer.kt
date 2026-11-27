@@ -24,7 +24,6 @@ object RobotContainer {
 
     init {
         drive // Ensure Drive is initialized
-        objectDetection
         autoChooser = AutoChooser()
 
         registerAutoCommands()

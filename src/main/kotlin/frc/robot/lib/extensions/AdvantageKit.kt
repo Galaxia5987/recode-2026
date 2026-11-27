@@ -36,14 +36,6 @@ abstract class AutoLogInputs : LoggableInputs {
     fun <T : StructSerializable> log(value: T, key: String? = null) =
         LoggedInput(value, key, LogTable::put, LogTable::get)
 
-    fun <T : StructSerializable> log(value: Array<T>, key: String? = null) =
-        LoggedInput(
-            value,
-            key,
-            { k, v -> put(k, *v) },
-            { k, v -> get(k, *v) },
-        )
-
     fun <T> log(value: T, struct: Struct<T>, key: String? = null) =
         LoggedInput(
             value,
