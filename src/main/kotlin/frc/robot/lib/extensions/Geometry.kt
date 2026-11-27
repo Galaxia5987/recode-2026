@@ -113,7 +113,4 @@ fun Rectangle2d.flipIfNeeded(): Rectangle2d =
     if (IS_RED) Rectangle2d(this.center.flip(), this.xWidth, this.yWidth)
     else this
 
-fun Translation3d.transformBy(transform: Transform3d): Translation3d =
-    rotateBy(transform.rotation) + transform.translation
-
 fun Translation3d.toPose3d(): Pose3d = Pose3d(this, Rotation3d.ZERO)

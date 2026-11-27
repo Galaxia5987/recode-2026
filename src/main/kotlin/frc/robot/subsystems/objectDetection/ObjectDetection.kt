@@ -6,7 +6,6 @@ import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.mm
 import frc.robot.lib.extensions.toPose3d
 import frc.robot.lib.extensions.toTransform
-import frc.robot.lib.extensions.transformBy
 import kotlin.jvm.optionals.getOrNull
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
@@ -109,21 +108,21 @@ object ObjectDetection : Mechanism {
         if (poses.size != classIds.size || age !in 0.0..MAX_RESULT_AGE_SECONDS)
             return emptyList()
 
-        val robotToField =
+        val robotPose =
             BetterPoseEstimator.getInstance()
                 .getEstimatedPoseAtTimestamp(timestamp)
                 .getOrNull()
-                ?.let { Pose3d(it).toTransform() } ?: return emptyList()
+                ?.let(::Pose3d) ?: return emptyList()
 
         return poses.zip(classIds.asList()).mapNotNull { (pose, classId) ->
             val objectClass =
                 ObjectClass.fromId(classId) ?: return@mapNotNull null
-            val robotRelative = pose.translation.transformBy(ROBOT_TO_CAMERA)
+            val robotToObject = ROBOT_TO_CAMERA + pose.toTransform()
             DetectedObject(
                 objectClass,
-                robotRelative.transformBy(robotToField),
+                (robotPose + robotToObject).translation,
                 timestamp,
-                robotRelative,
+                robotToObject.translation,
             )
         }
     }
