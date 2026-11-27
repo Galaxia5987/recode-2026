@@ -10,7 +10,12 @@ import frc.robot.subsystems.drive.TunerConstants
 import frc.robot.subsystems.drive.gyroIOs.GyroIO
 import frc.robot.subsystems.drive.gyroIOs.GyroIOPigeon2
 import frc.robot.subsystems.drive.gyroIOs.GyroIOSim
+import frc.robot.subsystems.objectDetection.ObjectDetection
+import frc.robot.subsystems.objectDetection.ObjectDetectionIO
+import frc.robot.subsystems.objectDetection.ObjectDetectionIONetworkTables
+import frc.robot.subsystems.objectDetection.ROBOT_TO_CAMERA
 import frc.robot.subsystems.vision.*
+import kotlin.jvm.optionals.getOrNull
 import org.ironmaple.simulation.SimulatedArena
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation
 import org.wpilib.math.geometry.Pose2d
@@ -97,4 +102,22 @@ val vision =
         BetterPoseEstimator.getInstance()::addVisionObservation,
         drive::resetOdometry,
         *visionIOs,
+    )
+
+val objectDetection =
+    ObjectDetection(
+        io =
+            when (CURRENT_MODE) {
+                // In simulation, point the coprocessor (or its mock camera)
+                // at the simulator's NetworkTables server.
+                Mode.REAL,
+                Mode.SIM -> ObjectDetectionIONetworkTables()
+                Mode.REPLAY -> object : ObjectDetectionIO {}
+            },
+        robotToCamera = ROBOT_TO_CAMERA,
+        robotPoseAt = {
+            BetterPoseEstimator.getInstance()
+                .getEstimatedPoseAtTimestamp(it)
+                .getOrNull()
+        },
     )
