@@ -4,6 +4,9 @@ import frc.robot.lib.BetterPoseEstimator
 import frc.robot.lib.commands.addPeriodic
 import frc.robot.lib.extensions.deg
 import frc.robot.lib.extensions.mm
+import frc.robot.lib.extensions.toPose3d
+import frc.robot.lib.extensions.toTransform
+import frc.robot.lib.extensions.transformBy
 import kotlin.jvm.optionals.getOrNull
 import org.littletonrobotics.junction.Logger
 import org.wpilib.command3.Mechanism
@@ -15,14 +18,24 @@ import org.wpilib.networktables.NetworkTableInstance
 import org.wpilib.system.Timer
 import org.wpilib.util.Alert
 
+enum class ObjectClass(val id: Long) {
+    FUEL(0),
+    ROBOT(1);
+
+    companion object {
+        fun fromId(id: Long) = entries.find { it.id == id }
+    }
+}
+
 data class DetectedObject(
-    val classId: Int,
-    /** Relative to the robot center at capture time. */
-    val robotRelative: Translation3d,
+    val objectClass: ObjectClass,
     val fieldPosition: Translation3d,
-    /** Capture time, seconds. */
     val timestamp: Double,
-)
+    private val robotRelative: Translation3d,
+) {
+    val distance: Double
+        get() = robotRelative.norm
+}
 
 object ObjectDetection : Mechanism {
     private const val LOG_PREFIX = "Subsystems/ObjectDetection"
@@ -30,10 +43,8 @@ object ObjectDetection : Mechanism {
     private const val MATCH_RADIUS_METERS = 0.3
     private const val LOST_TIMEOUT_SECONDS = 0.5
 
-    /**
-     * Placeholder: measure on the robot. Keep the coprocessor's
-     * `localization.extrinsics` at zero, or this is applied twice.
-     */
+    // Placeholder: measure on the robot. Keep the coprocessor's
+    // `localization.extrinsics` at zero, or this is applied twice.
     private val ROBOT_TO_CAMERA =
         Transform3d(300.mm, 0.mm, 500.mm, Rotation3d(0.deg, 20.deg, 0.deg))
 
@@ -57,16 +68,9 @@ object ObjectDetection : Mechanism {
             Alert.Level.MEDIUM,
         )
 
-    /** Every object in the latest fresh result; empty when stale. */
     var objects: List<DetectedObject> = emptyList()
         private set
 
-    /**
-     * The object being followed. Once locked, it only moves to a detection
-     * within [MATCH_RADIUS_METERS] of its last field position, so a new object
-     * coming into view can't steal it. If it goes unseen for
-     * [LOST_TIMEOUT_SECONDS], the nearest object to the robot is locked next.
-     */
     var target: DetectedObject? = null
         private set
 
@@ -74,7 +78,6 @@ object ObjectDetection : Mechanism {
         addPeriodic(::periodic)
     }
 
-    /** Drops the lock, so the nearest object is picked on the next loop. */
     fun clearTarget() {
         target = null
     }
@@ -96,56 +99,47 @@ object ObjectDetection : Mechanism {
     }
 
     private fun readObjects(): List<DetectedObject> {
-        // Read the last-published topic first: a read that lands mid-update
-        // then pairs at worst one-frame-old poses with a newer timestamp.
+        // Read in reverse publish order, so a read that lands mid-update
+        // pairs at worst one-frame-old poses with a newer timestamp.
         val classIds = classIds.get()
         val poses = cameraRelativePoses.get()
         val timestamp = timestampUs.get() / 1e6
 
-        // A negative age means the coprocessor's clock isn't synced yet.
         val age = Timer.getTimestamp() - timestamp
         if (poses.size != classIds.size || age !in 0.0..MAX_RESULT_AGE_SECONDS)
             return emptyList()
 
-        val robotPose =
+        val robotToField =
             BetterPoseEstimator.getInstance()
                 .getEstimatedPoseAtTimestamp(timestamp)
                 .getOrNull()
-                ?.let(::Pose3d) ?: return emptyList()
+                ?.let { Pose3d(it).toTransform() } ?: return emptyList()
 
-        return poses.zip(classIds.asList()) { pose, classId ->
-            val robotRelative =
-                pose.translation.toRobotRelative(ROBOT_TO_CAMERA)
+        return poses.zip(classIds.asList()).mapNotNull { (pose, classId) ->
+            val objectClass =
+                ObjectClass.fromId(classId) ?: return@mapNotNull null
+            val robotRelative = pose.translation.transformBy(ROBOT_TO_CAMERA)
             DetectedObject(
-                classId.toInt(),
-                robotRelative,
-                robotRelative.toField(robotPose),
+                objectClass,
+                robotRelative.transformBy(robotToField),
                 timestamp,
+                robotRelative,
             )
         }
     }
 
     private fun nextTarget(current: DetectedObject?): DetectedObject? {
         if (current == null || isLost(current))
-            return objects.minByOrNull { it.robotRelative.norm }
+            return objects.minByOrNull { it.distance }
 
         return objects
-            .filter {
-                it.fieldPosition.getDistance(current.fieldPosition) <
-                    MATCH_RADIUS_METERS
-            }
-            .minByOrNull { it.fieldPosition.getDistance(current.fieldPosition) }
-            ?: current
+            .filter { it.distanceTo(current) < MATCH_RADIUS_METERS }
+            .minByOrNull { it.distanceTo(current) } ?: current
     }
 
     private fun isLost(target: DetectedObject) =
         Timer.getTimestamp() - target.timestamp > LOST_TIMEOUT_SECONDS
+
+    private fun DetectedObject.distanceTo(other: DetectedObject) =
+        fieldPosition.getDistance(other.fieldPosition)
 }
-
-fun Translation3d.toRobotRelative(robotToCamera: Transform3d): Translation3d =
-    rotateBy(robotToCamera.rotation) + robotToCamera.translation
-
-fun Translation3d.toField(robotPose: Pose3d): Translation3d =
-    robotPose.transformBy(Transform3d(this, Rotation3d.ZERO)).translation
-
-private fun Translation3d.toPose3d() = Pose3d(this, Rotation3d.ZERO)
